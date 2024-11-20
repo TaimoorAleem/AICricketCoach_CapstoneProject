@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 /// Represents a Session entity in the domain layer.
-class Session extends Equatable {
+class SessionEntity extends Equatable {
   final String id; // Unique identifier for the session.
   final DateTime dateTime; // The date and time when the session was completed.
   final int deliveryCount; // Total number of deliveries in the session.
@@ -10,7 +10,7 @@ class Session extends Equatable {
   final double averageAccuracy; // Average accuracy rating of all deliveries.
 
   /// Constructor to initialize the Session entity.
-  const Session({
+  const SessionEntity({
     required this.id,
     required this.dateTime,
     required this.deliveryCount,
