@@ -5,6 +5,7 @@
  By encapsulating both successful data and error details, this structure
  provides a clean way to manage and propagate the result of data operations.
  */
+library;
 
 // Importing the Dio package, a popular HTTP client for making API requests in Flutter.
 import 'package:dio/dio.dart';
@@ -13,7 +14,7 @@ import 'package:dio/dio.dart';
 // This class is generic, allowing flexibility to handle any type of data (T).
 abstract class DataState<T> {
   final T? data; // Holds the successful data response if available.
-  final DioException? error; // Holds the error details if the request fails.
+  final Object? error; // Holds the error details if the request fails.
 
   // Constructor to initialize the data and error properties.
   // Both properties are optional since only one will be set at a time.
