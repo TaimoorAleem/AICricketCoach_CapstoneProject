@@ -1,4 +1,3 @@
-import '../../../../core/resources/data_state.dart';
 import '../entities/session.dart';
 
 abstract class SessionRepository {
@@ -13,7 +12,7 @@ abstract class SessionRepository {
 
   /// Creates a new session and stores it in the database.
   /// Accepts a `Session` object as input and returns a `DataState` with the created session's ID (success) or an error (failure).
-  Future<DataState<String>> createSession(SessionEntity session);
+  Future<String> createSession(SessionEntity session);
 
   /// Updates an existing session in the database.
   /// Accepts a `Session` object and returns a `DataState` with a boolean indicating success (true) or failure (false).
