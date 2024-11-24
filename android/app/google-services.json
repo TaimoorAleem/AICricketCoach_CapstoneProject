@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "891141938111",
+    "project_id": "mycricketcoachapp",
+    "storage_bucket": "mycricketcoachapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:891141938111:android:42b064e03f5adfb6fe1f0a",
+        "android_client_info": {
+          "package_name": "com.example.ai_cricket_coach"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2RyXf6nXqLOyNRKrVh_k-JrmPITiUFPI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
