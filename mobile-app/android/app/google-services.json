@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "735923563208",
+    "project_id": "aicricketcoach",
+    "storage_bucket": "aicricketcoach.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:735923563208:android:1ef4e84cf47bfbcda913fd",
+        "android_client_info": {
+          "package_name": "com.aicricketcoach.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "735923563208-dagdfjhee98pof8nkkh2h3ejc4nsh654.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRqk5L49f5PGMa6XSOww4hMDXazxYl8GY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "735923563208-dagdfjhee98pof8nkkh2h3ejc4nsh654.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "735923563208-lcsnc3nss4fm04bqcmsb9j3cookr9e4l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.aiCricketCoach"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
