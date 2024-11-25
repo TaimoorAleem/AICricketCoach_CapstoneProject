@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "174827312206",
+    "project_id": "aicc-proj-1",
+    "storage_bucket": "aicc-proj-1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174827312206:android:7e89957de682602b735f1f",
+        "android_client_info": {
+          "package_name": "com.example.ai_cricket_coach"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRj9n8Y_tV-1lge8tpHAzSiZ3qC3Vp37U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
