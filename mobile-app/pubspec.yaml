@@ -62,8 +62,13 @@ dependencies:
 
   # Dio
   dio: ^5.7.0
+
+  # Firebase
   firebase_core: ^3.4.0
   cloud_firestore: ^5.4.0
+
+  # Caching
+  flutter_cache_manager: ^3.4.1
 
 dev_dependencies:
   flutter_test:

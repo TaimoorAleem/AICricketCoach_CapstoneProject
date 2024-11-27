@@ -1,40 +1,17 @@
-import 'package:equatable/equatable.dart';
+class Session {
+  final String sessionId;
+  final DateTime date;
+  final double averageSpeed;
+  final double averageAccuracy;
+  final double averageExecutionRating;
+  final List<String> deliveryIds; // References to delivery entities
 
-/// Represents a Session entity in the domain layer.
-class SessionEntity extends Equatable {
-  final String id; // Unique identifier for the session.
-  final DateTime dateTime; // The date and time when the session was completed.
-  final int deliveryCount; // Total number of deliveries in the session.
-  final double averageExecutionRating; // Average execution quality rating for all deliveries.
-  final double averageSpeed; // Average speed of all deliveries.
-  final double averageAccuracy; // Average accuracy rating of all deliveries.
-
-  /// Constructor to initialize the Session entity.
-  const SessionEntity({
-    required this.id,
-    required this.dateTime,
-    required this.deliveryCount,
-    required this.averageExecutionRating,
+  Session({
+    required this.sessionId,
+    required this.date,
     required this.averageSpeed,
     required this.averageAccuracy,
+    required this.averageExecutionRating,
+    required this.deliveryIds,
   });
-
-  /// Specifies the fields that determine equality.
-  @override
-  List<Object?> get props => [
-    id,
-    dateTime,
-    deliveryCount,
-    averageExecutionRating,
-    averageSpeed,
-    averageAccuracy,
-  ];
-
-  /// Provides a readable string representation of the Session object.
-  @override
-  String toString() {
-    return 'Session(id: $id, dateTime: $dateTime, '
-        'deliveryCount: $deliveryCount, averageExecutionRating: $averageExecutionRating, '
-        'averageSpeed: $averageSpeed, averageAccuracy: $averageAccuracy)';
-  }
 }
