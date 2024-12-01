@@ -1,12 +1,13 @@
+import 'delivery_model.dart';
 import '../../domain/entities/session.dart';
 
 class SessionModel {
   final String sessionId;
-  final String date; // ISO 8601 format
+  final String date;
   final double averageSpeed;
   final double averageAccuracy;
   final double averageExecutionRating;
-  final List<String> deliveryIds;
+  final List<DeliveryModel> deliveries;
 
   SessionModel({
     required this.sessionId,
@@ -14,32 +15,8 @@ class SessionModel {
     required this.averageSpeed,
     required this.averageAccuracy,
     required this.averageExecutionRating,
-    required this.deliveryIds,
+    required this.deliveries,
   });
-
-  // Convert to domain entity
-  Session toDomain() {
-    return Session(
-      sessionId: sessionId,
-      date: DateTime.parse(date),
-      averageSpeed: averageSpeed,
-      averageAccuracy: averageAccuracy,
-      averageExecutionRating: averageExecutionRating,
-      deliveryIds: deliveryIds,
-    );
-  }
-
-  // Convert from domain entity
-  factory SessionModel.fromDomain(Session session) {
-    return SessionModel(
-      sessionId: session.sessionId,
-      date: session.date.toIso8601String(),
-      averageSpeed: session.averageSpeed,
-      averageAccuracy: session.averageAccuracy,
-      averageExecutionRating: session.averageExecutionRating,
-      deliveryIds: session.deliveryIds,
-    );
-  }
 
   // Convert to JSON
   Map<String, dynamic> toJson() {
@@ -49,7 +26,7 @@ class SessionModel {
       'averageSpeed': averageSpeed,
       'averageAccuracy': averageAccuracy,
       'averageExecutionRating': averageExecutionRating,
-      'deliveryIds': deliveryIds,
+      'deliveries': deliveries.map((delivery) => delivery.toJson()).toList(),
     };
   }
 
@@ -58,10 +35,24 @@ class SessionModel {
     return SessionModel(
       sessionId: json['sessionId'],
       date: json['date'],
-      averageSpeed: json['averageSpeed'],
-      averageAccuracy: json['averageAccuracy'],
-      averageExecutionRating: json['averageExecutionRating'],
-      deliveryIds: List<String>.from(json['deliveryIds']),
+      averageSpeed: json['averageSpeed'].toDouble(),
+      averageAccuracy: json['averageAccuracy'].toDouble(),
+      averageExecutionRating: json['averageExecutionRating'].toDouble(),
+      deliveries: (json['deliveries'] as List<dynamic>)
+          .map((delivery) => DeliveryModel.fromJson(delivery))
+          .toList(),
+    );
+  }
+
+  // Convert to domain entity
+  Session toDomain() {
+    return Session(
+      sessionId: sessionId,
+      date: DateTime.parse(date),
+      averageSpeed: averageSpeed,
+      averageAccuracy: averageAccuracy,
+      averageExecutionRating: averageExecutionRating,
+      deliveryIds: deliveries.map((delivery) => delivery.deliveryId).toList(),
     );
   }
 }

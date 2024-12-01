@@ -5,9 +5,12 @@ class SessionApiService {
 
   SessionApiService(this.dioClient);
 
-  Future<List<dynamic>> getSessions() async {
-    final response = await dioClient.get('/sessions');
-    return response.data as List<dynamic>;
+  Future<Map<String, dynamic>> getSessions(String uid) async {
+    final response = await dioClient.get(
+      '/get-sessions',
+      queryParameters: {'uid': uid},
+    );
+    return response.data as Map<String, dynamic>;
   }
 
   Future<List<dynamic>> getDeliveries(String sessionId) async {

@@ -5,11 +5,12 @@ class DeliveryModel {
   final double speed;
   final double bounceHeight;
   final double ballLength;
-  final double horizontalPosition;
+  final String horizontalPosition;
   final bool rightHandedBatsman;
   final double accuracy;
   final double executionRating;
   final String idealShot;
+  final String videoUrl;
 
   DeliveryModel({
     required this.deliveryId,
@@ -21,6 +22,7 @@ class DeliveryModel {
     required this.accuracy,
     required this.executionRating,
     required this.idealShot,
+    required this.videoUrl,
   });
 
   // Convert to domain entity
@@ -38,18 +40,19 @@ class DeliveryModel {
     );
   }
 
-  // Convert from domain entity
-  factory DeliveryModel.fromDomain(Delivery delivery) {
+  // Convert from JSON
+  factory DeliveryModel.fromJson(Map<String, dynamic> json) {
     return DeliveryModel(
-      deliveryId: delivery.deliveryId,
-      speed: delivery.speed,
-      bounceHeight: delivery.bounceHeight,
-      ballLength: delivery.ballLength,
-      horizontalPosition: delivery.horizontalPosition,
-      rightHandedBatsman: delivery.rightHandedBatsman,
-      accuracy: delivery.accuracy,
-      executionRating: delivery.executionRating,
-      idealShot: delivery.idealShot,
+      deliveryId: json['deliveryId'],
+      speed: json['speed'].toDouble(),
+      bounceHeight: json['bounceHeight'].toDouble(),
+      ballLength: json['ballLength'].toDouble(),
+      horizontalPosition: json['horizontalPosition'],
+      rightHandedBatsman: json['rightHandedBatsman'],
+      accuracy: json['accuracy'].toDouble(),
+      executionRating: json['executionRating'].toDouble(),
+      idealShot: json['idealShot'],
+      videoUrl: json['videoUrl'],
     );
   }
 
@@ -65,21 +68,7 @@ class DeliveryModel {
       'accuracy': accuracy,
       'executionRating': executionRating,
       'idealShot': idealShot,
+      'videoUrl': videoUrl,
     };
-  }
-
-  // Convert from JSON
-  factory DeliveryModel.fromJson(Map<String, dynamic> json) {
-    return DeliveryModel(
-      deliveryId: json['deliveryId'],
-      speed: json['speed'],
-      bounceHeight: json['bounceHeight'],
-      ballLength: json['ballLength'],
-      horizontalPosition: json['horizontalPosition'],
-      rightHandedBatsman: json['rightHandedBatsman'],
-      accuracy: json['accuracy'],
-      executionRating: json['executionRating'],
-      idealShot: json['idealShot'],
-    );
   }
 }

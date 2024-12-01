@@ -3,7 +3,7 @@ class Delivery {
   final double speed;
   final double bounceHeight;
   final double ballLength;
-  final double horizontalPosition;
+  final String horizontalPosition;
   final bool rightHandedBatsman;
   final double accuracy;
   final double executionRating;

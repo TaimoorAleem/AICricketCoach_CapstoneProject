@@ -7,9 +7,11 @@ class SessionsRemoteDataSource {
 
   SessionsRemoteDataSource(this.apiService);
 
-  Future<List<SessionModel>> getSessions() async {
-    final sessionsJson = await apiService.getSessions();
-    return sessionsJson.map((json) => SessionModel.fromJson(json)).toList();
+  Future<List<SessionModel>> getSessions(String uid) async {
+    final response = await apiService.getSessions(uid);
+    return response['sessions']
+        .map<SessionModel>((json) => SessionModel.fromJson(json))
+        .toList();
   }
 
   Future<List<DeliveryModel>> getDeliveries(String sessionId) async {

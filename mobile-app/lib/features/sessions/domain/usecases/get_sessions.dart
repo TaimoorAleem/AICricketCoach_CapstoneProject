@@ -6,7 +6,7 @@ class GetSessions {
 
   GetSessions(this.repository);
 
-  Future<List<Session>> execute() async {
-    return await repository.fetchSessions();
+  Future<List<Session>> execute(String uid) async {
+    return await repository.fetchSessions(uid);
   }
 }
