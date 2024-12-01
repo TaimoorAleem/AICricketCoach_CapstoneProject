@@ -63,6 +63,13 @@ dependencies:
   # Dio
   dio: ^5.7.0
 
+  # Firebase
+  firebase_core: ^3.4.0
+  cloud_firestore: ^5.4.0
+
+  # Caching
+  flutter_cache_manager: ^3.4.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -72,7 +79,10 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^5.0.0
+
+  mockito: ^5.4.4
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
