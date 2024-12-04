@@ -5,6 +5,7 @@
  By encapsulating both successful data and error details, this structure
  provides a clean way to manage and propagate the result of data operations.
  */
+library;
 
 // Importing the Dio package, a popular HTTP client for making API requests in Flutter.
 import 'package:dio/dio.dart';

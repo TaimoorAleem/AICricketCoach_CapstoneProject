@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'features/feedback/presentation/pages/accuracy_page.dart';
 
 void main() {
-  runApp(const App());
+  runApp(const MyApp());
 }
 
-class App extends StatelessWidget {
-  const App({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AI Cricket Coach',
+      title: 'Accuracy Demo',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Placeholder(),
+      home: AccuracyPage(),
     );
   }
 }
