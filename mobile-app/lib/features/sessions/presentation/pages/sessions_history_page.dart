@@ -63,10 +63,10 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
         itemBuilder: (context, index) {
           final session = sessions[index];
           return ListTile(
-            title: Text('Session ID: ${session.sessionId}'),
+            title: Text('Session Date: ${session.date}'),
             subtitle: Text(
-              'Average Speed: ${session.averageSpeed} km/h\n'
-                  'Average Accuracy: ${session.averageAccuracy}%',
+              'Average Accuracy: ${session.averageAccuracy}%\n'
+                  'Average Execution Rating: ${session.averageExecutionRating} / 10',
             ),
             trailing: const Icon(Icons.arrow_forward),
             onTap: () {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'features/sessions/presentation/pages/sessions_history_page.dart';
+
 void main() {
   runApp(const App());
 }
@@ -12,7 +14,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       title: 'AI Cricket Coach',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Placeholder(),
+      home: SessionsHistoryPage(),
     );
   }
 }

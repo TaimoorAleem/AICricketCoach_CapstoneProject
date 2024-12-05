@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ai_cricket_coach/features/sessions/domain/entities/delivery.dart';
+import 'package:ai_cricket_coach/features/sessions/presentation/pages/delivery_details_page.dart'; // Update to the actual path of DeliveryDetailsPage
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
@@ -23,7 +24,13 @@ class DeliveryCard extends StatelessWidget {
         ),
         trailing: Icon(Icons.arrow_forward),
         onTap: () {
-          // Navigate to a detailed delivery screen (optional)
+          // Navigate to the DeliveryDetailsPage
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DeliveryDetailsPage(delivery: delivery),
+            ),
+          );
         },
       ),
     );
