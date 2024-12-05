@@ -1,10 +1,12 @@
+import 'delivery.dart';
+
 class Session {
   final String sessionId;
   final DateTime date;
   final double averageSpeed;
   final double averageAccuracy;
   final double averageExecutionRating;
-  final List<String> deliveryIds; // References to delivery entities
+  final List<Delivery> deliveries; // References to delivery entities
 
   Session({
     required this.sessionId,
@@ -12,6 +14,6 @@ class Session {
     required this.averageSpeed,
     required this.averageAccuracy,
     required this.averageExecutionRating,
-    required this.deliveryIds,
+    required this.deliveries,
   });
 }

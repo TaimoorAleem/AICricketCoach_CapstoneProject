@@ -18,7 +18,7 @@ class SessionModel {
     required this.deliveries,
   });
 
-  // Convert to JSON
+  /// Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'sessionId': sessionId,
@@ -30,21 +30,21 @@ class SessionModel {
     };
   }
 
-  // Convert from JSON
+  /// Convert from JSON
   factory SessionModel.fromJson(Map<String, dynamic> json) {
     return SessionModel(
       sessionId: json['sessionId'],
       date: json['date'],
-      averageSpeed: json['averageSpeed'].toDouble(),
-      averageAccuracy: json['averageAccuracy'].toDouble(),
-      averageExecutionRating: json['averageExecutionRating'].toDouble(),
+      averageSpeed: (json['averageSpeed'] as num).toDouble(),
+      averageAccuracy: (json['averageAccuracy'] as num).toDouble(),
+      averageExecutionRating: (json['averageExecutionRating'] as num).toDouble(),
       deliveries: (json['deliveries'] as List<dynamic>)
           .map((delivery) => DeliveryModel.fromJson(delivery))
           .toList(),
     );
   }
 
-  // Convert to domain entity
+  /// Convert to domain entity
   Session toDomain() {
     return Session(
       sessionId: sessionId,
@@ -52,7 +52,7 @@ class SessionModel {
       averageSpeed: averageSpeed,
       averageAccuracy: averageAccuracy,
       averageExecutionRating: averageExecutionRating,
-      deliveryIds: deliveries.map((delivery) => delivery.deliveryId).toList(),
+      deliveries: deliveries.map((delivery) => delivery.toDomain()).toList(),
     );
   }
 }

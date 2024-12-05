@@ -5,8 +5,11 @@ import 'package:ai_cricket_coach/features/sessions/data/data_sources/sessions_re
 import 'package:ai_cricket_coach/features/sessions/data/repositories/session_repository_impl.dart';
 import 'package:ai_cricket_coach/features/sessions/domain/usecases/get_sessions.dart';
 import 'package:ai_cricket_coach/features/sessions/domain/entities/session.dart';
+import 'session_details_page.dart';
 
 class SessionsHistoryPage extends StatefulWidget {
+  const SessionsHistoryPage({super.key});
+
   @override
   _SessionsHistoryPageState createState() => _SessionsHistoryPageState();
 }
@@ -48,13 +51,13 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sessions History')),
+      appBar: AppBar(title: const Text('Sessions History')),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
           ? Center(child: Text('Error: $errorMessage'))
           : sessions.isEmpty
-          ? Center(child: Text('No sessions available'))
+          ? const Center(child: Text('No sessions available'))
           : ListView.builder(
         itemCount: sessions.length,
         itemBuilder: (context, index) {
@@ -65,6 +68,15 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
               'Average Speed: ${session.averageSpeed} km/h\n'
                   'Average Accuracy: ${session.averageAccuracy}%',
             ),
+            trailing: const Icon(Icons.arrow_forward),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SessionDetailsPage(session: session),
+                ),
+              );
+            },
           );
         },
       ),
