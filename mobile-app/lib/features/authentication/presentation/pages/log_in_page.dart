@@ -9,7 +9,7 @@ import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
 import '../../../home/presentation/pages/home_page.dart';
-import '../../data/models/login_req_params.dart';
+import '../../../authentication/data/models/login_req_params.dart';
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});
