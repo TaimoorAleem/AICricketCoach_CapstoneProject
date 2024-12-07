@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../resources/service_locator.dart';
-import '../../domain/usecases/is_authenticated_usecase.dart';
+import '../../../authentication/domain/usecases/is_authenticated_usecase.dart';
 import 'AuthState.dart';
 
 class AuthCubit extends Cubit<AuthState> {

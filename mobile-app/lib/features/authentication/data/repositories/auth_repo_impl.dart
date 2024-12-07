@@ -4,7 +4,7 @@ import 'package:wqeqwewq/features/authentication/data/models/login_req_params.da
 
 import '../../../../resources/service_locator.dart';
 import '../../domain/repositories/auth_repo.dart';
-import '../../../authentication/data/data_sources/auth_api_service.dart';
+import '../data_sources/auth_api_service.dart';
 import '../models/signup_req_params.dart';
 
 class AuthRepoImpl extends AuthRepo {
