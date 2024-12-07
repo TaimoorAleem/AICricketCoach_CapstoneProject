@@ -7,7 +7,6 @@ import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../../../user_profile/presentation/pages/edit_user_profile_page.dart';
 import '../../data/models/signup_req_params.dart';
 import '../../domain/usecases/signup_usecase.dart';

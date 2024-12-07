@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../resources/app_navigator.dart';
+import '../../../analytics/presentation/bloc/AuthCubit.dart';
+import '../../../analytics/presentation/bloc/AuthState.dart';
 import '../../../home/presentation/pages/home_page.dart';
-import '../blocs/AuthCubit.dart';
-import '../blocs/AuthState.dart';
 import 'log_in_page.dart';
 
 class LoadingPage extends StatelessWidget {
@@ -37,7 +37,7 @@ class LoadingPage extends StatelessWidget {
                 children: [
                   // Logo
                   Image.asset(
-                    '../resources/images/logo.png', // Path to your logo
+                    'lib/images/logo.png', // Path to your logo
                     height: 120, // Adjust size as needed
                     width: 120,
                   ),

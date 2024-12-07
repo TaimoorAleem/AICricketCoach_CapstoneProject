@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.ai_cricket_coach.app-mergeDebugResources-24:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.example.ai_cricket_coach.app-mergeDebugResources-26:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
-                    "source": "E:\\Sheridan\\Fall 2024\\INFO49635 Computer Science Capstone Project (Inception)\\AICricketCoach\\ai_cricket_coach\\mobile-app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
+                    "source": "C:\\Users\\calbl\\Documents\\AICricketCoach_CapstoneProject\\mobile-app\\android\\app\\src\\main\\res\\values-night\\styles.xml",
                     "from": {
                         "startLines": "3,14",
                         "startColumns": "4,4",

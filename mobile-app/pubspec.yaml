@@ -1,5 +1,5 @@
-name: ai_cricket_coach
-description: "AI Cricket Coach Application"
+name: wqeqwewq
+description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -19,7 +19,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.3
+  sdk: ^3.5.4
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,37 +31,26 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_bloc:
+
+  reactive_button: 0.0.9
+
+  dartz:
+
+  dio:
+
+  logger:
+
+  get_it:
+
+  shared_preferences:
+
+
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-
-  # State management
-  flutter_bloc: ^8.1.6
-
-  # Comparing dart objects
-  equatable: ^2.0.5
-
-  # Service locator
-  get_it: ^8.0.2
-
-  # dateFormat
-  intl: ^0.20.0
-
-  # Database
-  floor: ^1.5.0
-
-  # Make request to API
-  retrofit: ^4.4.1
-
-  # Hooks
-  flutter_hooks: ^0.20.5
-
-  # Cached image
-  cached_network_image: 3.4.0
-
-  # Dio
-  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +73,10 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - lib/images/logo.png
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
