@@ -10,9 +10,9 @@ class GetUserProfileUseCase extends UseCase<Either, dynamic> {
 
   @override
   Future<Either> call({params}) async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var uid = sharedPreferences.getString('uid');
-    return await sl<UserProfileRepo>().getProfileInfo(uid!);
+    // final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    // var uid = sharedPreferences.getString('uid');
+    return await sl<UserProfileRepo>().getProfileInfo();
   }
 
 }
