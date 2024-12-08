@@ -1,8 +1,8 @@
 import 'package:dartz/dartz.dart';
-import 'package:wqeqwewq/features/authentication/data/models/login_req_params.dart';
 
 import '../../../../resources/service_locator.dart';
 import '../../../../resources/usecase.dart';
+import '../../data/models/login_req_params.dart';
 import '../repositories/auth_repo.dart';
 
 class LoginUseCase extends UseCase<Either,LoginReqParams> {

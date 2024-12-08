@@ -4,7 +4,14 @@ import json
 from firebase_admin import credentials, auth, firestore, storage
 from flask import Flask, request, jsonify
 
-#IMPORTANT: do NOT run this file through android studio or within the same IDE env as the flutter front end because the java sdk and the python env clash!!!
+# everytime you update app.py do the following:
+
+# update dockerfile if needed
+# build image: "gcloud builds submit --tag gcr.io/aicc-proj-1/my-app-image
+# deploy cloud run: gcloud run deploy my-app-image \
+#   --image gcr.io/aicc-proj-1/my-app-image-v1.1 \
+#   --set-secrets FIREBASE_CREDENTIALS_PATH=projects/[PROJECT_ID]/secrets/firebase-credentials/versions/latest \
+#   --region us-central1
 
 
 # Initialize Firebase Admin SDK
@@ -13,7 +20,7 @@ firebase_creds_dict = json.loads(firebase_creds_json)
 firebase_admin.initialize_app(
     credentials.Certificate(firebase_creds_dict),
     {"storageBucket":"aicc-proj-1.firebasestorage.app"}
-    )
+)
 
 bucket = storage.bucket()
 
@@ -33,25 +40,19 @@ def sign_up():
         # Get request data
         data = request.get_json()
         email = data['email']
-        password = data['password']
-
-        # Create user in Firebase Auth
-        user = auth.create_user(
-            email=email,
-            password=password
-        )
+        uid = data['uid']
 
         # Add the user to Firestore
         user_data = {
             "email": email,
-            "uid": user.uid
+            "uid": uid
         }
-        db.collection('Users').document(user.uid).set(user_data) # document(user.uid) ensures the uid is the document id to make querying easier
+        db.collection('Users').document(uid).set(user_data)
 
         return jsonify({
             "status": "success",
             "message": "User registered successfully",
-            "uid": user.uid
+            "uid": uid
         }), 200
 
     except Exception as e:
@@ -65,10 +66,13 @@ def log_in():
     try:
         # Get request data
         data = request.get_json()
-        email = data['email']
-        id_token = data['id_token']
+        id_token = data['password']
 
-        uid = (auth.verify_id_token(id_token))['uid']
+        decoded_token = auth.verify_id_token(id_token)
+
+        uid = decoded_token['uid']
+
+
 
         #data to send to home page eventually
         user_ref = db.collection('Users').document(uid)
@@ -90,7 +94,7 @@ def log_in():
     except Exception as e:
         return jsonify({
             "status": "error",
-            "message": str(e)
+            "message": uid
         }), 500
 
 # @app.route('/delete-account')
@@ -109,7 +113,7 @@ def log_in():
 #     catch:
 
 
-    return jsonify({"status": "success", "message": "We're sorry to see you go! Account Deleted, thanks for using AI Cricket Coach"}), 200
+#    return jsonify({"status": "success", "message": "We're sorry to see you go! Account Deleted, thanks for using AI Cricket Coach"}), 200
 
 @app.route('/get-players', methods=['GET'])
 def get_players():
@@ -248,20 +252,20 @@ def upload_delivery():
             'executionRating': delivery['executionRating'],
             'idealShot': delivery['idealShot'],
             'videoUrl' : delivery['videoUrl']
-            })
+        })
 
         return jsonify({
             "data" :{
                 "deliveryId" : delivery_ref[1].id
-                },
+            },
             "status": "success",
             "message": "Delivery uploaded successfully."
         }), 200
 
     except Exception as e:
         return jsonify({
-        "status" :"error",
-        "message" : str(e)
+            "status" :"error",
+            "message" : str(e)
         })
 
 @app.route('/get-delivery', methods=["GET"])
@@ -359,8 +363,8 @@ def upload_session():
 
     except Exception as e:
         return jsonify({
-        "status" :"error",
-        "message" : str(e)
+            "status" :"error",
+            "message" : str(e)
         })
 
 
@@ -487,10 +491,10 @@ def get_performance_history():
             avg_accuracy = avg_accuracy / count
             avg_exec_rating = avg_exec_rating / count
             perf_ref = session_ref.collection('performance').add({
-                    "averageSpeed": avg_speed,
-                    "averageAccuracy": avg_accuracy,
-                    "averageExecutionRating" : avg_exec_rating
-                })
+                "averageSpeed": avg_speed,
+                "averageAccuracy": avg_accuracy,
+                "averageExecutionRating" : avg_exec_rating
+            })
 
 
 
@@ -520,7 +524,7 @@ def get_performance_history():
             "status": "success",
             "message" : f'The performance for Session {sessionId} has been updated successfully.',
             "performanceHistory" : result
-            }), 200
+        }), 200
 
     except Exception as e:
         return jsonify({

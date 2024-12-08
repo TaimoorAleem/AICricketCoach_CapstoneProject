@@ -1,8 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
-import 'package:wqeqwewq/features/authentication/presentation/pages/log_in_page.dart';
-
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
@@ -10,6 +8,7 @@ import '../../../../resources/service_locator.dart';
 import '../../../user_profile/presentation/pages/edit_user_profile_page.dart';
 import '../../data/models/signup_req_params.dart';
 import '../../domain/usecases/signup_usecase.dart';
+import 'log_in_page.dart';
 
 
 class SignupPage extends StatelessWidget {

@@ -1,15 +1,14 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
-import 'package:wqeqwewq/features/authentication/domain/usecases/login_usecase.dart';
-import 'package:wqeqwewq/features/authentication/presentation/pages/sign_up_page.dart';
-
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../data/models/login_req_params.dart';
+import '../../domain/usecases/login_usecase.dart';
+import 'sign_up_page.dart';
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});

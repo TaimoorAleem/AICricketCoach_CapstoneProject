@@ -65,4 +65,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'aicc-proj-1.firebasestorage.app',
     iosBundleId: 'com.example.aiCricketCoach',
   );
+
 }
