@@ -10,7 +10,6 @@ import '../../data/models/signup_req_params.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import 'log_in_page.dart';
 
-
 class SignupPage extends StatelessWidget {
   SignupPage({super.key});
 
@@ -21,22 +20,59 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        minimum: const EdgeInsets.only(top: 100,right:16,left:16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _signupText(),
-            const SizedBox(height: 30,),
-            _emailField(),
-            const SizedBox(height: 20,),
-            _passwordField(),
-            const SizedBox(height: 60,),
-            _signupButton(context),
-            const SizedBox(height: 20,),
-            _loginText(context)
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 50),
+              _welcomeHeading(),
+              const SizedBox(height: 50),
+              const SizedBox(height: 20),
+              _signupContainer(context),
+              const SizedBox(height: 20),
+              _loginText(context),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _welcomeHeading() {
+    return const Text(
+      'Welcome to AI Cricket Coach!',
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 26,
+        color: AppColors.primary,
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _signupContainer(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.secondary,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _signupText(),
+          const SizedBox(height: 20),
+          _fieldLabel('Email'),
+          const SizedBox(height: 5),
+          _emailField(),
+          const SizedBox(height: 20),
+          _fieldLabel('Password'),
+          const SizedBox(height: 5),
+          _passwordField(),
+          const SizedBox(height: 30),
+          _signupButton(context),
+        ],
       ),
     );
   }
@@ -45,8 +81,19 @@ class SignupPage extends StatelessWidget {
     return const Text(
       'Sign Up',
       style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 24
+        fontWeight: FontWeight.bold,
+        fontSize: 22,
+        color: AppColors.primary,
+      ),
+    );
+  }
+
+  Widget _fieldLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -55,7 +102,8 @@ class SignupPage extends StatelessWidget {
     return TextField(
       controller: _emailCon,
       decoration: const InputDecoration(
-          hintText: 'Email'
+        hintText: 'Email',
+        border: OutlineInputBorder(),
       ),
     );
   }
@@ -64,19 +112,23 @@ class SignupPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       decoration: const InputDecoration(
-          hintText: 'Password'
+        hintText: 'Password',
+        border: OutlineInputBorder(),
       ),
     );
   }
 
   Widget _signupButton(BuildContext context) {
-    return ReactiveButton(
+    return Center(
+      child: ReactiveButton(
         title: 'Sign Up',
+        width: 10,
+        height: 30,
         activeColor: AppColors.primary,
-        onPressed: () async => sl < SignupUseCase > ().call(
+        onPressed: () async => sl<SignupUseCase>().call(
           params: SignupReqParams(
-              email: _emailCon.text,
-              password: _passwordCon.text
+            email: _emailCon.text,
+            password: _passwordCon.text,
           ),
         ),
         onSuccess: () {
@@ -84,28 +136,31 @@ class SignupPage extends StatelessWidget {
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
-        }
+        },
+      ),
     );
   }
 
   Widget _loginText(BuildContext context) {
     return Text.rich(
-        TextSpan(
-            children: [
-              const TextSpan(
-                  text: "Do you have account?"
-              ),
-              TextSpan(
-                  text: ' Log In',
-                  style: const TextStyle(
-                      color: Colors.blue
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap=(){
-                    AppNavigator.push(context, LogInPage());
-                  }
-              )
-            ]
-        )
+      TextSpan(
+        children: [
+          const TextSpan(
+            text: "Do you have an account? ",
+          ),
+          TextSpan(
+            text: 'Log In',
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                AppNavigator.push(context, LogInPage());
+              },
+          ),
+        ],
+      ),
     );
   }
 }
