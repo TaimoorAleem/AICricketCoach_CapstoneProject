@@ -1,129 +1,134 @@
 import cv2
-import math
 import numpy as np
+import os
+import re
+import shutil
+import matplotlib.pyplot as plt
 
-def calculate_distance(prev_point, current_point):
-    return math.sqrt((current_point[0] - prev_point[0]) ** 2 + (current_point[1] - prev_point[1]) ** 2)
+class BallTracking:
+    def __init__(self, video_path, frame_dir='Frame', processed_frame_dir='Frame_b'):
+        self.video_path = video_path
+        self.frame_dir = frame_dir
+        self.processed_frame_dir = processed_frame_dir
+        self.trajectory_points = []
+        self.heights = []
+        self.fps = None
+        self.time_between_frames = None
 
-# Function to calculate speed in km/h (distance/time)
-def calculate_speed(distance, fps, scale_m_per_pixel):
-    # Speed in pixels per second * fps to convert to pixels/second
-    speed_px_per_s = distance * fps
-    # Convert speed to meters per second using scale factor (pixels to meters)
-    speed_m_per_s = speed_px_per_s * scale_m_per_pixel
-    # Convert meters per second to kilometers per hour
-    speed_km_per_hr = speed_m_per_s * 3.6
-    return speed_km_per_hr
+    @staticmethod
+    def calculate_displacement(point1, point2, pixel_to_distance_ratio):
+        dx = (point2[0] - point1[0]) * pixel_to_distance_ratio
+        dy = (point2[1] - point1[1]) * pixel_to_distance_ratio
+        return (dx**2 + dy**2)**0.5
 
-# Function to calculate bounce height in meters (assuming camera calibration gives a scale factor)
-def calculate_bounce_height(y_position, scale_m_per_pixel, frame_height):
-    
-    height_ratio = (frame_height - y_position) / frame_height  
-    bounce_height = 0.2 + height_ratio * (1.5 - 0.2)  
-    return bounce_height
+    @staticmethod
+    def cleanup_directories(directories):
+        for directory in directories:
+            if os.path.exists(directory):
+                shutil.rmtree(directory)
+            os.makedirs(directory, exist_ok=True)
 
-# Initialize video capture
-cap = cv2.VideoCapture('Ball.mp4')
+    def process_video(self):
+        cap = cv2.VideoCapture(self.video_path)
+        if not cap.isOpened():
+            print("Error opening video stream or file")
+            return
 
-# Read first frame to initialize variables
-ret, frame = cap.read()
-prev_frame = frame
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        self.time_between_frames = 1 / self.fps
 
-# Initialize variables
-prev_position = None
-prev_time = None
+        self.cleanup_directories([self.frame_dir, self.processed_frame_dir])
 
-# FPS (Frames per second) of the video
-fps = cap.get(cv2.CAP_PROP_FPS)
+        cnt = 0
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
 
+            roi = frame
+            cv2.imwrite(f'{self.frame_dir}/{cnt}.png', roi)
 
-scale_m_per_pixel = 0.01  
-frame_height = frame.shape[0]  
+            image_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-# Define a threshold for detecting the bounce (you can adjust this based on the Y-coordinate of the ground)
-ground_threshold = 150  
-prev_speeds = []
+            lower1 = np.array([0, 100, 0])
+            upper1 = np.array([10, 255, 255])
+            lower2 = np.array([160, 100, 20])
+            upper2 = np.array([180, 255, 255])
 
-# Loop through video frames
-while ret:
-    ret, frame = cap.read()
-    if not ret:
-        break
-    
-   
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    
-    lower_red = np.array([0, 120, 70])   # Lower bound for color
-    upper_red = np.array([10, 255, 255]) # Upper bound for color
-    
-   
-    mask = cv2.inRange(hsv, lower_red, upper_red)
-    
- 
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    
-   
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            lower_mask = cv2.inRange(image_hsv, lower1, upper1)
+            upper_mask = cv2.inRange(image_hsv, lower2, upper2)
+            full_mask = lower_mask + upper_mask
 
-   
-    for contour in contours:
-        area = cv2.contourArea(contour)
-        if area > 100:  
-            x, y, w, h = cv2.boundingRect(contour)
-            
-            # Calculate the center of the bounding box (potential ball location)
-            center = (x + w // 2, y + h // 2)
-            
-            # Draw a circle around the detected ball
-            cv2.circle(frame, center, 10, (0, 255, 0), 2)
-            
-           
-            if prev_position:
-                distance = calculate_distance(prev_position, center)
-                
-                # Print distance to debug (see how much the ball is moving between frames)
-                print(f"Distance: {distance:.2f} pixels")
-                
-                if prev_time:
-                    # Calculate speed in km/h
-                    speed_km_hr = calculate_speed(distance, fps, scale_m_per_pixel)
-                    
-                   
-                    prev_speeds.append(speed_km_hr)
-                    if len(prev_speeds) > 10: 
-                        prev_speeds.pop(0)
-                    
-                    smoothed_speed = np.mean(prev_speeds)
-                    
-                    cv2.putText(frame, f"Speed: {smoothed_speed:.2f} km/h", (center[0] + 10, center[1] - 10),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA)
-                   
-                    print(f"Smoothed Speed: {smoothed_speed:.2f} km/h")
+            result = cv2.bitwise_and(frame, frame, mask=full_mask)
 
-            # Detecting bounce: check if the ball is near the ground (Y position threshold)
-            print(f"Ball Y Position: {center[1]}")  # Print Y-coordinate of the ball to debug
+            contours, _ = cv2.findContours(full_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-            if center[1] < ground_threshold:  
-                bounce_height = calculate_bounce_height(center[1], scale_m_per_pixel, frame_height)
-                cv2.putText(frame, f"Bounce Height: {bounce_height:.2f} m", 
-                            (center[0] + 10, center[1] - 30), cv2.FONT_HERSHEY_SIMPLEX, 
-                            0.5, (255, 255, 255), 2, cv2.LINE_AA)
-                
-                print(f"Bounce Height: {bounce_height:.2f} m")
+            detected_circles = []
+            for c in contours:
+                blob_area = cv2.contourArea(c)
+                blob_perimeter = cv2.arcLength(c, True)
 
-         
-            prev_position = center
-            prev_time = cv2.getTickCount() / cv2.getTickFrequency()
+                if blob_perimeter != 0:
+                    blob_circularity = (4 * 3.1416 * blob_area) / (blob_perimeter**2)
+                    min_circularity = 0.2
+                    min_area = 35
 
-    
-    cv2.imshow('Ball Tracking', frame)
-    
-    
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+                    (x, y), radius = cv2.minEnclosingCircle(c)
+                    center = (int(x), int(y))
+                    radius = int(radius)
 
+                    if blob_circularity > min_circularity and blob_area > min_area:
+                        detected_circles.append([center, radius, blob_area, blob_circularity])
 
-cap.release()
-cv2.destroyAllWindows()
+            if detected_circles:
+                largest_blob = max(detected_circles, key=lambda x: x[2] * x[3])
+                largest_center, largest_radius, _, _ = largest_blob
 
+                self.trajectory_points.append(largest_center)
 
+                pixel_to_height_ratio = 0.01
+                height = largest_center[1] * pixel_to_height_ratio
+                self.heights.append(height)
+
+                cv2.circle(frame, largest_center, largest_radius, (255, 0, 0), 2)
+                cv2.rectangle(frame,
+                              (largest_center[0] - largest_radius, largest_center[1] - largest_radius),
+                              (largest_center[0] + largest_radius, largest_center[1] + largest_radius),
+                              (0, 255, 0), 2)
+
+            cv2.imwrite(f'{self.processed_frame_dir}/processed_frame_{cnt}.png', frame)
+            cnt += 1
+
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def calculate_speeds(self):
+        if len(self.trajectory_points) > 1:
+            pixel_to_distance_ratio = 0.01
+            speeds = []
+
+            for i in range(1, len(self.trajectory_points)):
+                displacement = self.calculate_displacement(self.trajectory_points[i-1], self.trajectory_points[i], pixel_to_distance_ratio)
+                speed = (displacement / self.time_between_frames) * 3.6
+                speeds.append(speed)
+
+            print("Ball Speed:", np.mean(speeds), "km/h")
+            print("Ball Height:", np.mean(self.heights), "meters")
+        else:
+            print("Not enough points detected to calculate speed and height.")
+
+    def create_output_video(self, output_filename='output_video.mp4'):
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        frames = sorted(os.listdir(self.processed_frame_dir), key=lambda x: int(re.sub('\\D', '', x)))
+
+        first_frame = cv2.imread(os.path.join(self.processed_frame_dir, frames[0]))
+        height, width, _ = first_frame.shape
+        size = (width, height)
+
+        out = cv2.VideoWriter(output_filename, fourcc, self.fps, size)
+        for frame_filename in frames:
+            frame = cv2.imread(os.path.join(self.processed_frame_dir, frame_filename))
+            out.write(frame)
+
+        out.release()
+        print(f"Video saved as {output_filename}")
