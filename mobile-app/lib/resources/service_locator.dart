@@ -10,6 +10,7 @@ import '../features/authentication/domain/repositories/auth_repo.dart';
 import '../features/authentication/domain/usecases/is_authenticated_usecase.dart';
 import '../features/authentication/domain/usecases/login_usecase.dart';
 import '../features/authentication/domain/usecases/signup_usecase.dart';
+import '../features/user_profile/domain/usecases/get_profile_picture.dart';
 import 'dio_client.dart';
 final sl = GetIt.instance;
 
@@ -30,4 +31,5 @@ void setupServiceLocator() {
   sl.registerSingleton<LoginUseCase>(LoginUseCase());
   sl.registerSingleton<IsAuthenticatedUseCase>(IsAuthenticatedUseCase());
   sl.registerSingleton<GetUserProfileUseCase>(GetUserProfileUseCase());
+  //sl.registerSingleton<GetProfilePictureUseCase>(GetProfilePictureUseCase());
 }
