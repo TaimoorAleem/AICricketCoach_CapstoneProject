@@ -1,4 +1,5 @@
 
+import 'package:ai_cricket_coach/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,7 +29,7 @@ class LoadingPage extends StatelessWidget {
           children: [
             // Background color
             Container(
-              color: const Color(0xff1A1B20), // Replace with your desired background color
+              color: AppColors.background, // Replace with your desired background color
             ),
             // Centered content
             Center(
@@ -48,7 +49,7 @@ class LoadingPage extends StatelessWidget {
                     width: 50,
                     child: CircularProgressIndicator(
                       strokeWidth: 5,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                     ),
                   ),
                 ],
