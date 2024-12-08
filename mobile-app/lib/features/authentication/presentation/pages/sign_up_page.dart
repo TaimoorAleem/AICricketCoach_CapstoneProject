@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
@@ -132,7 +133,7 @@ class SignupPage extends StatelessWidget {
           ),
         ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, EditUserProfilePage());
+          AppNavigator.pushAndRemove(context, const UserProfilePage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);

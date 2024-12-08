@@ -2,6 +2,7 @@
 import 'package:ai_cricket_coach/features/user_profile/data/data_sources/user_profile_service.dart';
 import 'package:ai_cricket_coach/features/user_profile/data/repositories/user_profile_repo_impl.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_profile_repo.dart';
+import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/get_user_profile.dart';
 import 'package:get_it/get_it.dart';
 import '../features/authentication/data/data_sources/auth_api_service.dart';
@@ -31,5 +32,6 @@ void setupServiceLocator() {
   sl.registerSingleton<LoginUseCase>(LoginUseCase());
   sl.registerSingleton<IsAuthenticatedUseCase>(IsAuthenticatedUseCase());
   sl.registerSingleton<GetUserProfileUseCase>(GetUserProfileUseCase());
+  sl.registerSingleton<EditProfileUseCase>(EditProfileUseCase());
   //sl.registerSingleton<GetProfilePictureUseCase>(GetProfilePictureUseCase());
 }
