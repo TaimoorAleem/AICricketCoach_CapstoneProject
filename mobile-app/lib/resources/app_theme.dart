@@ -23,21 +23,21 @@ class AppTheme {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(
-              color: AppColors.primary,
-              width: 0.5, // Extremely thin border
+              color:  Colors.white,
+              width: 0.5,
             ),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(
-              color: AppColors.primary,
+              color:  Colors.white,
               width: 0.5, // Extremely thin border
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(4),
             borderSide: const BorderSide(
-              color: AppColors.primary,
+              color: Colors.white,
               width: 0.5, // Consistent thin border on focus
             ),
           ),

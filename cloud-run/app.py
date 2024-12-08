@@ -2,16 +2,8 @@ import os
 import firebase_admin
 import json
 from firebase_admin import credentials, auth, firestore, storage
-from flask import Flask, request, jsonify
-
-# everytime you update app.py do the following:
-
-# update dockerfile if needed
-# build image: "gcloud builds submit --tag gcr.io/aicc-proj-1/my-app-image
-# deploy cloud run: gcloud run deploy my-app-image \
-#   --image gcr.io/aicc-proj-1/my-app-image-v1.1 \
-#   --set-secrets FIREBASE_CREDENTIALS_PATH=projects/[PROJECT_ID]/secrets/firebase-credentials/versions/latest \
-#   --region us-central1
+from flask import Flask, request, jsonify, send_file
+from io import BytesIO
 
 
 # Initialize Firebase Admin SDK
@@ -40,7 +32,7 @@ def sign_up():
         # Get request data
         data = request.get_json()
         email = data['email']
-        uid = data['uid']
+        uid = data['password']
 
         # Add the user to Firestore
         user_data = {
@@ -97,23 +89,6 @@ def log_in():
             "message": uid
         }), 500
 
-# @app.route('/delete-account')
-# def delete_account():
-#     try:
-#         uid = request.args.get('uid')
-#         sessions_ref= (db.collection('Users').document(uid)).collection('sessions').get()
-#         sessions = sessions_ref.to_dict()
-#         for session in sessions:
-#             deliveries_ref = (sessions_ref.document(session['sessionId']).collection('deliveries')).get()
-#             deliveries = deliveries_ref.to_dict()
-#             for delivery in deliveries:
-#                 delivery.delete()
-#             session.delete()
-#         (db.collection('Users').document(uid)).delete()
-#     catch:
-
-
-#    return jsonify({"status": "success", "message": "We're sorry to see you go! Account Deleted, thanks for using AI Cricket Coach"}), 200
 
 @app.route('/get-players', methods=['GET'])
 def get_players():
@@ -148,6 +123,30 @@ def edit_profile_picture():
             "message" : str(e)
         })
 
+@app.route('/get-profile-picture', methods=['GET'])
+def get_profile_picture():
+    try:
+        blob_url = request.args.get('url')
+        if not blob_url:
+            return jsonify({"status": "error", "message": "No URL provided."}), 400
+        blob_path = blob_url.split('uploads/')[-1]
+        blob = bucket.blob(f'uploads/{blob_path}')
+        if not blob.exists():
+            return jsonify({"status": "error", "message": "Image not found."}), 404
+
+        image_data = blob.download_as_bytes()
+
+        return send_file(
+            BytesIO(image_data),
+            mimetype='image/jpg',  # Adjust the MIME type to match the file format (e.g., 'image/png')
+            as_attachment=True,    # Set to True if you want to force download
+            download_name=blob_path # Suggested file name for download (optional)
+        )
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 @app.route('/edit-profile', methods=['POST'])
 def edit_profile():
@@ -193,6 +192,33 @@ def edit_profile():
             "status" :"error",
             "message" : str(e)
         })
+
+@app.route('/get-user', methods=['GET'])
+def get_user():
+    try:
+        uid = request.args.get('uid')
+
+        if not uid:
+            return jsonify({"status": "error", "message": "UID is missing."}), 400
+
+        users = db.collection('Users').where('uid', '==', uid).get()
+        if not users:
+            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+
+        # Reference to the user document
+        user_data = db.collection('Users').document(uid).get().to_dict()
+        return jsonify({
+            "status": "success",
+            "message" : f'User data retrieved successfully.',
+            "data" : user_data
+        }), 200
+
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
 
 
 @app.route('/upload-video', methods=["POST"])
@@ -532,13 +558,4 @@ def get_performance_history():
             "message": str(e)
         }), 500
 
-
-
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=8080)
-
-
-# running in cloud run
-# port = int(os.environ.get('PORT', 8080))
-# app.run(debug=True, host='0.0.0.0', port=port)
 
