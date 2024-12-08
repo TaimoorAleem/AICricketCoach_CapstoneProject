@@ -1,0 +1,29 @@
+com.example.ai_cricket_coach.app-core-runtime-2.2.0-0 C:\Users\Feras\.gradle\caches\transforms-3\0073f776ec986342f7d8a627afdc659a\transformed\core-runtime-2.2.0\res
+com.example.ai_cricket_coach.app-lifecycle-livedata-core-ktx-2.7.0-1 C:\Users\Feras\.gradle\caches\transforms-3\1f473067e76d3439e93d1c25507df3e8\transformed\lifecycle-livedata-core-ktx-2.7.0\res
+com.example.ai_cricket_coach.app-core-1.13.1-2 C:\Users\Feras\.gradle\caches\transforms-3\28ee8a5ebc96d117de5598ee6fce01ba\transformed\core-1.13.1\res
+com.example.ai_cricket_coach.app-startup-runtime-1.1.1-3 C:\Users\Feras\.gradle\caches\transforms-3\38814b5b6d18bab16f495f755c53373a\transformed\startup-runtime-1.1.1\res
+com.example.ai_cricket_coach.app-lifecycle-viewmodel-savedstate-2.7.0-4 C:\Users\Feras\.gradle\caches\transforms-3\3f11b00ed836555666c3a30ed06b097f\transformed\lifecycle-viewmodel-savedstate-2.7.0\res
+com.example.ai_cricket_coach.app-window-1.2.0-5 C:\Users\Feras\.gradle\caches\transforms-3\4c37d5a5298d34305de56be1eed9bc2c\transformed\window-1.2.0\res
+com.example.ai_cricket_coach.app-lifecycle-viewmodel-2.7.0-6 C:\Users\Feras\.gradle\caches\transforms-3\6066a53547e8fbcf4f45946ad85f0e5d\transformed\lifecycle-viewmodel-2.7.0\res
+com.example.ai_cricket_coach.app-fragment-1.7.1-7 C:\Users\Feras\.gradle\caches\transforms-3\63d3b185799b2c098a0f6ed885ea8db1\transformed\fragment-1.7.1\res
+com.example.ai_cricket_coach.app-window-java-1.2.0-8 C:\Users\Feras\.gradle\caches\transforms-3\7856d2ed4ba9b13cadf3a41775fcbe37\transformed\window-java-1.2.0\res
+com.example.ai_cricket_coach.app-core-1.0.0-9 C:\Users\Feras\.gradle\caches\transforms-3\975f0e31e900fc0d8f33138dd6a03d67\transformed\core-1.0.0\res
+com.example.ai_cricket_coach.app-lifecycle-livedata-core-2.7.0-10 C:\Users\Feras\.gradle\caches\transforms-3\a66a87692f835751c9cebc5e6aca319b\transformed\lifecycle-livedata-core-2.7.0\res
+com.example.ai_cricket_coach.app-tracing-1.2.0-11 C:\Users\Feras\.gradle\caches\transforms-3\a6fa79434ed45e339615d4fa58b5c957\transformed\tracing-1.2.0\res
+com.example.ai_cricket_coach.app-activity-1.8.1-12 C:\Users\Feras\.gradle\caches\transforms-3\b2e5149e1e6ee8926f59921b05db901c\transformed\activity-1.8.1\res
+com.example.ai_cricket_coach.app-lifecycle-process-2.7.0-13 C:\Users\Feras\.gradle\caches\transforms-3\b91c64ba4fd3a40c0b594afd99dfa563\transformed\lifecycle-process-2.7.0\res
+com.example.ai_cricket_coach.app-lifecycle-livedata-2.7.0-14 C:\Users\Feras\.gradle\caches\transforms-3\c11b0fd8d42c1350d7f4e72974d231fa\transformed\lifecycle-livedata-2.7.0\res
+com.example.ai_cricket_coach.app-lifecycle-runtime-2.7.0-15 C:\Users\Feras\.gradle\caches\transforms-3\c3e60d8edb6a86f432de0791fcaa87bd\transformed\lifecycle-runtime-2.7.0\res
+com.example.ai_cricket_coach.app-profileinstaller-1.3.1-16 C:\Users\Feras\.gradle\caches\transforms-3\db11fd50471775d0ee8caacaac3ca01a\transformed\profileinstaller-1.3.1\res
+com.example.ai_cricket_coach.app-savedstate-1.2.1-17 C:\Users\Feras\.gradle\caches\transforms-3\dd9916f74ab57080cd84e9ac8cf0533a\transformed\savedstate-1.2.1\res
+com.example.ai_cricket_coach.app-annotation-experimental-1.4.0-18 C:\Users\Feras\.gradle\caches\transforms-3\dfb8a35c5ec7d76db3811c0efb0d4610\transformed\annotation-experimental-1.4.0\res
+com.example.ai_cricket_coach.app-core-ktx-1.13.1-19 C:\Users\Feras\.gradle\caches\transforms-3\e1f84bc6289db0382641c5df2e0c6bcf\transformed\core-ktx-1.13.1\res
+com.example.ai_cricket_coach.app-debug-20 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\android\app\src\debug\res
+com.example.ai_cricket_coach.app-main-21 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\android\app\src\main\res
+com.example.ai_cricket_coach.app-pngs-22 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\app\generated\res\pngs\debug
+com.example.ai_cricket_coach.app-resValues-23 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\app\generated\res\resValues\debug
+com.example.ai_cricket_coach.app-packageDebugResources-24 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.ai_cricket_coach.app-packageDebugResources-25 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.ai_cricket_coach.app-merged_res-26 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\app\intermediates\merged_res\debug
+com.example.ai_cricket_coach.app-packaged_res-27 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\path_provider_android\intermediates\packaged_res\debug
+com.example.ai_cricket_coach.app-packaged_res-28 C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\build\sqflite_android\intermediates\packaged_res\debug
