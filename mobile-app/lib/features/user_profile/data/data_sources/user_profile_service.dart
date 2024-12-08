@@ -7,12 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/service_locator.dart';
 
 abstract class UserProfileService{
-  Future<Either> getProfileInfo();
+  Future<Either> getProfileInfo(String uid);
 }
 
 class UserProfileServiceImpl extends UserProfileService {
   @override
-  Future<Either> getProfileInfo() async {
+  Future<Either> getProfileInfo(String uid) async {
     try {
       final SharedPreferences sharedPreferences = await SharedPreferences
           .getInstance();
