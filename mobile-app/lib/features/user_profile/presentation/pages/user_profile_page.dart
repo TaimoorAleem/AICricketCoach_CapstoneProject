@@ -12,7 +12,7 @@ import '../../../../resources/service_locator.dart';
 import '../../data/models/EditProfileReqParams.dart';
 
 class UserProfilePage extends StatelessWidget{
-  const UserProfilePage({super.key});
+  UserProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +28,6 @@ class UserProfilePage extends StatelessWidget{
     );
 
   }
-
+ā
 
 }

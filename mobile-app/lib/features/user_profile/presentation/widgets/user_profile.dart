@@ -38,7 +38,7 @@ class UserProfile extends StatelessWidget {
                     const Center(
                       child: CircleAvatar(
                         radius: 60, // Larger profile image
-                        backgroundImage: AssetImage('lib/images/pfp.jpg'),
+                        backgroundImage: AssetImage('lib/images/default-pfp.jpg'),
                       ),
                     ),
                     const SizedBox(height: 20), // Spacing between image and name
@@ -57,18 +57,35 @@ class UserProfile extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 8), // Spacing between name and other details
+                          const SizedBox(height: 10), // Spacing between name and other details
 
                           // Age, City, Country, Team
                           Text(
-                            '${user.age ?? 'Not available'}, ${user.city ?? 'Not available'}, ${user.country ?? 'Not available'}, Team: ${user.teamName ?? 'Not available'}',
+                            '${user.age ?? 'Not available'}, ${user.teamName ?? 'Not available'}',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: Colors.white70,
                             ),
                           ),
-                          const SizedBox(height: 80), // Spacing before buttons
+                          Text(
+                            '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'} ',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          Text(
+                            user.description ?? 'Not available',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          const SizedBox(height: 50), // Spacing before buttons
+
 
                           // Buttons
                           Column(

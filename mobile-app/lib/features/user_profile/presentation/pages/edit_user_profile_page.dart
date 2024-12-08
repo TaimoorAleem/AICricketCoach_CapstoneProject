@@ -1,11 +1,10 @@
 import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../resources/app_theme.dart';
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
@@ -13,7 +12,7 @@ import '../../../../resources/service_locator.dart';
 import '../../data/models/EditProfileReqParams.dart';
 
 class EditUserProfilePage extends StatelessWidget{
-  final UserEntity user;
+  late final UserEntity user;
   EditUserProfilePage({super.key, required this.user});
 
   final TextEditingController _firstNameCon = TextEditingController();
@@ -23,6 +22,7 @@ class EditUserProfilePage extends StatelessWidget{
   final TextEditingController _cityCon = TextEditingController();
   final TextEditingController _countryCon = TextEditingController();
   final TextEditingController _descriptionCon = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +43,14 @@ class EditUserProfilePage extends StatelessWidget{
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 30),
-          _fieldLabel('Fist Name'),
+          _fieldLabel('First Name'),
           _firstNameField(),
           const SizedBox(height: 20),
           _fieldLabel('Last Name'),
@@ -78,63 +78,63 @@ class EditUserProfilePage extends StatelessWidget{
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration:  InputDecoration(
+        hintText: user.firstName,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _lastNameField() {
     return TextField(
       controller: _lastNameCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        hintText: user.lastName,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _teamNameField() {
     return TextField(
       controller: _teamNameCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        hintText: user.teamName,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _ageField() {
     return TextField(
       controller: _ageCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration: InputDecoration(
+        hintText: user.age,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _cityField() {
     return TextField(
       controller: _cityCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration:  InputDecoration(
+        hintText: user.city,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _countryField() {
     return TextField(
       controller: _countryCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration:  InputDecoration(
+        hintText: user.country,
+        border: const OutlineInputBorder(),
       ),
     );
   }
   Widget _descriptionField() {
     return TextField(
       controller: _descriptionCon,
-      decoration: const InputDecoration(
-        hintText: 'Email',
-        border: OutlineInputBorder(),
+      decoration:  InputDecoration(
+        hintText: user.description,
+        border: const OutlineInputBorder(),
       ),
     );
   }
@@ -155,23 +155,18 @@ class EditUserProfilePage extends StatelessWidget{
         width: 10,
         height: 30,
         activeColor: AppColors.primary,
-        onPressed: () async {
-          final sharedPreferences = await SharedPreferences.getInstance();
-          var uid = sharedPreferences.getString('uid');
-          sl<EditProfileUseCase>().call(
-            params: EditProfileReqParams(
-                uid: uid,
-                age: _ageCon.text,
-                city: _cityCon.text,
-                country: _countryCon.text,
-                description: _descriptionCon.text,
-                firstName: _firstNameCon.text,
-                lastName: _lastNameCon.text,
-                teamName: _teamNameCon.text
-            ),
-          );
-        }
-        ,
+        onPressed: () async => sl<EditProfileUseCase>().call(
+          params: EditProfileReqParams(
+              uid: user.uid,
+              age: _ageCon.text.isEmpty ? user.age! : _ageCon.text,
+              city: _cityCon.text.isEmpty ? user.city! : _cityCon.text,
+              country: _countryCon.text.isEmpty ? user.country! : _countryCon.text,
+              description: _descriptionCon.text.isEmpty ? user.description! : _descriptionCon.text,
+              firstName: _firstNameCon.text.isEmpty ? user.firstName! : _firstNameCon.text,
+              lastName: _lastNameCon.text.isEmpty ? user.lastName! : _lastNameCon.text,
+              teamName: _teamNameCon.text.isEmpty ? user.teamName! : _teamNameCon.text
+          ),
+        ),
         onSuccess: () {
           AppNavigator.pushAndRemove(context, const UserProfilePage());
         },
