@@ -5,4 +5,5 @@ class ApiUrl {
   static const signup = 'signup';
   static const login = 'login';
   static const editprofile = 'edit-profile';
+  static const getUser = 'get-user';
 }

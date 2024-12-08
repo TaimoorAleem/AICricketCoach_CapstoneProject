@@ -1,4 +1,7 @@
 
+import 'package:ai_cricket_coach/features/user_profile/data/data_sources/user_profile_service.dart';
+import 'package:ai_cricket_coach/features/user_profile/data/repositories/user_profile_repo_impl.dart';
+import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_profile_repo.dart';
 import 'package:get_it/get_it.dart';
 import '../features/authentication/data/data_sources/auth_api_service.dart';
 import '../features/authentication/data/repositories/auth_repo_impl.dart';
@@ -15,10 +18,11 @@ void setupServiceLocator() {
 
   // Services
   sl.registerSingleton<AuthService>(AuthApiServiceImpl());
-  // sl.registerSingleton<ProfileService>(ProfileApiServiceImpl());
+  sl.registerSingleton<UserProfileService>(UserProfileServiceImpl());
 
   // Repostories
   sl.registerSingleton<AuthRepo>(AuthRepoImpl());
+  sl.registerSingleton<UserProfileRepo>(UserProfileRepoImpl());
 
   // Usecases
   sl.registerSingleton<SignupUseCase>(SignupUseCase());
