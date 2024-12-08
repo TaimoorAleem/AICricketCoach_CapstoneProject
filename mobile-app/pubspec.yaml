@@ -1,4 +1,4 @@
-name: wqeqwewq
+name: ai_cricket_coach
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -30,6 +30,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  #firebase_core: ^2.16.0
+  firebase_core:
+
+  firebase_auth:
+
+
+  #firebase_auth: ^4.8.2
+
 
   flutter_bloc:
 

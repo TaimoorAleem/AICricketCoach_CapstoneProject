@@ -14,4 +14,5 @@ class LoginReqParams {
       'password': password,
     };
   }
+
 }
