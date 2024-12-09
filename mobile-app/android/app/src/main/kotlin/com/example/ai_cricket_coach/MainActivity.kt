@@ -1,4 +1,4 @@
-package com.example.ai_cricket_coach
+package com.aicricketcoach.app
 
 import io.flutter.embedding.android.FlutterActivity
 
