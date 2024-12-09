@@ -15,101 +15,51 @@ paths:
     post:
       summary: Register a new user
       operationId: signUpUser
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  description: Email address of the user.
-                password:
-                  type: string
-                  format: password
-                  description: Password for the user.
-              required:
-                - email
-                - password
+      parameters:
+        - in: body
+          name: data
+          description: The user email and uid
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+
       responses:
         '200':
           description: User registration was successful.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  message:
-                    type: string
-                  uid:
-                    type: string
+
         '500':
           description: Internal server error.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  message:
-                    type: string
-    /login:
-      post:
-        summary: Log in an existing user
-        operationId: logInUser
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  password:
-                    type: string
-                    format: password
-                    description: Firebase ID token for authentication.
-                required:
-                  - password
-        responses:
-          '200':
-            description: User logged in successfully.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                    message:
-                      type: string
-                    uid:
-                      type: string
-                    email:
-                      type: string
-          '404':
-            description: User not found.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                    message:
-                      type: string
-          '500':
-            description: Internal server error.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                    message:
-                      type: string
+
+  /login:
+    post:
+      summary: Log in an existing user
+      operationId: logInUser
+      parameters:
+        - in: body
+          name: data
+          description: The user email and token
+          schema:
+            type: object
+            required:
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: User logged in successfully.
+
+        '404':
+          description: User not found.
+
+        '500':
+          description: Internal server error.
