@@ -1,0 +1,65 @@
+# openapi2-run.yaml
+swagger: '2.0'
+info:
+  title: AICC API
+  description: API Gateway with a Cloud Run backend
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+x-google-backend:
+  address: https://my-app-image-174827312206.us-central1.run.app/
+paths:
+  /signup:
+    post:
+      summary: Register a new user
+      operationId: signUpUser
+      parameters:
+        - in: body
+          name: data
+          description: The user email and uid
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+
+      responses:
+        '200':
+          description: User registration was successful.
+
+        '500':
+          description: Internal server error.
+
+  /login:
+    post:
+      summary: Log in an existing user
+      operationId: logInUser
+      parameters:
+        - in: body
+          name: data
+          description: The user email and token
+          schema:
+            type: object
+            required:
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        '200':
+          description: User logged in successfully.
+
+        '404':
+          description: User not found.
+
+        '500':
+          description: Internal server error.
