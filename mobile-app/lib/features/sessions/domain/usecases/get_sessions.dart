@@ -1,12 +1,13 @@
+import '../../data/repositories/session_repository_impl.dart';
 import '../entities/session.dart';
-import '../repositories/session_repository.dart';
+import 'package:dartz/dartz.dart';
 
-class GetSessions {
-  final SessionRepository repository;
+class GetSessionsUseCase {
+  final SessionRepositoryImpl repository;
 
-  GetSessions(this.repository);
+  GetSessionsUseCase(this.repository);
 
-  Future<List<Session>> execute(String uid) async {
-    return await repository.fetchSessions(uid);
+  Future<Either<String, List<Session>>> execute(String uid) {
+    return repository.fetchSessions(uid);
   }
 }
