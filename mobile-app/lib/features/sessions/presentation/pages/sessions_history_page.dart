@@ -1,71 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/core/network/dio_client.dart';
-import 'package:ai_cricket_coach/features/sessions/data/network/sessions_api_service.dart';
-import 'package:ai_cricket_coach/features/sessions/data/data_sources/sessions_remote_data_source.dart';
-import 'package:ai_cricket_coach/features/sessions/data/repositories/session_repository_impl.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/usecases/get_sessions.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/entities/session.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/sessions_cubit.dart';
+import '../cubit/sessions_state.dart';
+import 'session_details_page.dart';
 
-class SessionsHistoryPage extends StatefulWidget {
-  @override
-  _SessionsHistoryPageState createState() => _SessionsHistoryPageState();
-}
-
-class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
-  List<Session> sessions = [];
-  bool isLoading = true;
-  String errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchSessions();
-  }
-
-  Future<void> fetchSessions() async {
-    final dioClient = DioClient('https://my-app-image-174827312206.us-central1.run.app');
-    final apiService = SessionApiService(dioClient);
-    final remoteDataSource = SessionsRemoteDataSource(apiService);
-    final repository = SessionRepositoryImpl(remoteDataSource: remoteDataSource);
-    final getSessions = GetSessions(repository);
-
-    const testUid = 'user123';
-
-    try {
-      final fetchedSessions = await getSessions.execute(testUid);
-      setState(() {
-        sessions = fetchedSessions;
-        isLoading = false;
-      });
-    } catch (error) {
-      setState(() {
-        errorMessage = error.toString();
-        isLoading = false;
-      });
-    }
-  }
+class SessionsHistoryPage extends StatelessWidget {
+  const SessionsHistoryPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Sessions History')),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-          ? Center(child: Text('Error: $errorMessage'))
-          : sessions.isEmpty
-          ? Center(child: Text('No sessions available'))
-          : ListView.builder(
-        itemCount: sessions.length,
-        itemBuilder: (context, index) {
-          final session = sessions[index];
-          return ListTile(
-            title: Text('Session ID: ${session.sessionId}'),
-            subtitle: Text(
-              'Average Speed: ${session.averageSpeed} km/h\n'
-                  'Average Accuracy: ${session.averageAccuracy}%',
-            ),
-          );
+      appBar: AppBar(
+        title: const Text('Sessions History'),
+      ),
+      body: BlocBuilder<SessionsCubit, SessionsState>(
+        builder: (context, state) {
+          if (state is SessionsLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is SessionsError) {
+            return Center(child: Text('Error: ${state.message}'));
+          } else if (state is SessionsLoaded) {
+            final sessions = state.sessions;
+            return ListView.builder(
+              itemCount: sessions.length,
+              itemBuilder: (context, index) {
+                final session = sessions[index];
+                return ListTile(
+                  title: Text('Session ${session.sessionId}'),
+                  subtitle: Text('Date: ${session.date.toString()}'),
+                  trailing: const Icon(Icons.arrow_forward),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            SessionDetailsPage(sessionId: session.sessionId),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          }
+          return const Center(child: Text('No sessions available.'));
         },
       ),
     );
