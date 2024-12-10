@@ -28,6 +28,4 @@ class UserProfilePage extends StatelessWidget{
     );
 
   }
-ā
-
 }
