@@ -13,7 +13,7 @@ class DeliveryLoaded extends DeliveryState {
 }
 
 class DeliveryError extends DeliveryState {
-  final String message;
+  final String errorMessage;
 
-  DeliveryError({required this.message});
+  DeliveryError({required this.errorMessage});
 }

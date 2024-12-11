@@ -13,7 +13,7 @@ class SessionsLoaded extends SessionsState {
 }
 
 class SessionsError extends SessionsState {
-  final String message;
+  final String errorMessage;
 
-  SessionsError({required this.message});
+  SessionsError({required this.errorMessage});
 }

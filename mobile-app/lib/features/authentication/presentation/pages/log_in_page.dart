@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/sessions/presentation/pages/sessions_history_page.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -132,7 +133,7 @@ class LogInPage extends StatelessWidget {
           ),
         ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, UserProfilePage());
+          AppNavigator.pushAndRemove(context, SessionsHistoryPage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);

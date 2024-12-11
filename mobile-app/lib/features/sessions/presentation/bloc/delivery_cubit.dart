@@ -1,19 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/usecases/get_delivery_details_usecase.dart';
+import '../../domain/entities/delivery.dart';
 import 'delivery_state.dart';
 
 class DeliveryCubit extends Cubit<DeliveryState> {
-  final GetDeliveryDetailsUseCase getDeliveryDetailsUseCase;
+  DeliveryCubit() : super(DeliveryInitial());
 
-  DeliveryCubit({required this.getDeliveryDetailsUseCase})
-      : super(DeliveryInitial());
-
-  void fetchDeliveryDetails(String deliveryId) async {
+  void loadDeliveryDetails(Delivery delivery) {
+    // Simulate loading of delivery data
     emit(DeliveryLoading());
-    final result = await getDeliveryDetailsUseCase.call(deliveryId);
-    result.fold(
-          (error) => emit(DeliveryError(message: error)),
-          (delivery) => emit(DeliveryLoaded(delivery: delivery)),
-    );
+
+    try {
+      // Add logic if needed to process or validate the delivery
+      emit(DeliveryLoaded(delivery: delivery));
+    } catch (e) {
+      emit(DeliveryError(errorMessage: "Failed to load delivery details."));
+    }
   }
 }

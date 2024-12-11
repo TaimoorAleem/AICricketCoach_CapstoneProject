@@ -1,25 +1,23 @@
-import '../../../../core/network/dio_client.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../resources/dio_client.dart';
 
 class SessionApiService {
   final DioClient dioClient;
 
   SessionApiService(this.dioClient);
 
-  Future<Map<String, dynamic>> getSessions(String uid) async {
+  Future<Map<String, dynamic>> getSessions() async {
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final uid = sharedPreferences.getString('uid');
+
+    if (uid == null) {
+      throw Exception("UID not found in SharedPreferences");
+    }
+
     final response = await dioClient.get(
-      '/get-sessions',
+      'get-sessions',
       queryParameters: {'uid': uid},
     );
-    return response.data as Map<String, dynamic>;
-  }
-
-  Future<List<dynamic>> getDeliveries(String sessionId) async {
-    final response = await dioClient.get('/sessions/$sessionId/deliveries');
-    return response.data as List<dynamic>;
-  }
-
-  Future<Map<String, dynamic>> getDeliveryDetails(String deliveryId) async {
-    final response = await dioClient.get('/deliveries/$deliveryId');
     return response.data as Map<String, dynamic>;
   }
 }
