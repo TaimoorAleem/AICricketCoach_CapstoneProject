@@ -7,7 +7,8 @@ class Delivery {
   final bool rightHandedBatsman;
   final double accuracy;
   final double executionRating;
-  final String idealShot; // Recommended shot for this delivery
+  final String idealShot;
+  final String videoUrl;
 
   Delivery({
     required this.deliveryId,
@@ -19,5 +20,6 @@ class Delivery {
     required this.accuracy,
     required this.executionRating,
     required this.idealShot,
+    required this.videoUrl,
   });
 }

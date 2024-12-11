@@ -1,30 +1,24 @@
-import '../../domain/entities/session.dart';
-import '../../domain/entities/delivery.dart';
+import 'package:dartz/dartz.dart';
 import '../../domain/repositories/session_repository.dart';
-import '../data_sources/sessions_remote_data_source.dart';
+import '../models/session_model.dart';
+import '../../domain/entities/session.dart';
+import '../network/sessions_api_service.dart';
 
-class SessionRepositoryImpl implements SessionRepository {
-  final SessionsRemoteDataSource remoteDataSource;
+class SessionsRepositoryImpl implements SessionsRepository {
+  final SessionApiService apiService;
 
-  SessionRepositoryImpl({
-    required this.remoteDataSource,
-  });
-
-  @override
-  Future<List<Session>> fetchSessions(String uid) async {
-      final remoteSessions = await remoteDataSource.getSessions(uid);
-      return remoteSessions.map((model) => model.toDomain()).toList();
-  }
+  SessionsRepositoryImpl({required this.apiService});
 
   @override
-  Future<List<Delivery>> fetchDeliveries(String sessionId) async {
-    final remoteDeliveries = await remoteDataSource.getDeliveries(sessionId);
-    return remoteDeliveries.map((model) => model.toDomain()).toList();
-  }
-
-  @override
-  Future<Delivery> fetchDeliveryDetails(String deliveryId) async {
-    final remoteDelivery = await remoteDataSource.getDeliveryDetails(deliveryId);
-    return remoteDelivery.toDomain();
+  Future<Either<String, List<Session>>> getSessions() async {
+    try {
+      final result = await apiService.getSessions();
+      final sessions = (result['sessions'] as List)
+          .map((json) => SessionModel.fromJson(json).toEntity())
+          .toList();
+      return Right(sessions);
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 }

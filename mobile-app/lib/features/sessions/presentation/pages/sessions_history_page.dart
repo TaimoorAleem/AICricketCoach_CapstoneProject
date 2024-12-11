@@ -1,72 +1,63 @@
+import 'package:ai_cricket_coach/features/sessions/presentation/pages/session_details_page.dart';
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/core/network/dio_client.dart';
-import 'package:ai_cricket_coach/features/sessions/data/network/sessions_api_service.dart';
-import 'package:ai_cricket_coach/features/sessions/data/data_sources/sessions_remote_data_source.dart';
-import 'package:ai_cricket_coach/features/sessions/data/repositories/session_repository_impl.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/usecases/get_sessions.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/entities/session.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../resources/app_colors.dart';
+import '../../../../resources/service_locator.dart';
+import '../../domain/usecases/get_sessions_usecase.dart';
+import '../bloc/sessions_cubit.dart';
+import '../bloc/sessions_state.dart';
 
-class SessionsHistoryPage extends StatefulWidget {
-  @override
-  _SessionsHistoryPageState createState() => _SessionsHistoryPageState();
-}
-
-class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
-  List<Session> sessions = [];
-  bool isLoading = true;
-  String errorMessage = '';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchSessions();
-  }
-
-  Future<void> fetchSessions() async {
-    final dioClient = DioClient('https://my-app-image-174827312206.us-central1.run.app');
-    final apiService = SessionApiService(dioClient);
-    final remoteDataSource = SessionsRemoteDataSource(apiService);
-    final repository = SessionRepositoryImpl(remoteDataSource: remoteDataSource);
-    final getSessions = GetSessions(repository);
-
-    const testUid = 'user123';
-
-    try {
-      final fetchedSessions = await getSessions.execute(testUid);
-      setState(() {
-        sessions = fetchedSessions;
-        isLoading = false;
-      });
-    } catch (error) {
-      setState(() {
-        errorMessage = error.toString();
-        isLoading = false;
-      });
-    }
-  }
+class SessionsHistoryPage extends StatelessWidget {
+  const SessionsHistoryPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Sessions History')),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-          ? Center(child: Text('Error: $errorMessage'))
-          : sessions.isEmpty
-          ? Center(child: Text('No sessions available'))
-          : ListView.builder(
-        itemCount: sessions.length,
-        itemBuilder: (context, index) {
-          final session = sessions[index];
-          return ListTile(
-            title: Text('Session ID: ${session.sessionId}'),
-            subtitle: Text(
-              'Average Speed: ${session.averageSpeed} km/h\n'
-                  'Average Accuracy: ${session.averageAccuracy}%',
-            ),
-          );
-        },
+    return BlocProvider(
+      create: (context) {
+        final cubit = SessionsCubit(getSessionsUseCase: sl<GetSessionsUseCase>());
+        cubit.getSessions(); // Fetch sessions immediately
+        return cubit;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Sessions History'),
+          backgroundColor: AppColors.secondary,
+        ),
+        body: BlocBuilder<SessionsCubit, SessionsState>(
+          builder: (context, state) {
+            if (state is SessionsLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is SessionsLoaded) {
+              if (state.sessions.isEmpty) {
+                return const Center(child: Text('No sessions available.'));
+              }
+              return ListView.builder(
+                itemCount: state.sessions.length,
+                itemBuilder: (context, index) {
+                  final session = state.sessions[index];
+                  return ListTile(
+                    title: Text('Session on ${session.date}'),
+                    subtitle: Text('Session ID: ${session.sessionId}'),
+                    trailing: const Icon(Icons.arrow_forward),
+                    onTap: () {
+                      // Navigate to session details
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SessionDetailsPage(session: session),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            } else if (state is SessionsError) {
+              return Center(child: Text(state.errorMessage));
+            } else {
+              return const Center(child: Text('No sessions found.'));
+            }
+          },
+        ),
       ),
     );
   }
