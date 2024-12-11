@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ai_cricket_coach/features/sessions/domain/entities/session.dart';
 
+import '../../../../resources/app_colors.dart';
 import '../widgets/DeliveryCard.dart';
 
 class SessionDetailsPage extends StatelessWidget {
@@ -13,6 +14,7 @@ class SessionDetailsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Session Details'),
+        backgroundColor: AppColors.secondary,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

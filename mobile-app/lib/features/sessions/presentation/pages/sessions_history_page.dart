@@ -1,6 +1,7 @@
 import 'package:ai_cricket_coach/features/sessions/presentation/pages/session_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../resources/app_colors.dart';
 import '../../../../resources/service_locator.dart';
 import '../../domain/usecases/get_sessions_usecase.dart';
 import '../bloc/sessions_cubit.dart';
@@ -20,6 +21,7 @@ class SessionsHistoryPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Sessions History'),
+          backgroundColor: AppColors.secondary,
         ),
         body: BlocBuilder<SessionsCubit, SessionsState>(
           builder: (context, state) {
