@@ -9,7 +9,7 @@ class DeliveryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String shotImage = shotImages[delivery.idealShot] ?? "assets/images/default_shot.png";
+    final String shotImage = shotImages[delivery.idealShot] ?? "assets/images/cut.gif";
     final String shotInstruction = shotInstructions[delivery.idealShot] ?? "No specific instructions available.";
 
     return Scaffold(

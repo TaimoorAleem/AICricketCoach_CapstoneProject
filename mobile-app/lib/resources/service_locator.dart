@@ -14,6 +14,10 @@ import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/get_user_profile.dart';
 import 'package:get_it/get_it.dart';
+import '../features/feedback/data/data_sources/api_service.dart';
+import '../features/feedback/data/repositories/shot_repository_impl.dart';
+import '../features/feedback/domain/repositories/shot_repository.dart';
+import '../features/feedback/domain/usecases/predict_shot.dart';
 import 'dio_client.dart';
 
 final sl = GetIt.instance;
@@ -30,6 +34,7 @@ void setupServiceLocator() {
   sl.registerLazySingleton<UserProfileService>(
           () => UserProfileServiceImpl()
   );
+  sl.registerSingleton<ApiService>(ApiService('http://10.0.2.2:5000'));
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
@@ -37,6 +42,8 @@ void setupServiceLocator() {
   sl.registerSingleton<SessionsRepository>(
     SessionsRepositoryImpl(apiService: sl<SessionApiService>()),
   );
+  sl.registerSingleton<ShotRepository>(ShotRepositoryImpl(sl<ApiService>()));
+
 
   // Use Cases
   sl.registerLazySingleton<SignupUseCase>(() => SignupUseCase());
@@ -49,4 +56,5 @@ void setupServiceLocator() {
   sl.registerSingleton<GetSessionsUseCase>(
     GetSessionsUseCase(repository: sl<SessionsRepository>()),
   );
+  sl.registerSingleton<PredictShot>(PredictShot(sl<ShotRepository>()));
 }

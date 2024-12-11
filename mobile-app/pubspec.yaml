@@ -60,6 +60,8 @@ dependencies:
 
   path_provider: ^2.1.5
   equatable: ^2.0.7
+  percent_indicator: ^4.2.4
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
