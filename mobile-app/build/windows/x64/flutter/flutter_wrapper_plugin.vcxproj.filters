@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\windows\flutter\ephemeral\cpp_client_wrapper\core_implementations.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\windows\flutter\ephemeral\cpp_client_wrapper\standard_codec.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\windows\flutter\ephemeral\cpp_client_wrapper\plugin_registrar.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Feras\Desktop\Capstone proj\ML\AICricketCoach_CapstoneProject\mobile-app\windows\flutter\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{AD3096D1-DF98-3BD0-A0ED-7FCEBC85858F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E73840BB-C085-3F79-B8AB-4F439A88F2DE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
