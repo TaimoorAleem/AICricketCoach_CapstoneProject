@@ -20,14 +20,14 @@ class LogInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 50),
               _welcomeHeading(),
-              const SizedBox(height: 50),
+              const SizedBox(height: 20),
               const SizedBox(height: 20),
               _loginContainer(context),
               const SizedBox(height: 20),

@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+
   #firebase_core: ^2.16.0
   firebase_core:
 
@@ -53,6 +54,8 @@ dependencies:
   get_it:
 
   shared_preferences:
+
+  path_provider: ^2.0.11
 
 
 
@@ -77,7 +80,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -85,6 +87,8 @@ flutter:
 
   assets:
     - lib/images/logo.png
+    - lib/images/pfp.jpg
+    - lib/images/default-pfp.jpg
 
 
   # To add assets to your application, add an assets section, like this:

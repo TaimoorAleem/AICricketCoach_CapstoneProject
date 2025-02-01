@@ -7,8 +7,8 @@ class UserModel {
     required this.email,
     required this.firstName,
     required this.lastName,
-    required this.pfpUrl,
-    required this.role,
+    this.pfpUrl,
+    this.role,
     required this.teamName,
     required this.uid,
   });
@@ -34,8 +34,8 @@ class UserModel {
       email: json["email"],
       firstName: json["firstName"],
       lastName: json["lastName"],
-      pfpUrl: json["pfpUrl"],
-      role: json["role"],
+      pfpUrl: json["pfpUrl"] ?? "",
+      role: json["role"] ?? "",
       teamName: json["teamName"],
       uid: json["uid"],
     );

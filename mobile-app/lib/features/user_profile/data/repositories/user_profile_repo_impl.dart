@@ -34,8 +34,8 @@ class UserProfileRepoImpl extends UserProfileRepo {
           return Left(error);
         },
             (data){
-          var user = UserMapper.toEntity(UserModel.fromJson(data['data']));
-          return Right(user);
+              var user = UserMapper.toEntity(UserModel.fromJson(data['user']));
+              return Right(user);
         }
     );
   }

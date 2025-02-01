@@ -40,12 +40,10 @@ class UserProfileServiceImpl extends UserProfileService {
   @override
   Future<Either> editProfileInfo(EditProfileReqParams params) async{
     try {
-      final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      var uid = sharedPreferences.getString('uid');
 
       var response = await sl<DioClient>().post(
           ApiUrl.editProfile,
-          data: { params.toMap() }
+          data: params.toMap()
       );
 
       return Right(response.data);
