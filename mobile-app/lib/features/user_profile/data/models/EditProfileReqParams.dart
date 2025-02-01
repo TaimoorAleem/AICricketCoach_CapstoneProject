@@ -14,6 +14,7 @@ class EditProfileReqParams {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'uid' : uid,
       'age': age,
       'city': city,
       'country': country,
