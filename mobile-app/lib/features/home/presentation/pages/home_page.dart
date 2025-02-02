@@ -43,8 +43,19 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary, // Button background color
-                foregroundColor: Colors.white, // Button text color
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                // TODO: Implement video capture functionality
+              },
+              child: const Text('Capture Video'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
@@ -59,15 +70,15 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary, // Button background color
-                foregroundColor: Colors.white, // Button text color
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
               ),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => IdealShotPage(
-                      predictShot: sl<PredictShot>(), // Inject the use case here
+                      predictShot: sl<PredictShot>(),
                     ),
                   ),
                 );
