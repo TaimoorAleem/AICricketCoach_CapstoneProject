@@ -6,6 +6,7 @@ import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
+import '../../../user_profile/presentation/pages/vid_display.dart';
 import '../../data/models/login_req_params.dart';
 import '../../domain/usecases/login_usecase.dart';
 import 'sign_up_page.dart';
@@ -132,7 +133,7 @@ class LogInPage extends StatelessWidget {
           ),
         ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, const UserProfilePage());
+          AppNavigator.pushAndRemove(context, const VideoPlayerPage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
