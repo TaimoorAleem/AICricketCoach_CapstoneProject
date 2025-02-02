@@ -1,4 +1,5 @@
 
+import 'package:ai_cricket_coach/features/authentication/domain/usecases/send_code_usecase.dart';
 import 'package:ai_cricket_coach/features/user_profile/data/data_sources/user_profile_service.dart';
 import 'package:ai_cricket_coach/features/user_profile/data/repositories/user_profile_repo_impl.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_profile_repo.dart';
@@ -30,6 +31,7 @@ void setupServiceLocator() {
   // Usecases
   sl.registerSingleton<SignupUseCase>(SignupUseCase());
   sl.registerSingleton<LoginUseCase>(LoginUseCase());
+  sl.registerSingleton<SendCodeUseCase>(SendCodeUseCase());
   sl.registerSingleton<IsAuthenticatedUseCase>(IsAuthenticatedUseCase());
   sl.registerSingleton<GetUserProfileUseCase>(GetUserProfileUseCase());
   sl.registerSingleton<EditProfileUseCase>(EditProfileUseCase());

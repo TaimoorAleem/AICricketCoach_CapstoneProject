@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/authentication/data/models/reset_pw_params.dart';
 import 'package:dartz/dartz.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/service_locator.dart';
@@ -19,6 +20,18 @@ class AuthRepoImpl extends AuthRepo {
             (data) async {
           final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
           sharedPreferences.setString('uid',data['uid']);
+          return Right(data);
+        }
+    );
+  }
+  @override
+  Future<Either> resetpassword(ResetPWParams params) async {
+    var data = await sl<AuthService>().resetpassword(params);
+    return data.fold(
+            (error) {
+          return Left(error);
+        },
+            (data) async {
           return Right(data);
         }
     );
