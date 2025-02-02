@@ -1,4 +1,5 @@
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
@@ -26,11 +27,13 @@ class SignupPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
+              const SizedBox(height: 30),
               _welcomeHeading(),
-              const SizedBox(height: 50),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
+              const SizedBox(height: 15),
               _signupContainer(context),
+              const SizedBox(height: 30),
+              _toggle(context),
               const SizedBox(height: 20),
               _loginText(context),
             ],
@@ -52,6 +55,41 @@ class SignupPage extends StatelessWidget {
     );
   }
 
+  Widget _toggle(BuildContext context) {
+    return CupertinoSegmentedControl<int>(
+      padding: const EdgeInsets.all(8),
+      onValueChanged: (int value) {
+        // Handle value change
+      },
+      groupValue: 0, // Set default value
+      children: {
+        0: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+          color: AppColors.secondary, // app.secondary
+          child: const Text(
+            'Player',
+            style: TextStyle(
+              color: Colors.white, // White text for better contrast
+            ),
+          ),
+        ),
+        1: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+          color: AppColors.primary, // app.primary
+          child: const Text(
+            'Coach',
+            style: TextStyle(
+              color: Colors.white, // White text for better contrast
+            ),
+          ),
+        ),
+      },
+    );
+  }
+
+
+
+
   Widget _signupContainer(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -71,8 +109,9 @@ class SignupPage extends StatelessWidget {
           _fieldLabel('Password'),
           const SizedBox(height: 5),
           _passwordField(),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           _signupButton(context),
+
         ],
       ),
     );
@@ -141,6 +180,7 @@ class SignupPage extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _loginText(BuildContext context) {
     return Text.rich(
