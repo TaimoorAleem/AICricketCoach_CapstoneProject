@@ -9,6 +9,7 @@ import '../../../../resources/service_locator.dart';
 import '../../../user_profile/presentation/pages/vid_display.dart';
 import '../../data/models/login_req_params.dart';
 import '../../domain/usecases/login_usecase.dart';
+import 'reset_password_page.dart';
 import 'sign_up_page.dart';
 
 class LogInPage extends StatelessWidget {
@@ -33,6 +34,7 @@ class LogInPage extends StatelessWidget {
               _loginContainer(context),
               const SizedBox(height: 20),
               _signupText(context),
+              _forgotpwtext(context),
             ],
           ),
         ),
@@ -112,6 +114,7 @@ class LogInPage extends StatelessWidget {
   Widget _passwordField() {
     return TextField(
       controller: _passwordCon,
+      obscureText: true,
       decoration: const InputDecoration(
         hintText: 'Password',
         border: OutlineInputBorder(),
@@ -141,6 +144,32 @@ class LogInPage extends StatelessWidget {
       ),
     );
   }
+
+  Widget _forgotpwtext(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const TextSpan(
+            text: "",
+          ),
+          TextSpan(
+            text: 'Forgot Password?',
+            style: const TextStyle(
+              color: Colors.blue,
+              fontWeight: FontWeight.bold,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                AppNavigator.push(context, ResetPasswordPage());
+              },
+          ),
+        ],
+      ),
+    );
+  }
+
+
+
 
   Widget _signupText(BuildContext context) {
     return Text.rich(

@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/authentication/data/models/reset_pw_params.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +12,7 @@ abstract class AuthService {
 
   Future<Either> signup(SignupReqParams params);
   Future<Either> login(LoginReqParams params);
+  Future<Either> resetpassword(ResetPWParams params);
 }
 
 
@@ -38,6 +40,16 @@ class AuthApiServiceImpl extends AuthService {
 
     } on DioException catch(e) {
       return Left(e.response!.data['message']);
+    }
+  }
+
+  @override
+  Future<Either> resetpassword(ResetPWParams params) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: params.email);
+      return const Right(null); // Success case
+    } catch (e) {
+      return Left(e.toString()); // Convert any error into a Left<String>
     }
   }
 
@@ -75,7 +87,5 @@ class AuthApiServiceImpl extends AuthService {
       return Left('An error occurred: $e');
     }
   }
-
-
 
 }
