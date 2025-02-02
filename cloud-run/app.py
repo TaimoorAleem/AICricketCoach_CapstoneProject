@@ -1,6 +1,7 @@
 import os
 import firebase_admin
 import json
+from datetime import timedelta
 from firebase_admin import credentials, auth, firestore, storage
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
@@ -229,18 +230,19 @@ def upload_video():
 
         file = request.files['file']
         if file.filename == '':
-            return jsonify({"status":"error", "message":"No image selected."}), 400
+            return jsonify({"status":"error", "message":"No video selected."}), 400
 
 
         blob = bucket.blob(f'uploads/{file.filename}')
         blob.upload_from_file(file)
 
-        blob_url = blob.public_url
+        signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
+
 
         return jsonify({
             "status" : "success",
-            "message" : "Profile picture updated successfully",
-            "url" : blob_url
+            "message" : "Delivery video uploaded successfully",
+            "url" : signed_url
         }),200
 
     except Exception as e:
@@ -248,6 +250,33 @@ def upload_video():
             "status" :"error",
             "message" : str(e)
         })
+
+@app.route('/get-video', methods=["GET"])
+def get_video():
+
+    vid_url = request.args.get('url')
+    if not vid_url :
+        return jsonify({"status": "error", "message": "No url found."}), 400
+
+
+
+    if vid_url == '':
+        return jsonify({"status": "error", "message": "Invalid url provided."}), 400
+
+    try:
+        split_url = vid_url.replace("https://storage.googleapis.com/", "").split("/", 1)
+        blob_name = split_url[1]
+
+    except IndexError:
+        return {"error": "Invalid video URL format"}, 400
+
+    blob = bucket.blob(blob_name)
+    if not blob.exists():
+        return {"error": "Video not found"}, 404
+
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    blob.download_to_filename(temp_file.name)
+    return send_file(temp_file.name, mimetype="video/mp4")
 
 @app.route('/add-delivery', methods=["POST"])
 def upload_delivery():
