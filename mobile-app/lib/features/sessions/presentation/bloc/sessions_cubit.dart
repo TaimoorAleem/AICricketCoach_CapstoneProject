@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/usecases/get_sessions_usecase.dart';

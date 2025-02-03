@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

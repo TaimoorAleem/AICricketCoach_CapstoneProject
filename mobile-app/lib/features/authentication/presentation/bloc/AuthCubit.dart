@@ -1,7 +1,7 @@
+import 'package:ai_cricket_coach/features/authentication/presentation/bloc/AuthState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../resources/service_locator.dart';
-import '../../../analytics/presentation/bloc/AuthState.dart';
 import '../../domain/usecases/is_authenticated_usecase.dart';
 
 class AuthCubit extends Cubit<AuthState> {

@@ -33,6 +33,7 @@ class AuthRepoImpl extends AuthRepo {
         },
             (data) async {
           final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          print("✅ Storing UID: ${data['uid']}");  // Debugging line
           sharedPreferences.setString('uid',data['uid']);
           return Right(data);
         }

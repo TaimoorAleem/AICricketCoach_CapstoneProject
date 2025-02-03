@@ -1,3 +1,5 @@
+// ignore_for_file: unused_import
+
 import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
 import 'package:dartz/dartz.dart';
 

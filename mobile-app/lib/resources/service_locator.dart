@@ -14,6 +14,10 @@ import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/get_user_profile.dart';
 import 'package:get_it/get_it.dart';
+import '../features/analytics/data/network/performance_api_service.dart';
+import '../features/analytics/data/repositories/performance_repository_impl.dart';
+import '../features/analytics/domain/repositories/performance_repository.dart';
+import '../features/analytics/domain/usecases/get_performance_history_usecase.dart';
 import '../features/feedback/data/data_sources/api_service.dart';
 import '../features/feedback/data/repositories/shot_repository_impl.dart';
 import '../features/feedback/domain/repositories/shot_repository.dart';
@@ -35,6 +39,7 @@ void setupServiceLocator() {
           () => UserProfileServiceImpl()
   );
   sl.registerSingleton<ApiService>(ApiService('http://10.0.2.2:5000'));
+  sl.registerSingleton<PerformanceApiService>(PerformanceApiService(sl<DioClient>()));
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
@@ -43,7 +48,7 @@ void setupServiceLocator() {
     SessionsRepositoryImpl(apiService: sl<SessionApiService>()),
   );
   sl.registerSingleton<ShotRepository>(ShotRepositoryImpl(sl<ApiService>()));
-
+  sl.registerSingleton<PerformanceRepository>(PerformanceRepositoryImpl(apiService: sl<PerformanceApiService>()));
 
   // Use Cases
   sl.registerLazySingleton<SignupUseCase>(() => SignupUseCase());
@@ -57,4 +62,6 @@ void setupServiceLocator() {
     GetSessionsUseCase(repository: sl<SessionsRepository>()),
   );
   sl.registerSingleton<PredictShot>(PredictShot(sl<ShotRepository>()));
+  sl.registerSingleton<GetPerformanceHistoryUseCase>(
+      GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()));
 }

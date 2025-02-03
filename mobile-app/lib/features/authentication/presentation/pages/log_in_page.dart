@@ -1,6 +1,4 @@
 import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
-import 'package:ai_cricket_coach/features/sessions/presentation/pages/sessions_history_page.dart';
-import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';

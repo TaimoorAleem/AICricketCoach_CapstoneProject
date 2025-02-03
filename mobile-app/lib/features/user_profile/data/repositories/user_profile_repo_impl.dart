@@ -1,10 +1,7 @@
-import 'dart:io';
 
-import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_profile_repo.dart';
 import 'package:ai_cricket_coach/resources/user_mapper.dart';
 import 'package:dartz/dartz.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../resources/service_locator.dart';
 import '../data_sources/user_profile_service.dart';

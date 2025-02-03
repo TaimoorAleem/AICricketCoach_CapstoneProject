@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../resources/app_navigator.dart';
-import '../../../analytics/presentation/bloc/AuthCubit.dart';
-import '../../../analytics/presentation/bloc/AuthState.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../bloc/AuthCubit.dart';
+import '../bloc/AuthState.dart';
 import 'log_in_page.dart';
 
 class LoadingPage extends StatelessWidget {

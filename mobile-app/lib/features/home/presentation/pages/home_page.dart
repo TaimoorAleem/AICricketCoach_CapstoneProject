@@ -1,5 +1,6 @@
-import 'package:ai_cricket_coach/features/feedback/presentation/pages/ideal_shot_page.dart';
 import 'package:flutter/material.dart';
+import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:ai_cricket_coach/features/feedback/presentation/pages/ideal_shot_page.dart';
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/service_locator.dart';
 import '../../../sessions/presentation/pages/sessions_history_page.dart';
@@ -73,6 +74,22 @@ class HomePage extends StatelessWidget {
                 );
               },
               child: const Text('Go to Feedback Page'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary, // Button background color
+                foregroundColor: Colors.white, // Button text color
+              ),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AnalyticsPage(),
+                  ),
+                );
+              },
+              child: const Text('Go to Analytics Page'),
             ),
           ],
         ),

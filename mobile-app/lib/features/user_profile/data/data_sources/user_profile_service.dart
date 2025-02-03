@@ -1,15 +1,14 @@
-import 'dart:io';
+
+// ignore_for_file: unused_local_variable
 
 import 'package:ai_cricket_coach/features/user_profile/data/models/EditProfileReqParams.dart';
 import 'package:ai_cricket_coach/resources/api_urls.dart';
 import 'package:ai_cricket_coach/resources/dio_client.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../resources/service_locator.dart';
-import '../../domain/entities/user_entity.dart';
 
 abstract class UserProfileService{
   Future<Either> getProfileInfo();

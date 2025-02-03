@@ -36,9 +36,7 @@ dependencies:
 
   firebase_auth:
 
-
   #firebase_auth: ^4.8.2
-
 
   flutter_bloc:
 
@@ -59,9 +57,15 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   path_provider: ^2.1.5
+
   equatable: ^2.0.7
+
   percent_indicator: ^4.2.4
+
   http: ^1.2.2
+  fl_chart: ^0.70.2
+  intl: ^0.20.2
+
 
 dev_dependencies:
   flutter_test:

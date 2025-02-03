@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../resources/service_locator.dart';
-import 'features/analytics/presentation/bloc/AuthCubit.dart';
+import 'features/authentication/presentation/bloc/AuthCubit.dart';
 import 'features/authentication/presentation/pages/loading_page.dart';
 import '../resources/app_theme.dart';
 

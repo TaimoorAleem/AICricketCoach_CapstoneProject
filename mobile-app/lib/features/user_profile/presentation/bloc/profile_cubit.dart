@@ -1,11 +1,10 @@
-import 'dart:io';
-import 'dart:typed_data';
+
+// ignore_for_file: unused_local_variable
 
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../resources/service_locator.dart';
-import '../../domain/usecases/get_profile_picture.dart';
 import '../../domain/usecases/get_user_profile.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
