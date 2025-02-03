@@ -173,7 +173,7 @@ class SignupPage extends StatelessWidget {
           ),
         ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, const UserProfilePage());
+          AppNavigator.pushAndRemove(context, UserProfilePage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);

@@ -7,4 +7,5 @@ class ApiUrl {
   static const editProfile = 'edit-profile';
   static const getUser = 'get-user';
   static const getProfilePicture = 'get-profile-picture';
+  static const deleteAccount = 'delete-account';
 }
