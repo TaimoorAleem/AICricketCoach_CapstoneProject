@@ -1,5 +1,6 @@
 import os
 import firebase_admin
+import subprocess
 import json
 from datetime import timedelta
 from firebase_admin import credentials, auth, firestore, storage
@@ -228,21 +229,35 @@ def upload_video():
         if 'file' not in request.files:
             return jsonify({"status": "error", "message": "No file found."}), 400
 
+
+
         file = request.files['file']
         if file.filename == '':
             return jsonify({"status":"error", "message":"No video selected."}), 400
+        fname = file.filename
 
 
-        blob = bucket.blob(f'uploads/{file.filename}')
+        blob = bucket.blob(f'uploads/{fname}')
         blob.upload_from_file(file)
 
         signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
+
+        destination_path = '.\video_processing\InputVideo.mp4'  # assuming the folder is inside the app directory
+        blob.download_to_filename(destination_path)
+
+        output = subprocess.check_output(
+            ["python3", ".\video_processing\FinalVideoProcessing.py"],
+            text=True
+        )
+
+
 
 
         return jsonify({
             "status" : "success",
             "message" : "Delivery video uploaded successfully",
-            "url" : signed_url
+            "url" : signed_url,
+            "output" : output
         }),200
 
     except Exception as e:
@@ -277,6 +292,48 @@ def get_video():
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     blob.download_to_filename(temp_file.name)
     return send_file(temp_file.name, mimetype="video/mp4")
+
+@app.route('/delete-account', methods=["POST"])
+def delete_account():
+    try:
+        data = request.get_json()
+        uid = data['uid']
+
+        if "uid" not in data:
+            return jsonify({"status": "error", "message": "No uid found."}), 400
+
+        id_token = data['password']
+
+        decoded_token = auth.verify_id_token(id_token)
+
+        uid = decoded_token['uid']
+
+        user_ref = db.collection('Users').document(uid)
+        user = user_ref.get()
+
+        if user.exists:
+            user_ref.delete()
+            auth.delete_user(uid)
+            return jsonify({
+                "status": "success",
+                "message": "User account deleted successfully",
+            }), 200
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "User not found"
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            "status": "error"
+        }), 500
+
+
+
+
+
+
 
 @app.route('/add-delivery', methods=["POST"])
 def upload_delivery():
@@ -515,9 +572,35 @@ def get_performance_history():
 
 
         sessionId = request.args.get('sessionId')
+
         sessions_check = user_ref.collection('sessions').where('sessionId', '==', sessionId).get()
+
         if not sessions_check:
-            return jsonify({"status": "error", "message": f"Session with SessionId {sessionId} does not exist."}), 404
+            # Get all sessions for the user
+            sessions_ref = user_ref.collection('sessions').get()
+            result = []
+
+            for session in sessions_ref:
+                session_data = session.to_dict()
+
+                session_data['date'] = session_data.get('date')
+
+                perf_ref = session.reference.collection('performance')
+                performances = perf_ref.stream()  # Stream all performance documents in the subcollection
+
+                session_data['performance'] = []
+
+                # Iterate over performance documents
+                for performance in performances:
+                    performance_data = performance.to_dict()  # Convert each performance document to dict
+                    session_data['performance'].append(performance_data)  # Add to the session's performances list
+
+                result.append(session_data)  # Append the session with its performances to the result
+
+            return jsonify({
+                "status": "success",
+                "message" : f'The performance for User {uid} has been retrieved successfully.',
+                "performanceHistory" : result}), 200
 
 
 
