@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import '../../domain/entities/performance.dart';
 import '../bloc/performance_cubit.dart';
 import '../bloc/performance_state.dart';
 
@@ -24,13 +25,42 @@ class AnalyticsPage extends StatelessWidget {
             } else if (state is PerformanceError) {
               return Center(child: Text(state.errorMessage));
             } else if (state is PerformanceLoaded) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
+              // ✅ Sort performance history by date (oldest to newest)
+              List<Performance> sortedHistory = List.from(state.performanceHistory.cast<Performance>());
+              sortedHistory.sort((a, b) => DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(25.0),
                 child: Column(
                   children: [
-                    _buildLegends(),
+                    _buildInfoText(),
                     const SizedBox(height: 16),
-                    _buildLineChart(state.performanceHistory),
+                    _buildSingleChart(
+                      sortedHistory,
+                      'Balling Accuracy (%)',
+                      Colors.blue,
+                          (p) => p.averageAccuracy,
+                      0,
+                      100,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSingleChart(
+                      sortedHistory,
+                      'Balling Speed (km/h)',
+                      Colors.green,
+                          (p) => p.averageSpeed,
+                      50,
+                      150,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSingleChart(
+                      sortedHistory,
+                      'Batting Performance (out of 10)',
+                      Colors.red,
+                          (p) => p.averageExecutionRating,
+                      0,
+                      10,
+                    ),
                   ],
                 ),
               );
@@ -42,91 +72,120 @@ class AnalyticsPage extends StatelessWidget {
     );
   }
 
-  /// 🎨 Adds Legends for color representation
-  Widget _buildLegends() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _legendItem(Colors.blue, "Accuracy"),
-        const SizedBox(width: 10),
-        _legendItem(Colors.green, "Speed"),
-        const SizedBox(width: 10),
-        _legendItem(Colors.red, "Execution Rating"),
-      ],
-    );
-  }
-
-  /// 🏷️ Widget for an individual legend item
-  Widget _legendItem(Color color, String text) {
-    return Row(
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 5),
-        Text(text, style: const TextStyle(color: Colors.white)),
-      ],
-    );
-  }
-
-  /// 📈 Line Chart Widget with Corrected Data Handling
-  Widget _buildLineChart(List<dynamic> performanceHistory) {
-    return SizedBox(
-      height: 300, // Reduced height for better visibility
-      child: LineChart(
-        LineChartData(
-          titlesData: FlTitlesData(
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  int index = value.toInt();
-                  if (index < 0 || index >= performanceHistory.length) {
-                    return const Text('');
-                  }
-                  return Text(
-                    _formatDate(performanceHistory[index]['date']),
-                    style: const TextStyle(fontSize: 10, color: Colors.white),
-                  );
-                },
-                reservedSize: 32,
-              ),
-            ),
-          ),
-          lineBarsData: [
-            _lineChartBarData(performanceHistory, 'averageAccuracy', Colors.blue),
-            _lineChartBarData(performanceHistory, 'averageSpeed', Colors.green),
-            _lineChartBarData(performanceHistory, 'averageExecutionRating', Colors.red),
-          ],
-        ),
+  /// 📝 Displays an information message instead of the legend
+  Widget _buildInfoText() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Text(
+        "The performance of your last 5 sessions are visualized below.",
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
+        textAlign: TextAlign.center,
       ),
     );
   }
 
-  /// 📊 Line Chart Data Processing with Correct API Data Mapping
-  LineChartBarData _lineChartBarData(List<dynamic> performanceHistory, String metric, Color color) {
+  /// 📊 Builds an individual line chart for a given metric with specified Y-axis range
+  Widget _buildSingleChart(
+      List<Performance> performanceHistory,
+      String title,
+      Color color,
+      double Function(Performance) getY,
+      double minY,
+      double maxY,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center, // ✅ Center align chart title
+      children: [
+        Center(
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 20), // ✅ Add spacing below title
+        SizedBox(
+          height: 250, // Height for each chart
+          child: LineChart(
+            LineChartData(
+              minY: minY, // ✅ Set minimum Y-axis value
+              maxY: maxY, // ✅ Set maximum Y-axis value
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+                ),
+                rightTitles: AxisTitles( // ✅ Hide Right Axis
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles( // ✅ Hide Top Axis
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      int index = value.toInt();
+                      if (index < 0 || index >= performanceHistory.length) {
+                        return const SizedBox.shrink();
+                      }
+                      // ✅ Now only shows exact received dates
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 20.0, right: 45.0), // ✅ Keeps bottom labels inside bounds
+                        child: Transform.rotate(
+                          angle: -0.5, // ✅ Adjusted rotation for better readability
+                          child: Text(
+                            _formatDate(performanceHistory[index].date),
+                            style: const TextStyle(fontSize: 12, color: Colors.white),
+                          ),
+                        ),
+                      );
+                    },
+                    reservedSize: 55, // ✅ Increased to prevent cutting off last date
+                    interval: 1, // ✅ Only display exact dates from received data
+                  ),
+                ),
+              ),
+              lineBarsData: [
+                _lineChartBarData(performanceHistory, getY, color),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 📈 Creates Line Chart Bar Data with Translucent Fill
+  LineChartBarData _lineChartBarData(
+      List<Performance> performanceHistory,
+      double Function(Performance) getY,
+      Color color,
+      ) {
     return LineChartBarData(
       isCurved: true,
       color: color,
       barWidth: 3,
-      dotData: FlDotData(show: true),
-      spots: performanceHistory.asMap().entries.map((entry) {
-        final index = entry.key;
-        final performanceData = entry.value['performance'][0]; // Extracting first performance object
-
-        return FlSpot(index.toDouble(), performanceData[metric].toDouble());
-      }).toList(),
+      belowBarData: BarAreaData(
+        show: true, // ✅ Enables the translucent fill effect
+        gradient: LinearGradient(
+          colors: [
+            color.withOpacity(0.4), // ✅ More visible at the top
+            color.withOpacity(0.1), // ✅ More transparent at the bottom
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      spots: performanceHistory
+          .asMap()
+          .entries
+          .map((entry) => FlSpot(entry.key.toDouble(), getY(entry.value))) // ✅ Fix: Directly use Performance properties
+          .toList(),
     );
   }
 
-  /// 📆 Formats Date for X-axis
+  /// 📆 Formats Date for X-axis in "dd MMM yy" (e.g., "20 Nov 24")
   String _formatDate(String date) {
     DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('MMM yyyy').format(parsedDate); // Example: "Nov 2024"
+    return DateFormat('dd MMM yy').format(parsedDate); // Example: "20 Nov 24"
   }
 }

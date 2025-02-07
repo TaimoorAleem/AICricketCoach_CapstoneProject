@@ -12,19 +12,11 @@ class Performance {
   });
 
   factory Performance.fromJson(Map<String, dynamic> json) {
-    // Extract performance list safely
-    List<dynamic>? performanceList = json["performance"];
-
-    // If performance list is empty or missing, use default values
-    var performanceData = (performanceList != null && performanceList.isNotEmpty)
-        ? performanceList[0]
-        : {"averageAccuracy": 0.0, "averageExecutionRating": 0.0, "averageSpeed": 0.0};
-
     return Performance(
       date: json["date"],
-      averageAccuracy: (performanceData["averageAccuracy"] ?? 0.0).toDouble(),
-      averageExecutionRating: (performanceData["averageExecutionRating"] ?? 0.0).toDouble(),
-      averageSpeed: (performanceData["averageSpeed"] ?? 0.0).toDouble(),
+      averageAccuracy: json["performance"][0]["averageAccuracy"].toDouble(),
+      averageExecutionRating: json["performance"][0]["averageExecutionRating"].toDouble(),
+      averageSpeed: json["performance"][0]["averageSpeed"].toDouble(),
     );
   }
 }
