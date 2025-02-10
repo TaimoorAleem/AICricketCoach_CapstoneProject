@@ -5,9 +5,9 @@ import '../../../../resources/service_locator.dart';
 import '../../../sessions/presentation/pages/sessions_history_page.dart';
 import '../../../user_profile/presentation/pages/user_profile_page.dart';
 import '../../../feedback/domain/usecases/predict_shot.dart';
-import '../../../video_upload/presentation/pages/video_capture_page.dart';
+
 import '../../../video_upload/presentation/pages/upload_video.dart';
-import '../../../video_upload/domain/usecases/captureVideoUseCase.dart';
+
 import 'package:camera/camera.dart';
 
 class HomePage extends StatelessWidget {
@@ -43,22 +43,6 @@ class HomePage extends StatelessWidget {
                 );
               },
               child: const Text('Go to User Profile'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const VideoCapturePage(),
-                  ),
-                );
-              },
-              child: const Text('Capture Video'),
             ),
             const SizedBox(height: 20),
             // New Upload Video Button
