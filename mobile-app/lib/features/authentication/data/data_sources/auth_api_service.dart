@@ -30,7 +30,7 @@ class AuthApiServiceImpl extends AuthService {
 
       String uid = userCredential.user!.uid;
 
-      final updatedParams = SignupReqParams(email: params.email, password: uid);
+      final updatedParams = SignupReqParams(email: params.email, password: uid, role: params.role);
 
       var response = await sl<DioClient>().post(
           ApiUrl.signup,

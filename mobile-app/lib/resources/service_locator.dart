@@ -37,5 +37,4 @@ void setupServiceLocator() {
   sl.registerSingleton<GetUserProfileUseCase>(GetUserProfileUseCase());
   sl.registerSingleton<EditProfileUseCase>(EditProfileUseCase());
   sl.registerSingleton<DeleteAccountUseCase>(DeleteAccountUseCase());
-  //sl.registerSingleton<GetProfilePictureUseCase>(GetProfilePictureUseCase());
 }

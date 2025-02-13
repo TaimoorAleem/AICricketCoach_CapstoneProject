@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/user_profile/data/models/role_enum.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
@@ -17,6 +18,7 @@ class SignupPage extends StatelessWidget {
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
+  Role _selectedRole = Role.player;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,6 @@ class SignupPage extends StatelessWidget {
               const SizedBox(height: 15),
               _signupContainer(context),
               const SizedBox(height: 30),
-              _toggle(context),
               const SizedBox(height: 20),
               _loginText(context),
             ],
@@ -52,38 +53,6 @@ class SignupPage extends StatelessWidget {
         color: AppColors.primary,
       ),
       textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _toggle(BuildContext context) {
-    return CupertinoSegmentedControl<int>(
-      padding: const EdgeInsets.all(8),
-      onValueChanged: (int value) {
-        // Handle value change
-      },
-      groupValue: 0, // Set default value
-      children: {
-        0: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-          color: AppColors.secondary, // app.secondary
-          child: const Text(
-            'Player',
-            style: TextStyle(
-              color: Colors.white, // White text for better contrast
-            ),
-          ),
-        ),
-        1: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-          color: AppColors.primary, // app.primary
-          child: const Text(
-            'Coach',
-            style: TextStyle(
-              color: Colors.white, // White text for better contrast
-            ),
-          ),
-        ),
-      },
     );
   }
 
@@ -109,6 +78,8 @@ class SignupPage extends StatelessWidget {
           _fieldLabel('Password'),
           const SizedBox(height: 5),
           _passwordField(),
+          const SizedBox(height: 20),
+          _rolePickField(context),
           const SizedBox(height: 20),
           _signupButton(context),
 
@@ -170,6 +141,7 @@ class SignupPage extends StatelessWidget {
           params: SignupReqParams(
             email: _emailCon.text,
             password: _passwordCon.text,
+            role: _selectedRole.title
           ),
         ),
         onSuccess: () {
@@ -188,7 +160,7 @@ class SignupPage extends StatelessWidget {
       TextSpan(
         children: [
           const TextSpan(
-            text: "Do you have an account? ",
+            text: "Already have an account? ",
           ),
           TextSpan(
             text: 'Log In',
@@ -203,6 +175,22 @@ class SignupPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _rolePickField(BuildContext context){
+    return Center(
+      child: DropdownButtonFormField(
+        value: _selectedRole,
+        decoration: const InputDecoration(label: Text('Role')),
+          items: Role.values.map((r) {
+            return DropdownMenuItem(
+                value: r,
+                child: Text(r.title));
+          }).toList(),
+          onChanged: (value){
+          _selectedRole = value!;
+          }),
     );
   }
 }
