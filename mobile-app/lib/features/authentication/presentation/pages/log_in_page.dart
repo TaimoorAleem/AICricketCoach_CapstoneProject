@@ -1,7 +1,9 @@
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
@@ -17,6 +19,7 @@ class LogInPage extends StatelessWidget {
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
@@ -129,13 +132,14 @@ class LogInPage extends StatelessWidget {
         width: 10,
         height: 30,
         activeColor: AppColors.primary,
-        onPressed: () async => sl<LoginUseCase>().call(
-          params: LoginReqParams(
-            email: _emailCon.text,
-            password: _passwordCon.text,
+        onPressed: () async => await sl<LoginUseCase>().call(
+            params: LoginReqParams(
+              email: _emailCon.text,
+              password: _passwordCon.text,
+            ),
           ),
-        ),
-        onSuccess: () {
+
+        onSuccess: () async {
           AppNavigator.pushAndRemove(context, UserProfilePage());
         },
         onFailure: (error) {
