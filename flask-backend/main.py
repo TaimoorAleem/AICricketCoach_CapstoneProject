@@ -5,7 +5,7 @@ from shot_recommendation_engine import ShotRecommendationEngine
 app = Flask(__name__)
 
 # Initialize the model engine
-engine = ShotRecommendationEngine("C:/Users/Feras/Desktop/Capstone proj/Expanded_CricketShotAnalysis_Dataset.csv")
+engine = ShotRecommendationEngine("C:/Users/Feras/Desktop/Personal/SPM/CricketShotAnalysis_Dataset.csv")
 
 # Train the model at server startup
 try:
@@ -32,15 +32,20 @@ def predict():
     input_df = pd.DataFrame([input_data])
     try:
         prediction_probs = engine.predict(input_df)
-        predicted_classes = prediction_probs.argmax(axis=1)
-        predicted_shots = engine.label_encoder.inverse_transform(predicted_classes)
-
+        class_probabilities = {shot: prob for shot, prob in zip(engine.label_encoder.classes_, prediction_probs[0])}
+        
+        # Sort probabilities in descending order
+        sorted_shots = sorted(class_probabilities.items(), key=lambda x: x[1], reverse=True)
+        
         return jsonify({
-            'predicted_ideal_shots': predicted_shots.tolist(),
-            'confidence_scores': prediction_probs.max(axis=1).tolist()
+            'predicted_ideal_shots': [
+                {'shot': shot, 'confidence_score': round(prob * 100, 2)} 
+                for shot, prob in sorted_shots if prob > 0  # Only include shots with some probability
+            ]
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,7 +1,7 @@
 # shot_recommendation_engine.py
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder, RobustScaler, OneHotEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -29,7 +29,7 @@ class ShotRecommendationEngine:
         
         preprocessor = ColumnTransformer(
             transformers=[
-                ('num', RobustScaler(), numerical_cols),
+                ('num', StandardScaler(), numerical_cols),
                 ('cat', OneHotEncoder(handle_unknown='ignore'), categorical_cols)
             ]
         )
@@ -48,9 +48,8 @@ class ShotRecommendationEngine:
             'classifier__n_estimators': [50, 100],
             'classifier__max_depth': [10, 20]
         }
-
         
-        stratified_kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        stratified_kfold = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
         grid_search = GridSearchCV(pipeline, param_grid, cv=stratified_kfold, scoring='balanced_accuracy', n_jobs=-1)
         grid_search.fit(X, y_encoded)
         
