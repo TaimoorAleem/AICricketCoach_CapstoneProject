@@ -1,8 +1,9 @@
 import os
 import firebase_admin
-import subprocess
+import time
 import json
 from datetime import timedelta
+import requests
 from firebase_admin import credentials, auth, firestore, storage
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
@@ -24,6 +25,8 @@ app = Flask(__name__)
 # Firestore client
 db = firestore.client()
 
+
+
 @app.route('/')
 def home():
     return jsonify({"status": "success", "message": "Welcome to the app!"}), 200
@@ -35,18 +38,21 @@ def sign_up():
         data = request.get_json()
         email = data['email']
         uid = data['password']
+        role = data['role']
 
         # Add the user to Firestore
         user_data = {
             "email": email,
-            "uid": uid
+            "uid": uid,
+            "role": role
         }
         db.collection('Users').document(uid).set(user_data)
 
         return jsonify({
             "status": "success",
             "message": "User registered successfully",
-            "uid": uid
+            "uid": uid,
+            "role": role
         }), 200
 
     except Exception as e:
@@ -72,11 +78,13 @@ def log_in():
         user_ref = db.collection('Users').document(uid)
         user = user_ref.get()
 
+
         if user.exists:
             return jsonify({
                 "status": "success",
                 "message": "User logged in successfully",
                 "uid": uid,
+                "role" : user.to_dict()['role'],
                 "email": user.to_dict()['email']
             }), 200
         else:
@@ -91,11 +99,47 @@ def log_in():
             "message": uid
         }), 500
 
-
 @app.route('/get-players', methods=['GET'])
 def get_players():
-    #implement for coach
-    return jsonify({"status": "success", "message": "List of players"}), 200
+    try:
+        uid = request.args.get('uid')
+
+        if not uid:
+            return jsonify({"status": "error", "message": "UID is missing."}), 400
+
+        users = db.collection('Users').where('uid', '==', uid).get()
+        if not users:
+            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+
+        # Reference to the user document
+        user_ref = db.collection('Users').document(uid)
+
+        # Get the sessions subcollection for the user
+        players_ref = user_ref.collection('Players')
+
+        players = players_ref.stream()  # Retrieve all players
+
+        result = {}
+
+        for player in players:
+            player_data = player.to_dict()
+            p_id=player_data['uid']
+            result[p_id] = db.collection('Users').document(p_id).get().to_dict()
+
+
+
+        return jsonify({
+            "status" : "success",
+            "message" : "Players retrieved successfully.",
+            "players" : result
+        }),200
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 
 @app.route('/edit-profile-picture', methods=['POST'])
 def edit_profile_picture():
@@ -222,7 +266,6 @@ def get_user():
             "message": str(e)
         }), 500
 
-
 @app.route('/upload-video', methods=["POST"])
 def upload_video():
     try:
@@ -242,22 +285,29 @@ def upload_video():
 
         signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
 
-        destination_path = '.\video_processing\InputVideo.mp4'  # assuming the folder is inside the app directory
-        blob.download_to_filename(destination_path)
+        vp_url = "https://my-vp-app-174827312206.us-central1.run.app/process-video"
+        payload = {"video_url": signed_url}
 
-        output = subprocess.check_output(
-            ["python3", ".\video_processing\FinalVideoProcessing.py"],
-            text=True
-        )
 
+        rsp = requests.post(vp_url, json=payload)
+        response = rsp.json()
 
 
 
+        ml_url = "https://shot-recommendation-api-607955695192.us-central1.run.app/predict"
+        payload = {
+            "Ball Speed": response['BallSpeed'],
+            "Ball Height": response['BallHeight'],
+            "Batsman Position": response['BatsmanPosition'],
+            "Ball Horizontal Line": "middle stump",
+            "Ball Length": "Yorker"
+        }
+
+        shot_rec = requests.post(ml_url, json=payload)
         return jsonify({
             "status" : "success",
             "message" : "Delivery video uploaded successfully",
-            "url" : signed_url,
-            "output" : output
+            "data" : shot_rec.json(),
         }),200
 
     except Exception as e:
@@ -265,33 +315,6 @@ def upload_video():
             "status" :"error",
             "message" : str(e)
         })
-
-@app.route('/get-video', methods=["GET"])
-def get_video():
-
-    vid_url = request.args.get('url')
-    if not vid_url :
-        return jsonify({"status": "error", "message": "No url found."}), 400
-
-
-
-    if vid_url == '':
-        return jsonify({"status": "error", "message": "Invalid url provided."}), 400
-
-    try:
-        split_url = vid_url.replace("https://storage.googleapis.com/", "").split("/", 1)
-        blob_name = split_url[1]
-
-    except IndexError:
-        return {"error": "Invalid video URL format"}, 400
-
-    blob = bucket.blob(blob_name)
-    if not blob.exists():
-        return {"error": "Video not found"}, 404
-
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    blob.download_to_filename(temp_file.name)
-    return send_file(temp_file.name, mimetype="video/mp4")
 
 @app.route('/delete-account', methods=["POST"])
 def delete_account():
@@ -328,12 +351,6 @@ def delete_account():
         return jsonify({
             "status": "error"
         }), 500
-
-
-
-
-
-
 
 @app.route('/add-delivery', methods=["POST"])
 def upload_delivery():
@@ -420,7 +437,6 @@ def get_delivery():
             "message": str(e)
         }), 500
 
-
 @app.route('/create-session', methods=['POST'])
 def upload_session():
     try :
@@ -478,7 +494,6 @@ def upload_session():
             "status" :"error",
             "message" : str(e)
         })
-
 
 @app.route('/get-sessions', methods=['GET'])
 def get_sessions():
@@ -551,31 +566,67 @@ def get_sessions():
             "message": str(e)
         }), 500
 
-
 @app.route('/get-performance-history', methods=['GET'])
 def get_performance_history():
 
     try:
-        uid = request.args.get('uid')
+        uid_list = request.args.get('uid_list')
+        if uid_list:
+            uid_list = json.loads(uid_list)
+        if not uid_list:
+            uid = request.args.get('uid')
+            if not uid:
+                return jsonify({"status": "error", "message": "UID is missing."}), 400
+            sessionId= request.args.get('sessionId')
+            user_ref = db.collection('Users').document(uid)
+            if sessionId:
+                # Get the sessions subcollection for the user
+                session_ref = user_ref.collection('sessions').document(sessionId)
+                deliveries = session_ref.collection('deliveries').get()
 
-        if not uid:
-            return jsonify({"status": "error", "message": "UID is missing."}), 400
+                performances= session_ref.collection('performance').get()
 
-        users = db.collection('Users').where('uid', '==', uid).get()
-        if not users:
-            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+                if len(performances) == 0:
+                    #performance for the session is yet to be calculated
+
+                    avg_speed = 0
+                    avg_accuracy = 0
+                    avg_exec_rating = 0
+                    count = 0
+
+                    for delivery_ref in deliveries:
+                        delivery = delivery_ref.to_dict()
+                        count = count+1
+                        avg_speed = avg_speed + delivery['speed']
+                        avg_accuracy = avg_accuracy + delivery['accuracy']
+                        avg_exec_rating = avg_exec_rating + delivery['executionRating']
+
+                    avg_speed = avg_speed / count
+                    avg_accuracy = avg_accuracy / count
+                    avg_exec_rating = avg_exec_rating / count
+                    perf_ref = session_ref.collection('performance').add({
+                        "averageSpeed": avg_speed,
+                        "averageAccuracy": avg_accuracy,
+                        "averageExecutionRating" : avg_exec_rating
+                    })
 
 
-        # Reference to the user document
-        user_ref = db.collection('Users').document(uid)
+            uid_list = [uid]
+
+        response={}
+
+        for uid in uid_list:
+
+            users = db.collection('Users').where('uid', '==', uid).get()
+
+            if not users:
+                return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
 
+            # Reference to the user document
+            user_ref = db.collection('Users').document(uid)
 
-        sessionId = request.args.get('sessionId')
 
-        sessions_check = user_ref.collection('sessions').where('sessionId', '==', sessionId).get()
-
-        if not sessions_check:
             # Get all sessions for the user
             sessions_ref = user_ref.collection('sessions').get()
             result = []
@@ -597,71 +648,12 @@ def get_performance_history():
 
                 result.append(session_data)  # Append the session with its performances to the result
 
-            return jsonify({
-                "status": "success",
-                "message" : f'The performance for User {uid} has been retrieved successfully.',
-                "performanceHistory" : result}), 200
 
-
-
-        # Get the sessions subcollection for the user
-        session_ref = user_ref.collection('sessions').document(sessionId)
-        deliveries = session_ref.collection('deliveries').get()
-
-        performances= session_ref.collection('performance').get()
-
-        if len(performances) == 0:
-            #performance for the session is yet to be calculated
-
-            avg_speed = 0
-            avg_accuracy = 0
-            avg_exec_rating = 0
-            count = 0
-
-            for delivery_ref in deliveries:
-                delivery = delivery_ref.to_dict()
-                count = count+1
-                avg_speed = avg_speed + delivery['speed']
-                avg_accuracy = avg_accuracy + delivery['accuracy']
-                avg_exec_rating = avg_exec_rating + delivery['executionRating']
-
-            avg_speed = avg_speed / count
-            avg_accuracy = avg_accuracy / count
-            avg_exec_rating = avg_exec_rating / count
-            perf_ref = session_ref.collection('performance').add({
-                "averageSpeed": avg_speed,
-                "averageAccuracy": avg_accuracy,
-                "averageExecutionRating" : avg_exec_rating
-            })
-
-
-
-        # Get all sessions for the user
-        sessions_ref = user_ref.collection('sessions').get()
-        result = []
-
-        for session in sessions_ref:
-            session_data = session.to_dict()
-
-            session_data['date'] = session_data.get('date')
-
-            perf_ref = session.reference.collection('performance')
-            performances = perf_ref.stream()  # Stream all performance documents in the subcollection
-
-            session_data['performance'] = []
-
-            # Iterate over performance documents
-            for performance in performances:
-                performance_data = performance.to_dict()  # Convert each performance document to dict
-                session_data['performance'].append(performance_data)  # Add to the session's performances list
-
-            result.append(session_data)  # Append the session with its performances to the result
-
+            response[uid] = result
 
         return jsonify({
             "status": "success",
-            "message" : f'The performance for Session {sessionId} has been updated successfully.',
-            "performanceHistory" : result
+            "data": response
         }), 200
 
     except Exception as e:
