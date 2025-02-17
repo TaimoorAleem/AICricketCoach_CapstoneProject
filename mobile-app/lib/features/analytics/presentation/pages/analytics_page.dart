@@ -37,15 +37,6 @@ class AnalyticsPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     _buildSingleChart(
                       sortedHistory,
-                      'Balling Accuracy (%)',
-                      Colors.blue,
-                          (p) => p.averageAccuracy,
-                      0,
-                      100,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSingleChart(
-                      sortedHistory,
                       'Balling Speed (km/h)',
                       Colors.green,
                           (p) => p.averageSpeed,
