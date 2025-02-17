@@ -65,6 +65,9 @@ dependencies:
   http: ^1.2.2
   fl_chart: ^0.70.2
   intl: ^0.20.2
+  chewie: ^1.10.0
+  video_player: ^2.9.2
+  image_picker: ^1.1.2
 
 
 dev_dependencies:
