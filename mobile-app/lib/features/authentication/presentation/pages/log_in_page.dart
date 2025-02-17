@@ -140,6 +140,7 @@ class LogInPage extends StatelessWidget {
           ),
 
         onSuccess: () async {
+
           AppNavigator.pushAndRemove(context, UserProfilePage());
         },
         onFailure: (error) {

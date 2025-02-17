@@ -3,6 +3,7 @@ import 'package:ai_cricket_coach/features/user_profile/data/models/EditProfileRe
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/api_urls.dart';
@@ -49,6 +50,7 @@ class AuthApiServiceImpl extends AuthService {
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
       sharedPreferences.setString('token', idToken);
+      await requestNotifPermissions();
 
       return Right(response.data);
 
@@ -109,6 +111,8 @@ class AuthApiServiceImpl extends AuthService {
 
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('token', idToken);
+      await requestNotifPermissions();
+
 
       return Right(response.data);
 
@@ -118,5 +122,23 @@ class AuthApiServiceImpl extends AuthService {
       return Left('An error occurred: $e');
     }
   }
+
+  Future<void> requestNotifPermissions() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if(settings.authorizationStatus == AuthorizationStatus.authorized){
+      debugPrint("User granted permissions");
+    }
+    else{
+      debugPrint("User denied permissions");
+    }
+  }
+
+
 
 }
