@@ -10,6 +10,12 @@ class ProfileLoaded extends ProfileState{
   ProfileLoaded({required this.user});
 }
 
+class ProfileLoadedWithPicture extends ProfileState{
+  final UserEntity user;
+  final String profilePicturePath;
+  ProfileLoadedWithPicture({required this.user, required this.profilePicturePath});
+}
+
 class ProfileLoadingFailed extends ProfileState{
   final String errorMessage;
   ProfileLoadingFailed({required this.errorMessage});

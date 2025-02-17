@@ -1,5 +1,5 @@
 import 'package:ai_cricket_coach/features/authentication/presentation/pages/sign_up_page.dart';
-import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
+
 import 'package:ai_cricket_coach/features/user_profile/presentation/widgets/user_profile.dart';
 
 import 'package:flutter/material.dart';

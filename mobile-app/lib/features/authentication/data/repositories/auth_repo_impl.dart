@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/service_locator.dart';
+import '../../../user_profile/data/models/EditProfileReqParams.dart';
 import '../../domain/repositories/auth_repo.dart';
 import '../data_sources/auth_api_service.dart';
 import '../models/login_req_params.dart';
@@ -25,6 +26,20 @@ class AuthRepoImpl extends AuthRepo {
         }
     );
   }
+  @override
+  Future<Either> createProfile(EditProfileReqParams params) async {
+    var data = await sl<AuthService>().createProfile(params);
+    debugPrint('meo2');
+    return data.fold(
+            (error) {
+          return Left(error);
+        },
+            (data) async {
+          return Right(data);
+        }
+    );
+  }
+
   @override
   Future<Either> resetpassword(ResetPWParams params) async {
     var data = await sl<AuthService>().resetpassword(params);

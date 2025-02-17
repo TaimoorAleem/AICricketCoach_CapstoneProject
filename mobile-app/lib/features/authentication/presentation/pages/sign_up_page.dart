@@ -1,9 +1,11 @@
 import 'package:ai_cricket_coach/features/user_profile/data/models/role_enum.dart';
+import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
@@ -56,9 +58,6 @@ class SignupPage extends StatelessWidget {
     );
   }
 
-
-
-
   Widget _signupContainer(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
@@ -82,7 +81,6 @@ class SignupPage extends StatelessWidget {
           _rolePickField(context),
           const SizedBox(height: 20),
           _signupButton(context),
-
         ],
       ),
     );
@@ -131,6 +129,7 @@ class SignupPage extends StatelessWidget {
   }
 
   Widget _signupButton(BuildContext context) {
+    String uid;
     return Center(
       child: ReactiveButton(
         title: 'Sign Up',
@@ -138,14 +137,27 @@ class SignupPage extends StatelessWidget {
         height: 30,
         activeColor: AppColors.primary,
         onPressed: () async => sl<SignupUseCase>().call(
-          params: SignupReqParams(
-            email: _emailCon.text,
-            password: _passwordCon.text,
-            role: _selectedRole.title
+            params: SignupReqParams(
+                email: _emailCon.text,
+                password: _passwordCon.text,
+                role: _selectedRole.title),
           ),
-        ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, UserProfilePage());
+          AppNavigator.pushAndRemove(
+              context,
+              EditUserProfilePage(
+                  user: UserEntity(
+                      age: "age",
+                      city: "city",
+                      country: "country",
+                      description: "description",
+                      email: "email",
+                      firstName: "firstName",
+                      lastName: "lastName",
+                      pfpUrl: "pfpUrl",
+                      role: "role",
+                      teamName: "teamName",
+                      uid: ""), pfpPath: '',));
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
@@ -153,6 +165,7 @@ class SignupPage extends StatelessWidget {
       ),
     );
   }
+
 
 
   Widget _loginText(BuildContext context) {
@@ -178,18 +191,16 @@ class SignupPage extends StatelessWidget {
     );
   }
 
-  Widget _rolePickField(BuildContext context){
+  Widget _rolePickField(BuildContext context) {
     return Center(
       child: DropdownButtonFormField(
-        value: _selectedRole,
-        decoration: const InputDecoration(label: Text('Role')),
+          value: _selectedRole,
+          decoration: const InputDecoration(label: Text('Role')),
           items: Role.values.map((r) {
-            return DropdownMenuItem(
-                value: r,
-                child: Text(r.title));
+            return DropdownMenuItem(value: r, child: Text(r.title));
           }).toList(),
-          onChanged: (value){
-          _selectedRole = value!;
+          onChanged: (value) {
+            _selectedRole = value!;
           }),
     );
   }
