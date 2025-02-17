@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:ai_cricket_coach/features/authentication/presentation/pages/loading_page.dart';
+import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_cubit.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_state.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/edit_user_profile_page.dart';
@@ -10,38 +12,40 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../resources/service_locator.dart';
+import '../../../authentication/domain/usecases/logout_usecase.dart';
 import '../../domain/entities/user_entity.dart';
 
 class UserProfile extends StatelessWidget {
   const UserProfile({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ProfileCubit()..getUserProfile(),
-      child: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
+        create: (context) => ProfileCubit()..getUserProfile(),
+        child:
+            BlocBuilder<ProfileCubit, ProfileState>(builder: (context, state) {
           if (state is ProfileLoading) {
             return const CircularProgressIndicator();
           }
           if (state is ProfileLoaded) {
-            UserEntity user = state.user;  // Get the user from the state
+            UserEntity user = state.user; // Get the user from the state
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //Profile Picture
                     const Center(
-                     child: CircleAvatar(
-                       radius: 60, // Larger profile image
-                       backgroundImage: AssetImage('lib/images/default-pfp.jpg'),
-                     ),
+                      child: CircleAvatar(
+                        radius: 60, // Larger profile image
+                        backgroundImage:
+                            AssetImage('lib/images/default-pfp.jpg'),
+                      ),
                     ),
-                    const SizedBox(height: 20), // Spacing between image and name
+                    const SizedBox(
+                        height: 20), // Spacing between image and name
 
                     // User Information
                     Center(
@@ -57,7 +61,9 @@ class UserProfile extends StatelessWidget {
                               color: Colors.white,
                             ),
                           ),
-                          const SizedBox(height: 10), // Spacing between name and other details
+                          const SizedBox(
+                              height:
+                                  10), // Spacing between name and other details
 
                           // Age, City, Country, Team
                           Text(
@@ -86,76 +92,104 @@ class UserProfile extends StatelessWidget {
                           ),
                           const SizedBox(height: 50), // Spacing before buttons
 
-
                           // Buttons
                           Column(
                             children: [
                               // Edit Profile Button
                               ElevatedButton.icon(
-                                onPressed: () async{
-                                  AppNavigator.push(context, EditUserProfilePage(user: user, pfpPath: 'lib/images/default-pfp.jpg',));},
-                                icon: const Icon(Icons.edit, color: Colors.white),
+                                onPressed: () async {
+                                  AppNavigator.push(
+                                      context,
+                                      EditUserProfilePage(
+                                        user: user,
+                                        pfpPath: 'lib/images/default-pfp.jpg',
+                                      ));
+                                },
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.white),
                                 label: const Text(
                                   'Edit Profile',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 111),
+                                  backgroundColor: AppColors
+                                      .secondary, // Button background color
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 111),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16), // Spacing between buttons
+                              const SizedBox(
+                                  height: 16), // Spacing between buttons
 
                               // Settings Button
                               ElevatedButton.icon(
                                 onPressed: () {},
-                                icon: const Icon(Icons.settings, color: Colors.white),
+                                icon: const Icon(Icons.settings,
+                                    color: Colors.white),
                                 label: const Text(
                                   'Settings',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
+                                  backgroundColor: AppColors
+                                      .secondary, // Button background color
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 120),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16), // Spacing between buttons
+                              const SizedBox(
+                                  height: 16), // Spacing between buttons
 
                               // Log Out Button
                               ElevatedButton.icon(
                                 onPressed: () {},
-                                icon: const Icon(Icons.logout, color: Colors.white),
+                                icon: const Icon(Icons.logout,
+                                    color: Colors.white),
                                 label: const Text(
                                   'Log Out',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
+                                  backgroundColor: AppColors
+                                      .secondary, // Button background color
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 120),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 16), // Spacing between buttons
+                              const SizedBox(
+                                  height: 16), // Spacing between buttons
 
                               // Terms and Agreement Button
                               ElevatedButton.icon(
                                 onPressed: () {},
-                                icon: const Icon(Icons.library_books, color: Colors.white),
+                                icon: const Icon(Icons.library_books,
+                                    color: Colors.white),
                                 label: const Text(
                                   'Terms and Agreement',
-                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 70),
+                                  backgroundColor: AppColors
+                                      .secondary, // Button background color
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 12, horizontal: 70),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
@@ -166,17 +200,12 @@ class UserProfile extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ]
-
-
-
-
-              ),
+                  ]),
             );
           }
-          if(state is ProfileLoadedWithPicture){
+          if (state is ProfileLoadedWithPicture) {
             debugPrint('HelloHello');
-            UserEntity user = state.user;  // Get the user from the state
+            UserEntity user = state.user; // Get the user from the state
             String profilePicturePath = state.profilePicturePath;
 
             return Padding(
@@ -186,11 +215,12 @@ class UserProfile extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 30, // Larger profile image
-                    backgroundImage: FileImage(File(profilePicturePath)), // Use stored image
-                    onBackgroundImageError: (_, __) => const AssetImage('lib/images/default-pfp.jpg'), // Fallback
+                    backgroundImage:
+                        FileImage(File(profilePicturePath)), // Use stored image
+                    onBackgroundImageError: (_, __) => const AssetImage(
+                        'lib/images/default-pfp.jpg'), // Fallback
                   ),
                   const SizedBox(height: 16),
-
 
                   // Display user's first and last name
                   Text(
@@ -239,16 +269,25 @@ class UserProfile extends StatelessWidget {
                     children: [
                       // Edit Profile Button
                       ElevatedButton.icon(
-                        onPressed: () async{
-                          AppNavigator.push(context, EditUserProfilePage(user: user, pfpPath: profilePicturePath,));},
+                        onPressed: () async {
+                          AppNavigator.push(
+                              context,
+                              EditUserProfilePage(
+                                user: user,
+                                pfpPath: profilePicturePath,
+                              ));
+                        },
                         icon: const Icon(Icons.edit, color: Colors.white),
                         label: const Text(
                           'Edit Profile',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 111),
+                          backgroundColor:
+                              AppColors.secondary, // Button background color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 111),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -262,11 +301,14 @@ class UserProfile extends StatelessWidget {
                         icon: const Icon(Icons.settings, color: Colors.white),
                         label: const Text(
                           'Settings',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
+                          backgroundColor:
+                              AppColors.secondary, // Button background color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 120),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -276,15 +318,48 @@ class UserProfile extends StatelessWidget {
 
                       // Log Out Button
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("Confirm Logout"),
+                                content:
+                                    const Text("Are you sure you want to log out?"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Close dialog
+                                    },
+                                    child: const Text("Cancel"),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context)
+                                          .pop(); // Close dialog
+                                      var done = await sl<LogOutUseCase>().call();// Call logout
+                                      if (done==true){AppNavigator.pushAndRemove(context, LogInPage());}
+                                    },
+                                    child: const Text("Confirm",
+                                        style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
                         icon: const Icon(Icons.logout, color: Colors.white),
                         label: const Text(
                           'Log Out',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
+                          backgroundColor:
+                              AppColors.secondary, // Button background color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 120),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -295,14 +370,18 @@ class UserProfile extends StatelessWidget {
                       // Terms and Agreement Button
                       ElevatedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(Icons.library_books, color: Colors.white),
+                        icon: const Icon(Icons.library_books,
+                            color: Colors.white),
                         label: const Text(
                           'Terms and Agreement',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 70),
+                          backgroundColor:
+                              AppColors.secondary, // Button background color
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 70),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -313,16 +392,11 @@ class UserProfile extends StatelessWidget {
                 ],
               ),
             );
-
-
           }
-          if (state is ProfileLoadingFailed){
+          if (state is ProfileLoadingFailed) {
             return Text(state.errorMessage);
           }
           return Container();
-        }
-      )
-    );
+        }));
   }
-
 }

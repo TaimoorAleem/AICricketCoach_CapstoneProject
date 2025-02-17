@@ -9,6 +9,7 @@ abstract class AuthRepo {
   Future<Either> signup(SignupReqParams params);
   Future<Either> login(LoginReqParams params);
   Future<bool> isAuthenticated();
+  Future<bool> logout();
   Future<Either> resetpassword(ResetPWParams params);
   Future<Either> createProfile(EditProfileReqParams params);
 }

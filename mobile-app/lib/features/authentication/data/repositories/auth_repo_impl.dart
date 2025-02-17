@@ -10,70 +10,60 @@ import '../models/login_req_params.dart';
 import '../models/signup_req_params.dart';
 
 class AuthRepoImpl extends AuthRepo {
-
-
   @override
   Future<Either> signup(SignupReqParams params) async {
     var data = await sl<AuthService>().signup(params);
-    return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          sharedPreferences.setString('uid',data['uid']);
-          return Right(data);
-        }
-    );
+    return data.fold((error) {
+      return Left(error);
+    }, (data) async {
+      final SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setString('uid', data['uid']);
+      return Right(data);
+    });
   }
+
   @override
   Future<Either> createProfile(EditProfileReqParams params) async {
     var data = await sl<AuthService>().createProfile(params);
     debugPrint('meo2');
-    return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          return Right(data);
-        }
-    );
+    return data.fold((error) {
+      return Left(error);
+    }, (data) async {
+      return Right(data);
+    });
   }
 
   @override
   Future<Either> resetpassword(ResetPWParams params) async {
     var data = await sl<AuthService>().resetpassword(params);
-    return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          return Right(data);
-        }
-    );
+    return data.fold((error) {
+      return Left(error);
+    }, (data) async {
+      return Right(data);
+    });
   }
 
   @override
   Future<Either> login(LoginReqParams params) async {
     var data = await sl<AuthService>().login(params);
-    return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          sharedPreferences.setString('uid',data['uid']);
-          sharedPreferences.setString('role', data['role']);
-          debugPrint(sharedPreferences.getString('uid'));
-          debugPrint(sharedPreferences.getString('role'));
-          return Right(data);
-        }
-    );
+    return data.fold((error) {
+      return Left(error);
+    }, (data) async {
+      final SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setString('uid', data['uid']);
+      sharedPreferences.setString('role', data['role']);
+      debugPrint(sharedPreferences.getString('uid'));
+      debugPrint(sharedPreferences.getString('role'));
+      return Right(data);
+    });
   }
 
   @override
   Future<bool> isAuthenticated() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
     var token = sharedPreferences.getString('token');
     if (token == null) {
       return false;
@@ -82,4 +72,14 @@ class AuthRepoImpl extends AuthRepo {
     }
   }
 
+  @override
+  Future<bool> logout() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }

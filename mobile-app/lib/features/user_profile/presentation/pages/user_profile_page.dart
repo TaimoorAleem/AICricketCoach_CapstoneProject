@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
 import 'package:ai_cricket_coach/features/authentication/presentation/pages/sign_up_page.dart';
 
 import 'package:ai_cricket_coach/features/user_profile/presentation/widgets/user_profile.dart';
@@ -46,7 +47,6 @@ class UserProfilePage extends StatelessWidget {
   Widget _deleteButton(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
-        // Show confirmation dialog when the button is pressed
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -59,7 +59,7 @@ class UserProfilePage extends StatelessWidget {
                   const SizedBox(height: 10),
                   TextField(
                     controller: _passwordCon,
-                    obscureText: true, // Obscure the text entered (password)
+                    obscureText: true,
                     decoration: const InputDecoration(
                       labelText: "Enter password",
                       hintText: "Password",
@@ -73,30 +73,36 @@ class UserProfilePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop(); // Close the dialog
                   },
-                  child: Text("Cancel"),
+                  child: const Text("Cancel"),
                 ),
-                ReactiveButton(
-                  title: 'Save changes',
-                  width: 10,
-                  height: 30,
-                  activeColor: AppColors.primary,
+                ElevatedButton(
                   onPressed: () async {
+                    try {
+                      String? uid = await get_uid();
 
-                    String? uid = await get_uid();
+                      // Check if UID is null
+                      if (uid == null) {
+                        DisplayMessage.errorMessage("User ID not found. Please log in again.", context);
+                        return;
+                      }
 
-                    await sl<DeleteAccountUseCase>().call(
-                      params: DeleteAccountReqParams(
-                          uid: uid!,
-                          password : _passwordCon.text
-                      ),
-                    );
+                      await sl<DeleteAccountUseCase>().call(
+                        params: DeleteAccountReqParams(
+                          uid: uid,
+                          password: _passwordCon.text,
+                        ),
+                      );
+
+                      // If successful, pop the dialog and navigate to LoginPage
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        AppNavigator.pushAndRemove(context, LogInPage());
+                      }
+                    } catch (error) {
+                      DisplayMessage.errorMessage(error.toString(), context);
+                    }
                   },
-                  onSuccess: () {
-                    AppNavigator.pushAndRemove(context, SignupPage());
-                  },
-                  onFailure: (error) {
-                    DisplayMessage.errorMessage(error, context);
-                  },
+                  child: const Text("Confirm Delete"),
                 ),
               ],
             );
@@ -106,6 +112,7 @@ class UserProfilePage extends StatelessWidget {
       child: const Text("Delete Account"),
     );
   }
+
 }
 
 

@@ -65,6 +65,9 @@ class UserProfileServiceImpl extends UserProfileService {
       var response = await sl<DioClient>()
           .post(ApiUrl.deleteAccount, data: updatedParams.toMap());
 
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+
       return Right(response.data);
     } on DioException catch (e) {
       return Left(e.response!.data['message']);
@@ -114,22 +117,22 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> editProfilePicture(String path) async {
     try {
       final SharedPreferences sharedPreferences =
-      await SharedPreferences.getInstance();
+          await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       FormData formData = FormData.fromMap({
         "uid": uid, // Send UID as text
-        "file": await MultipartFile.fromFile(path, filename: "profile.jpg"), // Image file
+        "file": await MultipartFile.fromFile(path,
+            filename: "profile.jpg"), // Image file
       });
 
-      var response = await sl<DioClient>().post("/edit-profile-picture", data: formData);
+      var response =
+          await sl<DioClient>().post("/edit-profile-picture", data: formData);
       if (response.statusCode == 200) {
         sharedPreferences.setString('pfpUrl', response.data['url']);
         return Right(response.data['url']);
-      }
-      else {
+      } else {
         return const Left('Failed to download image');
       }
-
     } catch (e) {
       return Left('Failed to download image: $e');
     }
