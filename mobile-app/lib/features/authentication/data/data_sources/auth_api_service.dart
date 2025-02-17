@@ -41,8 +41,14 @@ class AuthApiServiceImpl extends AuthService {
           data: updatedParams.toMap()
       );
 
+      String? idToken = await userCredential.user?.getIdToken();
+      if (idToken == null) {
+        return const Left('Failed to generate ID token.');
+      }
+
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
+      sharedPreferences.setString('token', idToken);
 
       return Right(response.data);
 
@@ -100,6 +106,9 @@ class AuthApiServiceImpl extends AuthService {
         ApiUrl.login,
         data: updatedParams.toMap(),
       );
+
+      final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString('token', idToken);
 
       return Right(response.data);
 
