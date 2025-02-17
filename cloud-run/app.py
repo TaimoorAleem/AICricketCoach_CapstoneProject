@@ -150,17 +150,23 @@ def edit_profile_picture():
         file = request.files['file']
         if file.filename == '':
             return jsonify({"status":"error", "message":"No image selected."}), 400
+        uid = request.form['uid']
 
 
-        blob = bucket.blob(f'uploads/{file.filename}')
+        blob = bucket.blob(f'uploads/{uid}/{file.filename}')
         blob.upload_from_file(file)
 
         blob_url = blob.public_url
+        user_ref = db.collection('Users').document(uid)
+
+
+        signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
+        user_ref.update({'pfpUrl': signed_url})
 
         return jsonify({
             "status" : "success",
             "message" : "Profile picture updated successfully",
-            "url" : blob_url
+            "url" : signed_url
         }),200
 
     except Exception as e:
@@ -198,46 +204,38 @@ def get_profile_picture():
 def edit_profile():
     try:
         data = request.get_json()
-        uid = data['uid']
+
         if 'uid' not in data:
-            return jsonify({"status" :"error","message" : str(e) })
+            return jsonify({"status": "error", "message": "UID is required."}), 400
+
         uid = data['uid']
-        users_check = db.collection('Users').where('uid', '==', uid).get()
-        if not users_check:
+
+
+        user_doc_ref = db.collection('Users').document(uid)
+        user_doc = user_doc_ref.get()
+
+        if not user_doc.exists:
             return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
 
-        user_doc = db.collection('Users').document(uid).get()
+        update_data = {key: value for key, value in data.items() if key != "uid"}
 
-        user_data = user_doc.to_dict()
+        if not update_data:
+            return jsonify({"status": "error", "message": "No fields provided for update."}), 400
 
-        new_data = {
-            "firstName": data.get('firstName', ''),
-            "lastName": data.get('lastName', ''),
-            "teamName": data.get('teamName', ''),
-            "age": data.get('age', ''),
-            "role": data.get('role', ''),
-            "city": data.get('city', ''),
-            "country": data.get('country', ''),
-            "description": data.get('description', ''),
-            "pfpUrl" : data.get('pfpUrl', '')
-        }
 
-        updated_data = {**user_data, **new_data}
-
-        db.collection('Users').document(uid).update(new_data)
+        user_doc_ref.update(update_data)
+        user_data = db.collection('Users').document(uid).get().to_dict()
 
         return jsonify({
-            "status" : "success",
-            "message" : "Profile updated successfully.",
-            "user" : updated_data
-        }),200
+            "status": "success",
+            "message": "Profile updated successfully.",
+            "updated_fields": update_data,
+            "user": user_data
+        }), 200
 
     except Exception as e:
-        return jsonify({
-            "status" :"error",
-            "message" : str(e)
-        })
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/get-user', methods=['GET'])
 def get_user():
