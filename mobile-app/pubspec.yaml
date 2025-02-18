@@ -41,6 +41,10 @@ dependencies:
 
   firebase_auth:
 
+  firebase_analytics:
+
+  firebase_messaging: ^15.2.2
+
 
   #firebase_auth: ^4.8.2
 

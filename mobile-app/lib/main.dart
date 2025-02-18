@@ -1,4 +1,6 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,10 +15,37 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await requestNotifPermissions();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
+  // Disable auto-init to prevent auto token refresh
+  await messaging.setAutoInitEnabled(false);
+  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
   setupServiceLocator();
   runApp(const MyApp());
 }
+Future<void> requestNotifPermissions() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  if(settings.authorizationStatus == AuthorizationStatus.authorized){
+    debugPrint("User granted permissions");
+  }
+  else{
+    debugPrint("User denied permissions");
+  }
+}
+
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("Background message received: ${message.messageId}");
+}
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

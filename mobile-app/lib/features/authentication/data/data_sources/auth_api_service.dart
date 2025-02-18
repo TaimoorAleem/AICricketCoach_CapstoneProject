@@ -11,6 +11,7 @@ import '../../../../resources/dio_client.dart';
 import '../../../../resources/service_locator.dart';
 import '../models/login_req_params.dart';
 import '../models/signup_req_params.dart';
+import '../models/update_fcmtoken_params.dart';
 
 abstract class AuthService {
 
@@ -50,7 +51,7 @@ class AuthApiServiceImpl extends AuthService {
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
       sharedPreferences.setString('token', idToken);
-      await requestNotifPermissions();
+      await saveFCMToken(response.data.uid);
 
       return Right(response.data);
 
@@ -109,9 +110,19 @@ class AuthApiServiceImpl extends AuthService {
         data: updatedParams.toMap(),
       );
 
+      FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+      if (response.data['role'] == 'Player'){
+        await messaging.subscribeToTopic('feedback-added-topic');
+      }
+      else if(response.data['role'] == 'Coach'){
+        await messaging.subscribeToTopic('delivery-uploaded-topic');
+      }
+
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('token', idToken);
-      await requestNotifPermissions();
+      await saveFCMToken(response.data['uid']);
+
 
 
       return Right(response.data);
@@ -123,22 +134,19 @@ class AuthApiServiceImpl extends AuthService {
     }
   }
 
-  Future<void> requestNotifPermissions() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
 
-    if(settings.authorizationStatus == AuthorizationStatus.authorized){
-      debugPrint("User granted permissions");
-    }
-    else{
-      debugPrint("User denied permissions");
+
+  Future<void> saveFCMToken(String uid) async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? fcm_token = await messaging.getToken();
+
+    if(fcm_token != null) {
+      UpdateFCMTokenParams params = UpdateFCMTokenParams(uid: uid, fcmToken: fcm_token);
+      await sl<DioClient>().post(
+          ApiUrl.editProfile,
+          data: params.toMap()
+      );
     }
   }
-
-
 
 }

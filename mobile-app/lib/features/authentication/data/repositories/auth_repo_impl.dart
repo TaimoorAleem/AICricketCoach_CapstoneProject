@@ -1,5 +1,6 @@
 import 'package:ai_cricket_coach/features/authentication/data/models/reset_pw_params.dart';
 import 'package:dartz/dartz.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/service_locator.dart';
@@ -75,6 +76,7 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<bool> logout() async {
     try {
+      await FirebaseAuth.instance.signOut();
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.clear();
       return true;
