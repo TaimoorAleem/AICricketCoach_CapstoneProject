@@ -1,11 +1,12 @@
-import '../repositories/shot_repository.dart';
+import '../entities/shot_prediction.dart';
+import '../repositories/shot_prediction_repository.dart';
 
 class PredictShot {
-  final ShotRepository repository;
+  final ShotPredictionRepository repository;
 
   PredictShot(this.repository);
 
-  Future<Map<String, dynamic>> call(Map<String, dynamic> inputData) {
-    return repository.predictShot(inputData);
+  Future<ShotPrediction> call(Map<String, dynamic> ballMetrics) {
+    return repository.predictShot(ballMetrics);
   }
 }

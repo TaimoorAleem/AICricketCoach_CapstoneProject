@@ -15,8 +15,8 @@ import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_prof
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/get_user_profile.dart';
 import 'package:get_it/get_it.dart';
 import '../features/feedback/data/data_sources/api_service.dart';
-import '../features/feedback/data/repositories/shot_repository_impl.dart';
-import '../features/feedback/domain/repositories/shot_repository.dart';
+import '../features/feedback/data/repositories/shot_prediction_repository.dart';
+import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
 import '../features/feedback/domain/usecases/predict_shot.dart';
 import 'dio_client.dart';
 
