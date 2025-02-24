@@ -42,8 +42,8 @@ import '../features/analytics/domain/usecases/get_performance_history_usecase.da
 
 // Feedback (Shot Recommendation)
 import '../features/feedback/data/data_sources/api_service.dart';
-import '../features/feedback/data/repositories/shot_repository_impl.dart';
-import '../features/feedback/domain/repositories/shot_repository.dart';
+import '../features/feedback/data/repositories/shot_prediction_repository.dart';
+import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
 import '../features/feedback/domain/usecases/predict_shot.dart';
 
 final sl = GetIt.instance;

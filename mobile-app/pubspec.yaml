@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cached_network_image: ^3.2.3  # ✅ Add this line
+
 
   #firebase_core: ^2.16.0
   firebase_core:
