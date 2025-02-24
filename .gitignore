@@ -17,6 +17,7 @@ migrate_working_dir/
 .idea/
 
 # Visual Studio Code related
+.vs/
 .vscode/
 
 # Flutter/Dart/Pub related
