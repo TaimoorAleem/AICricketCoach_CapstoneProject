@@ -1,84 +1,95 @@
 import 'package:dio/dio.dart';
-
 import 'api_urls.dart';
 import 'interceptors.dart';
 
 class DioClient {
-
   late final Dio _dio;
-  DioClient(): _dio = Dio(
-    BaseOptions(
-        baseUrl: ApiUrl.baseURL  ,
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8'
-        },
-        responseType: ResponseType.json,
-        sendTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10)
-    ),
-  )..interceptors.addAll([AuthorizationInterceptor(),LoggerInterceptor()]);
 
-  // GET METHOD
-  Future < Response > get(
+  DioClient()
+      : _dio = Dio(
+    BaseOptions(
+      baseUrl: ApiUrl.baseURL,
+      headers: {'Content-Type': 'application/json; charset=UTF-8'},
+      responseType: ResponseType.json,
+      sendTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  )..interceptors.addAll([AuthorizationInterceptor(), LoggerInterceptor()]);
+
+  // GET METHOD with optional base URL override
+  Future<Response> get(
       String url, {
-        Map < String,
-            dynamic > ? queryParameters,
-        Options ? options,
-        CancelToken ? cancelToken,
-        ProgressCallback ? onReceiveProgress,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+        ProgressCallback? onReceiveProgress,
+        String? overrideBaseUrl,
       }) async {
     try {
-      final Response response = await _dio.get(
+      final dioInstance = overrideBaseUrl != null
+          ? Dio(BaseOptions(baseUrl: overrideBaseUrl))
+          : _dio;
+
+      final Response response = await dioInstance.get(
         url,
         queryParameters: queryParameters,
         options: options,
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       );
+
       return response;
-    }
-    on DioException {
+    } on DioException {
       rethrow;
     }
   }
 
-  // POST METHOD
-  Future < Response > post(
-      String url, {
-        data,
-        Map < String,
-            dynamic > ? queryParameters,
-        Options ? options,
-        ProgressCallback ? onSendProgress,
-        ProgressCallback ? onReceiveProgress,
-      }) async {
-    try {
-      final Response response = await _dio.post(
-        url,
-        data: data,
-        options: options,
-        onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress,
-      );
-      return response;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // PUT METHOD
-  Future < Response > put(
+  // POST METHOD with optional base URL override
+  Future<Response> post(
       String url, {
         dynamic data,
-        Map < String,
-            dynamic > ? queryParameters,
-        Options ? options,
-        CancelToken ? cancelToken,
-        ProgressCallback ? onSendProgress,
-        ProgressCallback ? onReceiveProgress,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        ProgressCallback? onSendProgress,
+        ProgressCallback? onReceiveProgress,
+        String? overrideBaseUrl,
       }) async {
     try {
-      final Response response = await _dio.put(
+      final dioInstance = overrideBaseUrl != null
+          ? Dio(BaseOptions(baseUrl: overrideBaseUrl))
+          : _dio;
+
+      final Response response = await dioInstance.post(
+        url,
+        data: data,
+        options: options,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+      );
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // PUT METHOD with optional base URL override
+  Future<Response> put(
+      String url, {
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+        ProgressCallback? onSendProgress,
+        ProgressCallback? onReceiveProgress,
+        String? overrideBaseUrl,
+      }) async {
+    try {
+      final dioInstance = overrideBaseUrl != null
+          ? Dio(BaseOptions(baseUrl: overrideBaseUrl))
+          : _dio;
+
+      final Response response = await dioInstance.put(
         url,
         data: data,
         queryParameters: queryParameters,
@@ -87,29 +98,35 @@ class DioClient {
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
       );
+
       return response;
     } catch (e) {
       rethrow;
     }
   }
 
-  // DELETE METHOD
-  Future < dynamic > delete(
+  // DELETE METHOD with optional base URL override
+  Future<dynamic> delete(
       String url, {
-        data,
-        Map < String,
-            dynamic > ? queryParameters,
-        Options ? options,
-        CancelToken ? cancelToken,
+        dynamic data,
+        Map<String, dynamic>? queryParameters,
+        Options? options,
+        CancelToken? cancelToken,
+        String? overrideBaseUrl,
       }) async {
     try {
-      final Response response = await _dio.delete(
+      final dioInstance = overrideBaseUrl != null
+          ? Dio(BaseOptions(baseUrl: overrideBaseUrl))
+          : _dio;
+
+      final Response response = await dioInstance.delete(
         url,
         data: data,
         queryParameters: queryParameters,
         options: options,
         cancelToken: cancelToken,
       );
+
       return response.data;
     } catch (e) {
       rethrow;

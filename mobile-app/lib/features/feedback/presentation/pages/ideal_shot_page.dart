@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../domain/usecases/predict_shot.dart';
+import '../../domain/usecases/predict_shot_usecase.dart';
 import '../../domain/entities/shot_prediction.dart';
 import '../widgets/donut_chart.dart';
 
 class IdealShotPage extends StatefulWidget {
-  final PredictShot predictShot;
+  final PredictShotUseCase predictShot;
 
   const IdealShotPage({super.key, required this.predictShot});
 

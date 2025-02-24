@@ -6,7 +6,7 @@ import '../../../../resources/app_colors.dart';
 import '../../../../resources/service_locator.dart';
 import '../../../sessions/presentation/pages/sessions_history_page.dart';
 import '../../../user_profile/presentation/pages/user_profile_page.dart';
-import '../../../feedback/domain/usecases/predict_shot.dart';
+import '../../../feedback/domain/usecases/predict_shot_usecase.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -79,7 +79,7 @@ class HomePage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => IdealShotPage(
-                          predictShot: sl<PredictShot>(),
+                          predictShot: sl<PredictShotUseCase>(),
                         ),
                       ),
                     );
