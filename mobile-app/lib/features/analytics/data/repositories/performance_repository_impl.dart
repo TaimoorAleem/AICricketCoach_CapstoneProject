@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ Import for retrieving UID
 import '../../domain/entities/performance.dart';
 import '../../domain/repositories/performance_repository.dart';
 import '../network/performance_api_service.dart';
@@ -10,27 +9,49 @@ class PerformanceRepositoryImpl implements PerformanceRepository {
   PerformanceRepositoryImpl({required this.apiService});
 
   @override
-  Future<Either<String, List<Performance>>> getPerformanceHistory() async {
-    final result = await apiService.getPerformanceHistory();
+  Future<Either<String, Map<String, List<Performance>>>> getPerformanceHistory({required List<String> playerUids}) async {
+    final result = await apiService.fetchPerformanceHistory(playerUids: playerUids);
 
     return result.fold(
           (error) => Left(error),
           (data) async {
-        // ✅ Retrieve the current user UID from shared preferences
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        final String? uid = prefs.getString('uid');
+        try {
+          if (!data.containsKey('data')) {
+            return Left("Invalid response format: missing 'data' key.");
+          }
 
-        // ✅ Ensure UID exists
-        if (uid == null || !data['data'].containsKey(uid)) {
-          return Left("User data not found");
+          final Map<String, List<Performance>> performanceMap = {};
+
+          for (var uid in playerUids) {
+            if (data['data'].containsKey(uid)) {
+              final playerSessions = data['data'][uid] as List<dynamic>;
+
+              final List<Performance> playerPerformance = playerSessions
+                  .where((session) => (session['performance'] as List).isNotEmpty)
+                  .map((session) {
+                final perfData = session['performance'][0];
+
+                return Performance(
+                  date: session['date'],
+                  averageExecutionRating: (perfData['averageExecutionRating'] ?? 0.0).toDouble(),
+                  averageSpeed: (perfData['averageSpeed'] ?? 0.0).toDouble(),
+                );
+              }).toList();
+
+              if (playerPerformance.isNotEmpty) {
+                performanceMap[uid] = playerPerformance;
+              }
+            }
+          }
+
+          if (performanceMap.isEmpty) {
+            return Left("No valid performance data found for the selected players.");
+          }
+
+          return Right(performanceMap);
+        } catch (e) {
+          return Left("Error parsing performance data: $e");
         }
-
-        // ✅ Extract user's performance history
-        final performanceHistory = (data['data'][uid] as List)
-            .map((json) => Performance.fromJson(json))
-            .toList();
-
-        return Right(performanceHistory);
       },
     );
   }

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../../../resources/dio_client.dart';
 
 class PerformanceApiService {
@@ -8,14 +8,13 @@ class PerformanceApiService {
 
   PerformanceApiService(this.dioClient);
 
-  Future<Either<String, Map<String, dynamic>>> getPerformanceHistory() async {
+  Future<Either<String, Map<String, dynamic>>> fetchPerformanceHistory({required List<String> playerUids}) async {
     try {
-      final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      final uid = sharedPreferences.getString('uid');
-
       final response = await dioClient.get(
         'get-performance-history',
-        queryParameters: {'uid': uid},
+        queryParameters: {
+          'uid_list': jsonEncode(playerUids),
+        },
       );
 
       return Right(response.data as Map<String, dynamic>);

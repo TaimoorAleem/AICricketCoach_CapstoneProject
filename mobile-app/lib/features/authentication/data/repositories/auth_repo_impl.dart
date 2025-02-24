@@ -11,63 +11,51 @@ import '../models/signup_req_params.dart';
 
 class AuthRepoImpl extends AuthRepo {
 
-
   @override
-  Future<Either> signup(SignupReqParams params) async {
+  Future<Either<String, Map<String, dynamic>>> signup(SignupReqParams params) async {
     var data = await sl<AuthService>().signup(params);
     return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          sharedPreferences.setString('uid',data['uid']);
-          return Right(data);
-        }
+          (error) => Left(error),
+          (data) async {
+        final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        sharedPreferences.setString('uid', data['uid']);
+        return Right(data);
+      },
     );
   }
+
   @override
-  Future<Either> createProfile(EditProfileReqParams params) async {
+  Future<Either<String, Map<String, dynamic>>> createProfile(EditProfileReqParams params) async {
     var data = await sl<AuthService>().createProfile(params);
     debugPrint('meo2');
     return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          return Right(data);
-        }
+          (error) => Left(error),
+          (data) async => Right(data),
     );
   }
 
   @override
-  Future<Either> resetpassword(ResetPWParams params) async {
+  Future<Either<String, Map<String, dynamic>>> resetpassword(ResetPWParams params) async {
     var data = await sl<AuthService>().resetpassword(params);
     return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          return Right(data);
-        }
+          (error) => Left(error),
+          (data) async => Right(data),
     );
   }
 
   @override
-  Future<Either> login(LoginReqParams params) async {
+  Future<Either<String, Map<String, dynamic>>> login(LoginReqParams params) async {
     var data = await sl<AuthService>().login(params);
     return data.fold(
-            (error) {
-          return Left(error);
-        },
-            (data) async {
-          final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          sharedPreferences.setString('uid',data['uid']);
-          sharedPreferences.setString('role', data['role']);
-          debugPrint(sharedPreferences.getString('uid'));
-          debugPrint(sharedPreferences.getString('role'));
-          return Right(data);
-        }
+          (error) => Left(error),
+          (data) async {
+        final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+        sharedPreferences.setString('uid', data['uid']);
+        sharedPreferences.setString('role', data['role']);
+        debugPrint(sharedPreferences.getString('uid'));
+        debugPrint(sharedPreferences.getString('role'));
+        return Right(data);
+      },
     );
   }
 
@@ -75,11 +63,6 @@ class AuthRepoImpl extends AuthRepo {
   Future<bool> isAuthenticated() async {
     final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     var token = sharedPreferences.getString('token');
-    if (token == null) {
-      return false;
-    } else {
-      return true;
-    }
+    return token != null;
   }
-
 }

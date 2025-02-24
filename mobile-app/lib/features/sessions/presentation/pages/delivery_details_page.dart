@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/ideal_shots.dart';
 import '../../domain/entities/delivery.dart';
+import '../../../../core/constants/ideal_shots.dart';
 
 class DeliveryDetailsPage extends StatelessWidget {
   final Delivery delivery;
@@ -9,22 +9,19 @@ class DeliveryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String shotImage = shotImages[delivery.idealShot] ?? "assets/images/cut.gif";
+    final String shotImage = shotImages[delivery.idealShot] ?? "assets/images/default_shot.png";
     final String shotInstruction = shotInstructions[delivery.idealShot] ?? "No specific instructions available.";
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Delivery Details'),
-        backgroundColor: Colors.green,
-      ),
+      appBar: AppBar(title: const Text('Delivery Details')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Delivery Details:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Details:',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
             Text('Speed: ${delivery.speed} km/h'),
@@ -39,7 +36,7 @@ class DeliveryDetailsPage extends StatelessWidget {
                 children: [
                   Text(
                     'Ideal Shot: ${delivery.idealShot}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16.0),
                   Image.asset(
@@ -47,17 +44,17 @@ class DeliveryDetailsPage extends StatelessWidget {
                     height: 200.0,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(height: 16.0),
-                  const Text(
-                    'How to Execute:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    shotInstruction,
-                    style: const TextStyle(fontSize: 16),
-                  ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16.0),
+            const Text(
+              'How to execute:',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              shotInstruction,
+              style: const TextStyle(fontSize: 16.0),
             ),
           ],
         ),

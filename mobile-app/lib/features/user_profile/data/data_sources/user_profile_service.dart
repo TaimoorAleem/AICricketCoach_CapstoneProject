@@ -6,13 +6,9 @@ import 'package:ai_cricket_coach/resources/dio_client.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
-import '../../domain/entities/user_entity.dart';
 import '../models/delete_account_params.dart';
 
 abstract class UserProfileService {
