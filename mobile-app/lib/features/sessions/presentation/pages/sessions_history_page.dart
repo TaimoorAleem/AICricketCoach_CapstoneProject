@@ -1,63 +1,86 @@
-import 'package:ai_cricket_coach/features/sessions/presentation/pages/session_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../resources/app_colors.dart';
 import '../../../../resources/service_locator.dart';
+import '../../domain/entities/session.dart';
 import '../../domain/usecases/get_sessions_usecase.dart';
-import '../bloc/sessions_cubit.dart';
-import '../bloc/sessions_state.dart';
+import 'session_details_page.dart';
 
-class SessionsHistoryPage extends StatelessWidget {
-  const SessionsHistoryPage({Key? key}) : super(key: key);
+class SessionsHistoryPage extends StatefulWidget {
+  final String playerUid;
+
+  const SessionsHistoryPage({super.key, required this.playerUid});
+
+  @override
+  _SessionsHistoryPageState createState() => _SessionsHistoryPageState();
+}
+
+class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
+  List<Session> sessions = [];
+  bool isLoading = true;
+  String errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSessions();
+  }
+
+  Future<void> fetchSessions() async {
+    final getSessions = sl<GetSessionsUseCase>();
+    try {
+      final result = await getSessions.call(playerUid: widget.playerUid);
+      result.fold(
+            (error) {
+          setState(() {
+            errorMessage = error;
+            isLoading = false;
+          });
+        },
+            (fetchedSessions) {
+          setState(() {
+            sessions = fetchedSessions;
+            isLoading = false;
+          });
+        },
+      );
+    } catch (error) {
+      setState(() {
+        errorMessage = error.toString();
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) {
-        final cubit = SessionsCubit(getSessionsUseCase: sl<GetSessionsUseCase>());
-        cubit.getSessions(); // Fetch sessions immediately
-        return cubit;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Sessions History'),
-          backgroundColor: AppColors.secondary,
-        ),
-        body: BlocBuilder<SessionsCubit, SessionsState>(
-          builder: (context, state) {
-            if (state is SessionsLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is SessionsLoaded) {
-              if (state.sessions.isEmpty) {
-                return const Center(child: Text('No sessions available.'));
-              }
-              return ListView.builder(
-                itemCount: state.sessions.length,
-                itemBuilder: (context, index) {
-                  final session = state.sessions[index];
-                  return ListTile(
-                    title: Text('Session on ${session.date}'),
-                    subtitle: Text('Session ID: ${session.sessionId}'),
-                    trailing: const Icon(Icons.arrow_forward),
-                    onTap: () {
-                      // Navigate to session details
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SessionDetailsPage(session: session),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            } else if (state is SessionsError) {
-              return Center(child: Text(state.errorMessage));
-            } else {
-              return const Center(child: Text('No sessions found.'));
-            }
-          },
-        ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('Sessions History')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : errorMessage.isNotEmpty
+          ? Center(child: Text('Error: $errorMessage'))
+          : sessions.isEmpty
+          ? const Center(child: Text('No sessions available'))
+          : ListView.builder(
+        itemCount: sessions.length,
+        itemBuilder: (context, index) {
+          final session = sessions[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: ListTile(
+              title: Text('Session Date: ${session.date}'),
+              trailing: const Icon(Icons.arrow_forward),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SessionDetailsPage(session: session),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

@@ -1,4 +1,6 @@
-import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
+import 'package:ai_cricket_coach/features/user_profile/data/models/role_enum.dart';
+import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
@@ -16,29 +18,38 @@ class SignupPage extends StatelessWidget {
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
+  Role _selectedRole = Role.player;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 50),
-              _welcomeHeading(),
-              const SizedBox(height: 50),
-              const SizedBox(height: 20),
-              _signupContainer(context),
-              const SizedBox(height: 20),
-              _loginText(context),
-            ],
-          ),
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            _welcomeHeading(),
+            const SizedBox(height: 30),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _signupContainer(context),
+                      const SizedBox(height: 30),
+                      _loginText(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   Widget _welcomeHeading() {
     return const Text(
@@ -71,7 +82,9 @@ class SignupPage extends StatelessWidget {
           _fieldLabel('Password'),
           const SizedBox(height: 5),
           _passwordField(),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
+          _rolePickField(context),
+          const SizedBox(height: 20),
           _signupButton(context),
         ],
       ),
@@ -112,6 +125,7 @@ class SignupPage extends StatelessWidget {
   Widget _passwordField() {
     return TextField(
       controller: _passwordCon,
+      obscureText: true,
       decoration: const InputDecoration(
         hintText: 'Password',
         border: OutlineInputBorder(),
@@ -120,6 +134,7 @@ class SignupPage extends StatelessWidget {
   }
 
   Widget _signupButton(BuildContext context) {
+    String uid;
     return Center(
       child: ReactiveButton(
         title: 'Sign Up',
@@ -127,13 +142,27 @@ class SignupPage extends StatelessWidget {
         height: 30,
         activeColor: AppColors.primary,
         onPressed: () async => sl<SignupUseCase>().call(
-          params: SignupReqParams(
-            email: _emailCon.text,
-            password: _passwordCon.text,
+            params: SignupReqParams(
+                email: _emailCon.text,
+                password: _passwordCon.text,
+                role: _selectedRole.title),
           ),
-        ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, UserProfilePage());
+          AppNavigator.pushAndRemove(
+              context,
+              EditUserProfilePage(
+                  user: UserEntity(
+                      age: "age",
+                      city: "city",
+                      country: "country",
+                      description: "description",
+                      email: "email",
+                      firstName: "firstName",
+                      lastName: "lastName",
+                      pfpUrl: "pfpUrl",
+                      role: "role",
+                      teamName: "teamName",
+                      uid: ""), pfpPath: '',));
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
@@ -142,12 +171,14 @@ class SignupPage extends StatelessWidget {
     );
   }
 
+
+
   Widget _loginText(BuildContext context) {
     return Text.rich(
       TextSpan(
         children: [
           const TextSpan(
-            text: "Do you have an account? ",
+            text: "Already have an account? ",
           ),
           TextSpan(
             text: 'Log In',
@@ -162,6 +193,20 @@ class SignupPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _rolePickField(BuildContext context) {
+    return Center(
+      child: DropdownButtonFormField(
+          value: _selectedRole,
+          decoration: const InputDecoration(label: Text('Role')),
+          items: Role.values.map((r) {
+            return DropdownMenuItem(value: r, child: Text(r.title));
+          }).toList(),
+          onChanged: (value) {
+            _selectedRole = value!;
+          }),
     );
   }
 }
