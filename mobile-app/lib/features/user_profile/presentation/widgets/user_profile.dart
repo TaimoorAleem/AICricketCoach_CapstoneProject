@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_cubit.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_state.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/edit_user_profile_page.dart';
@@ -8,14 +7,10 @@ import 'package:ai_cricket_coach/resources/app_navigator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../domain/entities/user_entity.dart';
 
 class UserProfile extends StatelessWidget {
   const UserProfile({super.key});
-
-
 
   @override
   Widget build(BuildContext context) {

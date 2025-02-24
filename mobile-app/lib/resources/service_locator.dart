@@ -1,5 +1,10 @@
 import 'package:get_it/get_it.dart';
-import '../features/analytics/presentation/bloc/AuthCubit.dart';
+import '../features/authentication/presentation/bloc/AuthCubit.dart';
+import '../features/coaches/data/data_sources/player_api_service.dart';
+import '../features/coaches/data/repositories/player_repository_impl.dart';
+import '../features/coaches/domain/repositories/player_repository.dart';
+import '../features/coaches/domain/usecases/get_players_performance_usecase.dart';
+import '../features/coaches/domain/usecases/get_players_usecase.dart';
 import 'dio_client.dart';
 
 // Authentication
@@ -22,7 +27,7 @@ import '../features/user_profile/domain/usecases/edit_pfp_usecase.dart';
 import '../features/user_profile/domain/usecases/get_profile_picture.dart';
 
 // Sessions
-import '../features/sessions/data/network/sessions_api_service.dart';
+import '../features/sessions/data/data_sources/sessions_api_service.dart';
 import '../features/sessions/data/repositories/session_repository_impl.dart';
 import '../features/sessions/domain/repositories/session_repository.dart';
 import '../features/sessions/domain/usecases/get_sessions_usecase.dart';
@@ -48,22 +53,36 @@ void setupServiceLocator() {
   // **API Services**
   sl.registerLazySingleton<AuthService>(() => AuthApiServiceImpl());
   sl.registerLazySingleton<UserProfileService>(() => UserProfileServiceImpl());
-  sl.registerSingleton<SessionApiService>(SessionApiService(sl<DioClient>()));
-  sl.registerSingleton<PerformanceApiService>(PerformanceApiService(sl<DioClient>()));
-  sl.registerSingleton<ApiService>(ApiService('http://10.0.2.2:5000')); // Flask API for shot predictions
+  sl.registerLazySingleton<SessionApiService>(
+        () => SessionApiService(sl<DioClient>()),
+  );
+  sl.registerLazySingleton<PerformanceApiService>(
+        () => PerformanceApiService(sl<DioClient>()),
+  );
+  sl.registerLazySingleton<ApiService>(
+        () => ApiService('http://10.0.2.2:5000'), // Flask API for shot predictions
+  );
+  sl.registerLazySingleton<PlayerApiService>(
+        () => PlayerApiService(),
+  );
 
   // **Repositories**
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<UserProfileRepo>(() => UserProfileRepoImpl());
-  sl.registerSingleton<SessionsRepository>(
-    SessionsRepositoryImpl(apiService: sl<SessionApiService>()),
+  sl.registerLazySingleton<SessionsRepository>(
+        () => SessionsRepositoryImpl(apiService: sl<SessionApiService>()),
   );
-  sl.registerSingleton<PerformanceRepository>(
-    PerformanceRepositoryImpl(apiService: sl<PerformanceApiService>()),
+  sl.registerLazySingleton<PerformanceRepository>(
+        () => PerformanceRepositoryImpl(apiService: sl<PerformanceApiService>()),
   );
-  sl.registerSingleton<ShotRepository>(ShotRepositoryImpl(sl<ApiService>()));
+  sl.registerLazySingleton<ShotRepository>(
+        () => ShotRepositoryImpl(sl<ApiService>()),
+  );
+  sl.registerLazySingleton<PlayerRepository>(
+        () => PlayerRepositoryImpl(apiService: sl<PlayerApiService>()),
+  );
 
-  // Bloc / Cubit
+  // **Bloc / Cubit**
   sl.registerLazySingleton<AuthCubit>(() => AuthCubit());
 
   // **Use Cases**
@@ -72,20 +91,23 @@ void setupServiceLocator() {
   sl.registerLazySingleton<IsAuthenticatedUseCase>(() => IsAuthenticatedUseCase());
   sl.registerLazySingleton<GetUserProfileUseCase>(() => GetUserProfileUseCase());
   sl.registerLazySingleton<EditProfileUseCase>(() => EditProfileUseCase());
-  sl.registerSingleton<GetProfilePictureUseCase>(GetProfilePictureUseCase());
+  sl.registerLazySingleton<GetProfilePictureUseCase>(() => GetProfilePictureUseCase());
   sl.registerLazySingleton<EditPFPUseCase>(() => EditPFPUseCase());
   sl.registerLazySingleton<SendCodeUseCase>(() => SendCodeUseCase());
   sl.registerLazySingleton<DeleteAccountUseCase>(() => DeleteAccountUseCase());
-
-  sl.registerSingleton<GetSessionsUseCase>(
-    GetSessionsUseCase(repository: sl<SessionsRepository>()),
+  sl.registerLazySingleton<GetSessionsUseCase>(
+        () => GetSessionsUseCase(repository: sl<SessionsRepository>()),
   );
-
-  sl.registerSingleton<GetPerformanceHistoryUseCase>(
-    GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()),
+  sl.registerLazySingleton<GetPerformanceHistoryUseCase>(
+        () => GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()),
   );
-
-  sl.registerSingleton<PredictShot>(
-    PredictShot(sl<ShotRepository>()),
+  sl.registerLazySingleton<PredictShot>(
+        () => PredictShot(sl<ShotRepository>()),
+  );
+  sl.registerLazySingleton<GetPlayersUseCase>(
+        () => GetPlayersUseCase(repository: sl<PlayerRepository>()),
+  );
+  sl.registerLazySingleton<GetPlayersPerformanceUseCase>(
+        () => GetPlayersPerformanceUseCase(repository: sl<PlayerRepository>()),
   );
 }

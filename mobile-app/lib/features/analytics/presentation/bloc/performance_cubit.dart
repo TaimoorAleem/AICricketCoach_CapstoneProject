@@ -1,21 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dartz/dartz.dart';
+import '../../domain/entities/performance.dart';
 import '../../domain/usecases/get_performance_history_usecase.dart';
-import '../../../../resources/service_locator.dart';
 import 'performance_state.dart';
 
 class PerformanceCubit extends Cubit<PerformanceState> {
-  final GetPerformanceHistoryUseCase _getPerformanceHistoryUseCase;
+  final GetPerformanceHistoryUseCase getPerformanceHistoryUseCase;
 
-  PerformanceCubit()
-      : _getPerformanceHistoryUseCase = sl<GetPerformanceHistoryUseCase>(),
-        super(PerformanceInitial());
+  PerformanceCubit({required this.getPerformanceHistoryUseCase}) : super(PerformanceInitial());
 
-  void getPerformanceHistory() async {
+  Future<void> getPerformanceHistory(List<String> playerUids) async {
     emit(PerformanceLoading());
-    final result = await _getPerformanceHistoryUseCase.call();
+
+    final Either<String, Map<String, List<Performance>>> result =
+    await getPerformanceHistoryUseCase(playerUids: playerUids);
+
     result.fold(
-          (error) => emit(PerformanceError(errorMessage: error)),
-          (performance) => emit(PerformanceLoaded(performanceHistory: performance)),
+          (error) {
+        emit(PerformanceError(errorMessage: error));
+      },
+          (performanceData) {
+        try {
+          emit(PerformanceLoaded(performanceHistory: performanceData));
+        } catch (e) {
+          emit(PerformanceError(errorMessage: "Error parsing performance data: $e"));
+        }
+      },
     );
   }
 }

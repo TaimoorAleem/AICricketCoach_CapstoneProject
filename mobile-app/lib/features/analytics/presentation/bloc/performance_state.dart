@@ -7,7 +7,8 @@ class PerformanceInitial extends PerformanceState {}
 class PerformanceLoading extends PerformanceState {}
 
 class PerformanceLoaded extends PerformanceState {
-  final List<Performance> performanceHistory;
+  final Map<String, List<Performance>> performanceHistory;
+
   PerformanceLoaded({required this.performanceHistory});
 }
 

@@ -1,26 +1,23 @@
+import 'package:ai_cricket_coach/features/coaches/presentation/pages/coach_home_page.dart';
 import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
-import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
-import 'package:dartz/dartz.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
-import '../../../user_profile/presentation/pages/vid_display.dart';
-import '../../data/models/login_req_params.dart';
+import '../../../coaches/domain/usecases/get_players_usecase.dart';
+import '../../../coaches/presentation/bloc/PlayerCubit.dart';
 import '../../domain/usecases/login_usecase.dart';
-import 'reset_password_page.dart';
-import 'sign_up_page.dart';
+import '../../data/models/login_req_params.dart';
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +31,7 @@ class LogInPage extends StatelessWidget {
               const SizedBox(height: 50),
               _welcomeHeading(),
               const SizedBox(height: 20),
-              const SizedBox(height: 20),
               _loginContainer(context),
-              const SizedBox(height: 20),
-              _signupText(context),
-              _forgotpwtext(context),
             ],
           ),
         ),
@@ -52,7 +45,6 @@ class LogInPage extends StatelessWidget {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 26,
-        color: AppColors.primary,
       ),
       textAlign: TextAlign.center,
     );
@@ -62,45 +54,16 @@ class LogInPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _loginText(),
-          const SizedBox(height: 20),
-          _fieldLabel('Email'),
-          const SizedBox(height: 5),
           _emailField(),
           const SizedBox(height: 20),
-          _fieldLabel('Password'),
-          const SizedBox(height: 5),
           _passwordField(),
           const SizedBox(height: 30),
           _loginButton(context),
         ],
-      ),
-    );
-  }
-
-  Widget _loginText() {
-    return const Text(
-      'Log In',
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 22,
-        color: AppColors.primary,
-      ),
-    );
-  }
-
-  Widget _fieldLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
       ),
     );
   }
@@ -132,16 +95,26 @@ class LogInPage extends StatelessWidget {
         title: 'Sign In',
         width: 10,
         height: 30,
-        activeColor: AppColors.primary,
-        onPressed: () async => await sl<LoginUseCase>().call(
+        onPressed: () async {
+          final result = await sl<LoginUseCase>().call(
             params: LoginReqParams(
               email: _emailCon.text,
               password: _passwordCon.text,
             ),
-          ),
+          );
 
+          result.fold(
+                (error) {
+              print("❌ Login Failed: $error");
+              DisplayMessage.errorMessage(error, context);
+            },
+                (data) async {
+              await _redirectUser(context);
+            },
+          );
+        },
         onSuccess: () async {
-          AppNavigator.pushAndRemove(context, const HomePage());
+          await _redirectUser(context);
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
@@ -150,52 +123,36 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  Widget _forgotpwtext(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          const TextSpan(
-            text: "",
+  Future<void> _redirectUser(BuildContext context) async {
+    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final String? role = sharedPreferences.getString('role');
+    final String? uid = sharedPreferences.getString('uid');
+
+    if (role == "coach") {
+      print("🔹 Navigating to CoachHomePage...");
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MultiProvider(
+            providers: [
+              Provider<GetPlayersUseCase>(create: (_) => sl<GetPlayersUseCase>()),
+              BlocProvider<PlayerCubit>(
+                create: (context) => PlayerCubit(getPlayersUseCase: context.read<GetPlayersUseCase>()),
+              ),
+            ],
+            child: CoachHomePage(coachUid: uid!),
           ),
-          TextSpan(
-            text: 'Forgot Password?',
-            style: const TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                AppNavigator.push(context, ResetPasswordPage());
-              },
-          ),
-        ],
-      ),
-    );
+        ),
+            (route) => false, // Clears the navigation stack
+      );
+
+      print("✅ Navigation to CoachHomePage completed");
+    } else {
+      print("🔹 Navigating to HomePage...");
+      AppNavigator.pushAndRemove(context, const HomePage());
+      print("✅ Navigation to HomePage completed");
+    }
   }
 
-
-
-
-  Widget _signupText(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          const TextSpan(
-            text: "Don't have an account? ",
-          ),
-          TextSpan(
-            text: 'Sign Up',
-            style: const TextStyle(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                AppNavigator.push(context, SignupPage());
-              },
-          ),
-        ],
-      ),
-    );
-  }
 }
