@@ -1,16 +1,16 @@
+import '../../core/network/api_client.dart';
 import '../../domain/entities/shot_prediction.dart';
+import '../../domain/repositories/shot_prediction_repository.dart';
+import '../models/shot_prediction_model.dart';
 
-class ShotPredictionModel extends ShotPrediction {
-  ShotPredictionModel({required super.shots});
+class ShotPredictionRepositoryImpl implements ShotPredictionRepository {
+  final ApiClient apiClient;
 
-  factory ShotPredictionModel.fromJson(Map<String, dynamic> json) {
-    return ShotPredictionModel(
-      shots: (json['predicted_ideal_shots'] as List)
-          .map((shot) => PredictedShot(
-        shot: shot['shot'],
-        confidenceScore: shot['confidence_score'],
-      ))
-          .toList(),
-    );
+  ShotPredictionRepositoryImpl(this.apiClient);
+
+  @override
+  Future<ShotPrediction> predictShot(Map<String, dynamic> ballMetrics) async {
+    final response = await apiClient.post('/predict', ballMetrics);
+    return ShotPredictionModel.fromJson(response);
   }
 }
