@@ -11,4 +11,7 @@ abstract class AuthRepo {
   Future<bool> isAuthenticated();
   Future<Either<String, Map<String, dynamic>>> resetpassword(ResetPWParams params);
   Future<Either<String, Map<String, dynamic>>> createProfile(EditProfileReqParams params);
+  Future<bool> logout();
+  Future<Either> resetpassword(ResetPWParams params);
+  Future<Either> createProfile(EditProfileReqParams params);
 }

@@ -24,25 +24,32 @@ class SignupPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 30),
-              _welcomeHeading(),
-              const SizedBox(height: 30),
-              const SizedBox(height: 15),
-              _signupContainer(context),
-              const SizedBox(height: 30),
-              const SizedBox(height: 20),
-              _loginText(context),
-            ],
-          ),
+        child: Column(
+          children: [
+            const SizedBox(height: 30),
+            _welcomeHeading(),
+            const SizedBox(height: 30),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _signupContainer(context),
+                      const SizedBox(height: 30),
+                      _loginText(context),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   Widget _welcomeHeading() {
     return const Text(
