@@ -1,0 +1,1 @@
+The AI Cricket Coach project provides an affordable, tech-driven solution using computer vision and machine learning to deliver personalized, real-time coaching feedback, benefiting amateur players, sports clubs, and organizations like the Ontario Cricket Academy by enhancing training scalability and effectiveness.
