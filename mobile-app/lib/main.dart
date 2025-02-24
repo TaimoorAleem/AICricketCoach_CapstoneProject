@@ -7,25 +7,30 @@ import 'package:provider/provider.dart';
 import '../resources/service_locator.dart';
 import 'features/authentication/presentation/bloc/AuthCubit.dart';
 import 'features/coaches/domain/usecases/get_players_usecase.dart';
-import 'features/coaches/presentation/bloc/PlayerCubit.dart';
 import 'features/authentication/presentation/pages/loading_page.dart';
 import '../resources/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  await requestNotifPermissions();
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Disable auto-init to prevent auto token refresh
-  await messaging.setAutoInitEnabled(false);
-  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  await requestNotifPermissions();
   setupServiceLocator();
+
   runApp(const MyApp());
 }
+
+/// 📩 Background message handler (Ensuring it's not duplicated)
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("📩 Background message received: ${message.messageId}");
+}
+
+/// 📲 Request notification permissions
 Future<void> requestNotifPermissions() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   NotificationSettings settings = await messaging.requestPermission(
@@ -34,30 +39,20 @@ Future<void> requestNotifPermissions() async {
     sound: true,
   );
 
-  if(settings.authorizationStatus == AuthorizationStatus.authorized){
-    debugPrint("User granted permissions");
-  }
-  else{
-    debugPrint("User denied permissions");
-  }
+  debugPrint(settings.authorizationStatus == AuthorizationStatus.authorized
+      ? "🔔 User granted permissions for notifications."
+      : "🚫 User denied notification permissions.");
 }
-
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint("Background message received: ${message.messageId}");
-}
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<GetPlayersUseCase>(create: (_) => sl<GetPlayersUseCase>()),
-        BlocProvider<AuthCubit>(create: (context) => AuthCubit()..appStarted()),
+        BlocProvider<AuthCubit>(create: (_) => AuthCubit()..appStarted()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -67,4 +62,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

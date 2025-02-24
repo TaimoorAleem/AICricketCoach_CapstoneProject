@@ -69,6 +69,8 @@ dependencies:
   video_player: ^2.9.2
   image_picker: ^1.1.2
   provider: ^6.1.2
+  firebase_messaging: ^15.2.3
+  firebase_analytics: ^11.4.3
 
 
 dev_dependencies:

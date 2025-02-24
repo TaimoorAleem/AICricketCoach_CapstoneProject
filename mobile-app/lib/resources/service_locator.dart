@@ -1,4 +1,3 @@
-
 import 'package:ai_cricket_coach/features/authentication/domain/usecases/create_profile.dart';
 import 'package:ai_cricket_coach/features/authentication/domain/usecases/logout_usecase.dart';
 import 'package:ai_cricket_coach/features/authentication/domain/usecases/send_code_usecase.dart';
@@ -25,16 +24,8 @@ import '../features/authentication/domain/repositories/auth_repo.dart';
 import '../features/authentication/domain/usecases/is_authenticated_usecase.dart';
 import '../features/authentication/domain/usecases/login_usecase.dart';
 import '../features/authentication/domain/usecases/signup_usecase.dart';
-import '../features/authentication/domain/usecases/send_code_usecase.dart';
 
 // User Profile
-import '../features/user_profile/data/data_sources/user_profile_service.dart';
-import '../features/user_profile/data/repositories/user_profile_repo_impl.dart';
-import '../features/user_profile/domain/repositories/user_profile_repo.dart';
-import '../features/user_profile/domain/usecases/get_user_profile.dart';
-import '../features/user_profile/domain/usecases/edit_profile.dart';
-import '../features/user_profile/domain/usecases/delete_account_usecase.dart';
-import '../features/user_profile/domain/usecases/edit_pfp_usecase.dart';
 import '../features/user_profile/domain/usecases/get_profile_picture.dart';
 
 // Sessions
@@ -64,73 +55,69 @@ void setupServiceLocator() {
   // **API Services**
   sl.registerLazySingleton<AuthService>(() => AuthApiServiceImpl());
   sl.registerLazySingleton<UserProfileService>(() => UserProfileServiceImpl());
-  sl.registerLazySingleton<SessionApiService>(
-        () => SessionApiService(sl<DioClient>()),
-  );
-  sl.registerLazySingleton<PerformanceApiService>(
-        () => PerformanceApiService(sl<DioClient>()),
-  );
-  sl.registerLazySingleton<ApiService>(
-        () => ApiService('http://10.0.2.2:5000'), // Flask API for shot predictions
-  );
-  sl.registerLazySingleton<PlayerApiService>(
-        () => PlayerApiService(),
-  );
+  sl.registerLazySingleton<SessionApiService>(() => SessionApiService(sl<DioClient>()));
+  sl.registerLazySingleton<PerformanceApiService>(() => PerformanceApiService(sl<DioClient>()));
+  sl.registerLazySingleton<ApiService>(() => ApiService('http://10.0.2.2:5000')); // Flask API for shot predictions
+  sl.registerLazySingleton<PlayerApiService>(() => PlayerApiService());
 
   // **Repositories**
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
   sl.registerLazySingleton<UserProfileRepo>(() => UserProfileRepoImpl());
-  sl.registerLazySingleton<SessionsRepository>(
-        () => SessionsRepositoryImpl(apiService: sl<SessionApiService>()),
-  );
-  sl.registerLazySingleton<PerformanceRepository>(
-        () => PerformanceRepositoryImpl(apiService: sl<PerformanceApiService>()),
-  );
-  sl.registerLazySingleton<ShotRepository>(
-        () => ShotRepositoryImpl(sl<ApiService>()),
-  );
-  sl.registerLazySingleton<PlayerRepository>(
-        () => PlayerRepositoryImpl(apiService: sl<PlayerApiService>()),
-  );
+  sl.registerLazySingleton<SessionsRepository>(() => SessionsRepositoryImpl(apiService: sl<SessionApiService>()));
+  sl.registerLazySingleton<PerformanceRepository>(() => PerformanceRepositoryImpl(apiService: sl<PerformanceApiService>()));
+  sl.registerLazySingleton<ShotRepository>(() => ShotRepositoryImpl(sl<ApiService>()));
+  sl.registerLazySingleton<PlayerRepository>(() => PlayerRepositoryImpl(apiService: sl<PlayerApiService>()));
 
   // **Bloc / Cubit**
   sl.registerLazySingleton<AuthCubit>(() => AuthCubit());
 
-  // Usecases
-  sl.registerSingleton<SignupUseCase>(SignupUseCase());
-  sl.registerSingleton<LoginUseCase>(LoginUseCase());
-  sl.registerSingleton<LogOutUseCase>(LogOutUseCase());
-  sl.registerSingleton<CreateProfileUseCase>(CreateProfileUseCase());
-  sl.registerSingleton<EditPFPUseCase>(EditPFPUseCase());
-  sl.registerSingleton<SendCodeUseCase>(SendCodeUseCase());
-  sl.registerSingleton<IsAuthenticatedUseCase>(IsAuthenticatedUseCase());
-  sl.registerSingleton<GetUserProfileUseCase>(GetUserProfileUseCase());
-  sl.registerSingleton<GetProfilePictureUseCase>(GetProfilePictureUseCase());
-  sl.registerSingleton<EditProfileUseCase>(EditProfileUseCase());
-  sl.registerSingleton<DeleteAccountUseCase>(DeleteAccountUseCase());
-  // **Use Cases**
-  sl.registerLazySingleton<SignupUseCase>(() => SignupUseCase());
-  sl.registerLazySingleton<LoginUseCase>(() => LoginUseCase());
-  sl.registerLazySingleton<IsAuthenticatedUseCase>(() => IsAuthenticatedUseCase());
-  sl.registerLazySingleton<GetUserProfileUseCase>(() => GetUserProfileUseCase());
-  sl.registerLazySingleton<EditProfileUseCase>(() => EditProfileUseCase());
-  sl.registerLazySingleton<GetProfilePictureUseCase>(() => GetProfilePictureUseCase());
-  sl.registerLazySingleton<EditPFPUseCase>(() => EditPFPUseCase());
-  sl.registerLazySingleton<SendCodeUseCase>(() => SendCodeUseCase());
-  sl.registerLazySingleton<DeleteAccountUseCase>(() => DeleteAccountUseCase());
-  sl.registerLazySingleton<GetSessionsUseCase>(
-        () => GetSessionsUseCase(repository: sl<SessionsRepository>()),
-  );
-  sl.registerLazySingleton<GetPerformanceHistoryUseCase>(
-        () => GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()),
-  );
-  sl.registerLazySingleton<PredictShot>(
-        () => PredictShot(sl<ShotRepository>()),
-  );
-  sl.registerLazySingleton<GetPlayersUseCase>(
-        () => GetPlayersUseCase(repository: sl<PlayerRepository>()),
-  );
-  sl.registerLazySingleton<GetPlayersPerformanceUseCase>(
-        () => GetPlayersPerformanceUseCase(repository: sl<PlayerRepository>()),
-  );
+  // **Use Cases** (No Duplicates)
+  if (!sl.isRegistered<SignupUseCase>()) {
+    sl.registerLazySingleton<SignupUseCase>(() => SignupUseCase());
+  }
+  if (!sl.isRegistered<LoginUseCase>()) {
+    sl.registerLazySingleton<LoginUseCase>(() => LoginUseCase());
+  }
+  if (!sl.isRegistered<LogOutUseCase>()) {
+    sl.registerLazySingleton<LogOutUseCase>(() => LogOutUseCase());
+  }
+  if (!sl.isRegistered<CreateProfileUseCase>()) {
+    sl.registerLazySingleton<CreateProfileUseCase>(() => CreateProfileUseCase());
+  }
+  if (!sl.isRegistered<EditPFPUseCase>()) {
+    sl.registerLazySingleton<EditPFPUseCase>(() => EditPFPUseCase());
+  }
+  if (!sl.isRegistered<SendCodeUseCase>()) {
+    sl.registerLazySingleton<SendCodeUseCase>(() => SendCodeUseCase());
+  }
+  if (!sl.isRegistered<IsAuthenticatedUseCase>()) {
+    sl.registerLazySingleton<IsAuthenticatedUseCase>(() => IsAuthenticatedUseCase());
+  }
+  if (!sl.isRegistered<GetUserProfileUseCase>()) {
+    sl.registerLazySingleton<GetUserProfileUseCase>(() => GetUserProfileUseCase());
+  }
+  if (!sl.isRegistered<GetProfilePictureUseCase>()) {
+    sl.registerLazySingleton<GetProfilePictureUseCase>(() => GetProfilePictureUseCase());
+  }
+  if (!sl.isRegistered<EditProfileUseCase>()) {
+    sl.registerLazySingleton<EditProfileUseCase>(() => EditProfileUseCase());
+  }
+  if (!sl.isRegistered<DeleteAccountUseCase>()) {
+    sl.registerLazySingleton<DeleteAccountUseCase>(() => DeleteAccountUseCase());
+  }
+  if (!sl.isRegistered<GetSessionsUseCase>()) {
+    sl.registerLazySingleton<GetSessionsUseCase>(() => GetSessionsUseCase(repository: sl<SessionsRepository>()));
+  }
+  if (!sl.isRegistered<GetPerformanceHistoryUseCase>()) {
+    sl.registerLazySingleton<GetPerformanceHistoryUseCase>(() => GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()));
+  }
+  if (!sl.isRegistered<PredictShot>()) {
+    sl.registerLazySingleton<PredictShot>(() => PredictShot(sl<ShotRepository>()));
+  }
+  if (!sl.isRegistered<GetPlayersUseCase>()) {
+    sl.registerLazySingleton<GetPlayersUseCase>(() => GetPlayersUseCase(repository: sl<PlayerRepository>()));
+  }
+  if (!sl.isRegistered<GetPlayersPerformanceUseCase>()) {
+    sl.registerLazySingleton<GetPlayersPerformanceUseCase>(() => GetPlayersPerformanceUseCase(repository: sl<PlayerRepository>()));
+  }
 }
