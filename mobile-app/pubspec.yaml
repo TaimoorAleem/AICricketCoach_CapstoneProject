@@ -30,6 +30,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  image_picker: ^0.8.6+3
+  camera: ^0.11.0+1
+  video_player:
+  file_picker:
+#  video_player: ^2.9.2
   cached_network_image: ^3.4.1
 
 
@@ -39,6 +44,7 @@ dependencies:
   firebase_auth:
 
   #firebase_auth: ^4.8.2
+
 
   flutter_bloc:
 
