@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/ideal_shots.dart';
 import '../../domain/entities/delivery.dart';
+import '../../../../core/constants/ideal_shots.dart';
+import '../../../feedback/presentation/pages/ideal_shot_page.dart';
+import '../../../../resources/service_locator.dart';
+import '../../../feedback/domain/usecases/predict_shot_usecase.dart';
 
 class DeliveryDetailsPage extends StatelessWidget {
   final Delivery delivery;
@@ -9,54 +12,40 @@ class DeliveryDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String shotImage = shotImages[delivery.idealShot] ?? "assets/images/cut.gif";
-    final String shotInstruction = shotInstructions[delivery.idealShot] ?? "No specific instructions available.";
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Delivery Details'),
-        backgroundColor: Colors.green,
-      ),
+      appBar: AppBar(title: const Text('Delivery Details')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Delivery Details:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Details:',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
             Text('Speed: ${delivery.speed} km/h'),
-            Text('Accuracy: ${delivery.accuracy}%'),
             Text('Right-Handed Batsman: ${delivery.rightHandedBatsman ? "Yes" : "No"}'),
             Text('Bounce Height: ${delivery.bounceHeight}'),
             Text('Ball Length: ${delivery.ballLength}'),
             Text('Horizontal Position: ${delivery.horizontalPosition}'),
-            const SizedBox(height: 16.0),
+
+            const SizedBox(height: 20),
+
+            // 📌 Navigate to IdealShotPage Button
             Center(
-              child: Column(
-                children: [
-                  Text(
-                    'Ideal Shot: ${delivery.idealShot}',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16.0),
-                  Image.asset(
-                    shotImage,
-                    height: 200.0,
-                    fit: BoxFit.cover,
-                  ),
-                  const SizedBox(height: 16.0),
-                  const Text(
-                    'How to Execute:',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    shotInstruction,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IdealShotPage(
+                        predictShot: sl<PredictShotUseCase>(), // Injecting via service locator
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('View Ideal Shot Recommendation'),
               ),
             ),
           ],
