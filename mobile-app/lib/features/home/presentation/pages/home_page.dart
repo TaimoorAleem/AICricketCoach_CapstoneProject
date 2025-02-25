@@ -101,22 +101,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-
-// const SizedBox(height: 20),
-// // Capture Video Button
-// ElevatedButton(
-//   style: ElevatedButton.styleFrom(
-//     backgroundColor: AppColors.primary,
-//     foregroundColor: Colors.white,
-//   ),
-//   onPressed: () {
-//     Navigator.push(
-//       context,
-//       MaterialPageRoute(
-//         builder: (context) => const VideoCapturePage(),
-//       ),
-//     );
-//   },
-//   child: const Text('Capture Video'),
-// ),
