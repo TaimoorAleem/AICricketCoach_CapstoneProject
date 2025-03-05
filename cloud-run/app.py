@@ -1,6 +1,9 @@
 import os
 import firebase_admin
+import time
 import json
+from datetime import timedelta
+import requests
 from firebase_admin import credentials, auth, firestore, storage
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
@@ -22,6 +25,8 @@ app = Flask(__name__)
 # Firestore client
 db = firestore.client()
 
+
+
 @app.route('/')
 def home():
     return jsonify({"status": "success", "message": "Welcome to the app!"}), 200
@@ -33,18 +38,21 @@ def sign_up():
         data = request.get_json()
         email = data['email']
         uid = data['password']
+        role = data['role']
 
         # Add the user to Firestore
         user_data = {
             "email": email,
-            "uid": uid
+            "uid": uid,
+            "role": role
         }
         db.collection('Users').document(uid).set(user_data)
 
         return jsonify({
             "status": "success",
             "message": "User registered successfully",
-            "uid": uid
+            "uid": uid,
+            "role": role
         }), 200
 
     except Exception as e:
@@ -70,11 +78,13 @@ def log_in():
         user_ref = db.collection('Users').document(uid)
         user = user_ref.get()
 
+
         if user.exists:
             return jsonify({
                 "status": "success",
                 "message": "User logged in successfully",
                 "uid": uid,
+                "role" : user.to_dict()['role'],
                 "email": user.to_dict()['email']
             }), 200
         else:
@@ -89,11 +99,47 @@ def log_in():
             "message": uid
         }), 500
 
-
 @app.route('/get-players', methods=['GET'])
 def get_players():
-    #implement for coach
-    return jsonify({"status": "success", "message": "List of players"}), 200
+    try:
+        uid = request.args.get('uid')
+
+        if not uid:
+            return jsonify({"status": "error", "message": "UID is missing."}), 400
+
+        users = db.collection('Users').where('uid', '==', uid).get()
+        if not users:
+            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+
+        # Reference to the user document
+        user_ref = db.collection('Users').document(uid)
+
+        # Get the sessions subcollection for the user
+        players_ref = user_ref.collection('Players')
+
+        players = players_ref.stream()  # Retrieve all players
+
+        result = {}
+
+        for player in players:
+            player_data = player.to_dict()
+            p_id=player_data['uid']
+            result[p_id] = db.collection('Users').document(p_id).get().to_dict()
+
+
+
+        return jsonify({
+            "status" : "success",
+            "message" : "Players retrieved successfully.",
+            "players" : result
+        }),200
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 
 @app.route('/edit-profile-picture', methods=['POST'])
 def edit_profile_picture():
@@ -104,17 +150,23 @@ def edit_profile_picture():
         file = request.files['file']
         if file.filename == '':
             return jsonify({"status":"error", "message":"No image selected."}), 400
+        uid = request.form['uid']
 
 
-        blob = bucket.blob(f'uploads/{file.filename}')
+        blob = bucket.blob(f'uploads/{uid}/{file.filename}')
         blob.upload_from_file(file)
 
         blob_url = blob.public_url
+        user_ref = db.collection('Users').document(uid)
+
+
+        signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
+        user_ref.update({'pfpUrl': signed_url})
 
         return jsonify({
             "status" : "success",
             "message" : "Profile picture updated successfully",
-            "url" : blob_url
+            "url" : signed_url
         }),200
 
     except Exception as e:
@@ -152,46 +204,38 @@ def get_profile_picture():
 def edit_profile():
     try:
         data = request.get_json()
-        uid = data['uid']
+
         if 'uid' not in data:
-            return jsonify({"status" :"error","message" : str(e) })
+            return jsonify({"status": "error", "message": "UID is required."}), 400
+
         uid = data['uid']
-        users_check = db.collection('Users').where('uid', '==', uid).get()
-        if not users_check:
+
+
+        user_doc_ref = db.collection('Users').document(uid)
+        user_doc = user_doc_ref.get()
+
+        if not user_doc.exists:
             return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
 
-        user_doc = db.collection('Users').document(uid).get()
+        update_data = {key: value for key, value in data.items() if key != "uid"}
 
-        user_data = user_doc.to_dict()
+        if not update_data:
+            return jsonify({"status": "error", "message": "No fields provided for update."}), 400
 
-        new_data = {
-            "firstName": data.get('firstName', ''),
-            "lastName": data.get('lastName', ''),
-            "teamName": data.get('teamName', ''),
-            "age": data.get('age', ''),
-            "role": data.get('role', ''),
-            "city": data.get('city', ''),
-            "country": data.get('country', ''),
-            "description": data.get('description', ''),
-            "pfpUrl" : data.get('pfpUrl', '')
-        }
 
-        updated_data = {**user_data, **new_data}
-
-        db.collection('Users').document(uid).update(new_data)
+        user_doc_ref.update(update_data)
+        user_data = db.collection('Users').document(uid).get().to_dict()
 
         return jsonify({
-            "status" : "success",
-            "message" : "Profile updated successfully.",
-            "user" : updated_data
-        }),200
+            "status": "success",
+            "message": "Profile updated successfully.",
+            "updated_fields": update_data,
+            "user": user_data
+        }), 200
 
     except Exception as e:
-        return jsonify({
-            "status" :"error",
-            "message" : str(e)
-        })
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/get-user', methods=['GET'])
 def get_user():
@@ -220,27 +264,48 @@ def get_user():
             "message": str(e)
         }), 500
 
-
 @app.route('/upload-video', methods=["POST"])
 def upload_video():
     try:
         if 'file' not in request.files:
             return jsonify({"status": "error", "message": "No file found."}), 400
 
+
+
         file = request.files['file']
         if file.filename == '':
-            return jsonify({"status":"error", "message":"No image selected."}), 400
+            return jsonify({"status":"error", "message":"No video selected."}), 400
+        fname = file.filename
 
 
-        blob = bucket.blob(f'uploads/{file.filename}')
+        blob = bucket.blob(f'uploads/{fname}')
         blob.upload_from_file(file)
 
-        blob_url = blob.public_url
+        signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
 
+        vp_url = "https://my-vp-app-174827312206.us-central1.run.app/process-video"
+        payload = {"video_url": signed_url}
+
+
+        rsp = requests.post(vp_url, json=payload)
+        response = rsp.json()
+
+
+
+        ml_url = "https://shot-recommendation-api-607955695192.us-central1.run.app/predict"
+        payload = {
+            "Ball Speed": response['BallSpeed'],
+            "Ball Height": response['BallHeight'],
+            "Batsman Position": response['BatsmanPosition'],
+            "Ball Horizontal Line": "middle stump",
+            "Ball Length": "Yorker"
+        }
+
+        shot_rec = requests.post(ml_url, json=payload)
         return jsonify({
             "status" : "success",
-            "message" : "Profile picture updated successfully",
-            "url" : blob_url
+            "message" : "Delivery video uploaded successfully",
+            "data" : shot_rec.json(),
         }),200
 
     except Exception as e:
@@ -248,6 +313,42 @@ def upload_video():
             "status" :"error",
             "message" : str(e)
         })
+
+@app.route('/delete-account', methods=["POST"])
+def delete_account():
+    try:
+        data = request.get_json()
+        uid = data['uid']
+
+        if "uid" not in data:
+            return jsonify({"status": "error", "message": "No uid found."}), 400
+
+        id_token = data['password']
+
+        decoded_token = auth.verify_id_token(id_token)
+
+        uid = decoded_token['uid']
+
+        user_ref = db.collection('Users').document(uid)
+        user = user_ref.get()
+
+        if user.exists:
+            user_ref.delete()
+            auth.delete_user(uid)
+            return jsonify({
+                "status": "success",
+                "message": "User account deleted successfully",
+            }), 200
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "User not found"
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            "status": "error"
+        }), 500
 
 @app.route('/add-delivery', methods=["POST"])
 def upload_delivery():
@@ -334,7 +435,6 @@ def get_delivery():
             "message": str(e)
         }), 500
 
-
 @app.route('/create-session', methods=['POST'])
 def upload_session():
     try :
@@ -392,7 +492,6 @@ def upload_session():
             "status" :"error",
             "message" : str(e)
         })
-
 
 @app.route('/get-sessions', methods=['GET'])
 def get_sessions():
@@ -465,91 +564,94 @@ def get_sessions():
             "message": str(e)
         }), 500
 
-
 @app.route('/get-performance-history', methods=['GET'])
 def get_performance_history():
 
     try:
-        uid = request.args.get('uid')
+        uid_list = request.args.get('uid_list')
+        if uid_list:
+            uid_list = json.loads(uid_list)
+        if not uid_list:
+            uid = request.args.get('uid')
+            if not uid:
+                return jsonify({"status": "error", "message": "UID is missing."}), 400
+            sessionId= request.args.get('sessionId')
+            user_ref = db.collection('Users').document(uid)
+            if sessionId:
+                # Get the sessions subcollection for the user
+                session_ref = user_ref.collection('sessions').document(sessionId)
+                deliveries = session_ref.collection('deliveries').get()
 
-        if not uid:
-            return jsonify({"status": "error", "message": "UID is missing."}), 400
+                performances= session_ref.collection('performance').get()
 
-        users = db.collection('Users').where('uid', '==', uid).get()
-        if not users:
-            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+                if len(performances) == 0:
+                    #performance for the session is yet to be calculated
 
+                    avg_speed = 0
+                    avg_accuracy = 0
+                    avg_exec_rating = 0
+                    count = 0
 
-        # Reference to the user document
-        user_ref = db.collection('Users').document(uid)
+                    for delivery_ref in deliveries:
+                        delivery = delivery_ref.to_dict()
+                        count = count+1
+                        avg_speed = avg_speed + delivery['speed']
+                        avg_accuracy = avg_accuracy + delivery['accuracy']
+                        avg_exec_rating = avg_exec_rating + delivery['executionRating']
 
-
-
-        sessionId = request.args.get('sessionId')
-        sessions_check = user_ref.collection('sessions').where('sessionId', '==', sessionId).get()
-        if not sessions_check:
-            return jsonify({"status": "error", "message": f"Session with SessionId {sessionId} does not exist."}), 404
-
-
-
-        # Get the sessions subcollection for the user
-        session_ref = user_ref.collection('sessions').document(sessionId)
-        deliveries = session_ref.collection('deliveries').get()
-
-        performances= session_ref.collection('performance').get()
-
-        if len(performances) == 0:
-            #performance for the session is yet to be calculated
-
-            avg_speed = 0
-            avg_accuracy = 0
-            avg_exec_rating = 0
-            count = 0
-
-            for delivery_ref in deliveries:
-                delivery = delivery_ref.to_dict()
-                count = count+1
-                avg_speed = avg_speed + delivery['speed']
-                avg_accuracy = avg_accuracy + delivery['accuracy']
-                avg_exec_rating = avg_exec_rating + delivery['executionRating']
-
-            avg_speed = avg_speed / count
-            avg_accuracy = avg_accuracy / count
-            avg_exec_rating = avg_exec_rating / count
-            perf_ref = session_ref.collection('performance').add({
-                "averageSpeed": avg_speed,
-                "averageAccuracy": avg_accuracy,
-                "averageExecutionRating" : avg_exec_rating
-            })
+                    avg_speed = avg_speed / count
+                    avg_accuracy = avg_accuracy / count
+                    avg_exec_rating = avg_exec_rating / count
+                    perf_ref = session_ref.collection('performance').add({
+                        "averageSpeed": avg_speed,
+                        "averageAccuracy": avg_accuracy,
+                        "averageExecutionRating" : avg_exec_rating
+                    })
 
 
+            uid_list = [uid]
 
-        # Get all sessions for the user
-        sessions_ref = user_ref.collection('sessions').get()
-        result = []
+        response={}
 
-        for session in sessions_ref:
-            session_data = session.to_dict()
+        for uid in uid_list:
 
-            session_data['date'] = session_data.get('date')
+            users = db.collection('Users').where('uid', '==', uid).get()
 
-            perf_ref = session.reference.collection('performance')
-            performances = perf_ref.stream()  # Stream all performance documents in the subcollection
+            if not users:
+                return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
-            session_data['performance'] = []
 
-            # Iterate over performance documents
-            for performance in performances:
-                performance_data = performance.to_dict()  # Convert each performance document to dict
-                session_data['performance'].append(performance_data)  # Add to the session's performances list
+            # Reference to the user document
+            user_ref = db.collection('Users').document(uid)
 
-            result.append(session_data)  # Append the session with its performances to the result
 
+            # Get all sessions for the user
+            sessions_ref = user_ref.collection('sessions').get()
+            result = []
+
+            for session in sessions_ref:
+                session_data = session.to_dict()
+
+                session_data['date'] = session_data.get('date')
+
+                perf_ref = session.reference.collection('performance')
+                performances = perf_ref.stream()  # Stream all performance documents in the subcollection
+
+                session_data['performance'] = []
+
+                # Iterate over performance documents
+                for performance in performances:
+                    performance_data = performance.to_dict()  # Convert each performance document to dict
+                    session_data['performance'].append(performance_data)  # Add to the session's performances list
+
+                result.append(session_data)  # Append the session with its performances to the result
+
+
+            response[uid] = result
 
         return jsonify({
             "status": "success",
-            "message" : f'The performance for Session {sessionId} has been updated successfully.',
-            "performanceHistory" : result
+            "data": response
         }), 200
 
     except Exception as e:
