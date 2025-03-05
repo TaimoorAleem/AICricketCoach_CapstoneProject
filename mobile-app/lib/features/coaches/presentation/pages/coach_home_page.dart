@@ -16,9 +16,10 @@ class CoachHomePage extends StatefulWidget {
 }
 
 class _CoachHomePageState extends State<CoachHomePage> {
-  final Set<String> selectedPlayers = {}; // ✅ Stores selected player UIDs
-  bool compareMode = false; // ✅ Track if compare mode is active
+  final Set<String> selectedPlayers = {};
+  bool compareMode = false;
 
+  // TODO: User Profile Button
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -27,21 +28,19 @@ class _CoachHomePageState extends State<CoachHomePage> {
         appBar: AppBar(title: const Text("Coach Dashboard")),
         body: Column(
           children: [
-            // ✅ Compare Players Button (always visible)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    compareMode = !compareMode; // ✅ Toggle compare mode
-                    selectedPlayers.clear(); // ✅ Reset selected players
+                    compareMode = !compareMode;
+                    selectedPlayers.clear();
                   });
                 },
                 child: Text(compareMode ? "Cancel Compare" : "Compare Players"),
               ),
             ),
 
-            // ✅ Player List (Cards or Checkboxes)
             Expanded(
               child: BlocBuilder<PlayerCubit, PlayerState>(
                 builder: (context, state) {
@@ -54,8 +53,8 @@ class _CoachHomePageState extends State<CoachHomePage> {
                       children: state.players.map((player) {
                         return PlayerCard(
                           player: player,
-                          compareMode: compareMode, // ✅ Switch mode dynamically
-                          isSelected: selectedPlayers.contains(player.uid), // ✅ Check if selected
+                          compareMode: compareMode,
+                          isSelected: selectedPlayers.contains(player.uid),
                           onSelect: (bool? selected) {
                             setState(() {
                               if (selected == true) {

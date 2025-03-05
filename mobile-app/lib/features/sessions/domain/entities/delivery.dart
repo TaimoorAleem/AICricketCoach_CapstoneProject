@@ -9,6 +9,8 @@ class Delivery {
   final double executionRating;
   final String idealShot;
   final String videoUrl;
+  final double? battingRating; // ✅ New field
+  final String? feedback; // ✅ New field
 
   Delivery({
     required this.deliveryId,
@@ -21,5 +23,7 @@ class Delivery {
     required this.executionRating,
     required this.idealShot,
     required this.videoUrl,
+    this.battingRating,
+    this.feedback,
   });
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/entities/delivery.dart';
-import 'package:ai_cricket_coach/features/sessions/presentation/pages/delivery_details_page.dart'; // Update to the actual path of DeliveryDetailsPage
+import '../../domain/entities/delivery.dart';
+import '../pages/delivery_details_page.dart';
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
+  final String sessionId; // ✅ Session ID required for feedback
+  final String playerId;  // ✅ Player ID added for tracking
 
-  const DeliveryCard({Key? key, required this.delivery}) : super(key: key);
+  const DeliveryCard({Key? key, required this.delivery, required this.sessionId, required this.playerId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +24,17 @@ class DeliveryCard extends StatelessWidget {
             Text('Execution Rating: ${delivery.executionRating}'),
           ],
         ),
-        trailing: Icon(Icons.arrow_forward),
+        trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          // Navigate to the DeliveryDetailsPage
+          // Navigate to the DeliveryDetailsPage and pass sessionId & playerId
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DeliveryDetailsPage(delivery: delivery),
+              builder: (context) => DeliveryDetailsPage(
+                delivery: delivery,
+                sessionId: sessionId, // ✅ Ensure sessionId is passed
+                playerId: playerId,   // ✅ Ensure playerId is passed
+              ),
             ),
           );
         },

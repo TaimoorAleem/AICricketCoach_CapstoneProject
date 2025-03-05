@@ -48,9 +48,9 @@ class AnalyticsPage extends StatelessWidget {
                     _buildSubheading(),
                     if (playerUids.length == 2) _buildLegend(),
                     const SizedBox(height: 16),
-                    _buildChart(state.performanceHistory, 'Ball Speed (km/h)', (p) => p.averageSpeed, 50, 150),
+                    _buildChart(state.performanceHistory, 'Average Ball Speed (km/h)', (p) => p.averageSpeed, 50, 150),
                     const SizedBox(height: 16),
-                    _buildChart(state.performanceHistory, 'Batting Performance (out of 10)', (p) => p.averageExecutionRating, 0, 10),
+                    _buildChart(state.performanceHistory, 'Average Batting Performance \n(out of 10)', (p) => p.averageExecutionRating, 0, 10),
                   ],
                 ),
               );
@@ -69,7 +69,7 @@ class AnalyticsPage extends StatelessWidget {
       child: Text(
         playerUids.length == 1
             ? "The performance of your last 5 sessions is visualized below."
-            : "The comparison of the two players is visualized below.",
+            : "The comparison between the two players is visualized below.",
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
         textAlign: TextAlign.center,
       ),

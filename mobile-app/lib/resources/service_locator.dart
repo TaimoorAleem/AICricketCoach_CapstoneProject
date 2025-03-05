@@ -18,6 +18,7 @@ import '../features/coaches/domain/usecases/get_players_usecase.dart';
 import '../features/feedback/data/repositories/shot_prediction_repository_impl.dart';
 import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
 import '../features/feedback/domain/usecases/predict_shot_usecase.dart';
+import '../features/sessions/domain/usecases/add_feedback_usecase.dart';
 import 'dio_client.dart';
 
 // Authentication
@@ -115,5 +116,8 @@ void setupServiceLocator() {
   }
   if (!sl.isRegistered<PredictShotUseCase>()) {
     sl.registerLazySingleton(() => PredictShotUseCase(sl<ShotPredictionRepository>()));
+  }
+  if (!sl.isRegistered<AddFeedbackUseCase>()) {
+    sl.registerLazySingleton(() => AddFeedbackUseCase(repository: sl<SessionsRepository>()));
   }
 }

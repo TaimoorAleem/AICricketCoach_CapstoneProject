@@ -12,4 +12,27 @@ class SessionApiService {
     );
     return response.data as Map<String, dynamic>;
   }
+
+  Future<void> addFeedback({
+    required String playerId,
+    required String sessionId,
+    required String deliveryId,
+    required double battingRating,
+    required String feedback,
+  }) async {
+    try {
+      await dioClient.post(
+        'add-feedback',
+        data: {
+          "playerId": playerId,
+          "sessionId": sessionId,
+          "deliveryId": deliveryId,
+          "battingRating": battingRating,
+          "feedback": feedback,
+        },
+      );
+    } catch (e) {
+      throw Exception("Failed to submit feedback: $e");
+    }
+  }
 }

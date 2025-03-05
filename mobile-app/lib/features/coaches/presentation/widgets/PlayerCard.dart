@@ -36,6 +36,7 @@ class PlayerCard extends StatelessWidget {
       subtitle: Text(player.teamName.isNotEmpty ? player.teamName : "No Team"),
       trailing: ElevatedButton(
         onPressed: () {
+          // ✅ Pass player UID when navigating
           Navigator.push(
             context,
             MaterialPageRoute(

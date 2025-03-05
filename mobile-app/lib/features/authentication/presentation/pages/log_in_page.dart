@@ -123,7 +123,7 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  Future<void> _redirectUser(BuildContext context) async {
+  Future<void> _redirectUser(BuildContext context) async { // TODO: weird error message on home page after logging in
     final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     final String? role = sharedPreferences.getString('role');
     final String? uid = sharedPreferences.getString('uid');

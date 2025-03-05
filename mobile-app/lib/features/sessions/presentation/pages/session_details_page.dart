@@ -4,8 +4,9 @@ import '../widgets/DeliveryCard.dart';
 
 class SessionDetailsPage extends StatelessWidget {
   final Session session;
+  final String playerId; // ✅ Add playerId to track which player this session belongs to
 
-  const SessionDetailsPage({Key? key, required this.session}) : super(key: key);
+  const SessionDetailsPage({Key? key, required this.session, required this.playerId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,11 @@ class SessionDetailsPage extends StatelessWidget {
               itemCount: session.deliveries.length,
               itemBuilder: (context, index) {
                 final delivery = session.deliveries[index];
-                return DeliveryCard(delivery: delivery);
+                return DeliveryCard(
+                  delivery: delivery,
+                  sessionId: session.sessionId,
+                  playerId: playerId, // ✅ Pass playerId down to DeliveryCard
+                );
               },
             ),
           ),

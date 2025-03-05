@@ -6,7 +6,7 @@ import '../../domain/usecases/get_sessions_usecase.dart';
 import 'session_details_page.dart';
 
 class SessionsHistoryPage extends StatefulWidget {
-  final String playerUid;
+  final String playerUid; // ✅ Player ID received from CoachHomePage
 
   const SessionsHistoryPage({super.key, required this.playerUid});
 
@@ -74,7 +74,10 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SessionDetailsPage(session: session),
+                    builder: (context) => SessionDetailsPage(
+                      session: session,
+                      playerId: widget.playerUid, // ✅ Pass playerUid to SessionDetailsPage
+                    ),
                   ),
                 );
               },
