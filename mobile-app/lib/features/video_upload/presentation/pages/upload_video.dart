@@ -16,6 +16,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   VideoPlayerController? _videoController;
   String? _videoPath;
   final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false; // Added for tracking upload state
 
   @override
   void dispose() {
@@ -61,6 +62,11 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       );
       return;
     }
+
+    setState(() {
+      _isUploading = true; // Show loading bar
+    });
+
     try {
       var request = http.MultipartRequest('POST', Uri.parse('https://my-app-image-174827312206.us-central1.run.app/upload-video'));
       request.files.add(await http.MultipartFile.fromPath('file', _videoPath!));
@@ -81,6 +87,10 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
+    } finally {
+      setState(() {
+        _isUploading = false; // Hide loading bar
+      });
     }
   }
 
@@ -133,9 +143,20 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
-            child: ElevatedButton(
-              onPressed: uploadVideo,
-              child: const Text('Upload Video'),
+            child: Column(
+              children: [
+                if (_isUploading) // Show loading bar when uploading
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 10),
+                    child: CircularProgressIndicator(),
+                  ),
+                ElevatedButton(
+                  onPressed: _isUploading ? null : uploadVideo, // Disable button while uploading
+                  child: _isUploading
+                      ? const Text('Uploading...')
+                      : const Text('Upload Video'),
+                ),
+              ],
             ),
           ),
         ],
@@ -157,5 +178,3 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
     );
   }
 }
-
-
