@@ -1,25 +1,22 @@
 import cv2
 import numpy as np
 import os
-import re
 import shutil
+from ultralytics import YOLO
 import matplotlib.pyplot as plt
 
-class BallTracking:
-    def __init__(self, video_path, frame_dir='Frame', processed_frame_dir='Frame_b'):
+class CricketBallTracker:
+    def __init__(self, video_path, model_path, pitch_image_path, frame_dir='Frame', processed_frame_dir='Frame_b'):
         self.video_path = video_path
+        self.model = YOLO(model_path)
+        self.pitch_image_path = pitch_image_path
         self.frame_dir = frame_dir
         self.processed_frame_dir = processed_frame_dir
         self.trajectory_points = []
-        self.heights = []
         self.fps = None
-        self.time_between_frames = None
-
-    @staticmethod
-    def calculate_displacement(point1, point2, pixel_to_distance_ratio):
-        dx = (point2[0] - point1[0]) * pixel_to_distance_ratio
-        dy = (point2[1] - point1[1]) * pixel_to_distance_ratio
-        return (dx**2 + dy**2)**0.5
+        self.src_points = []
+        self.dst_points = []
+        self.homography_matrix = None
 
     @staticmethod
     def cleanup_directories(directories):
@@ -28,6 +25,45 @@ class BallTracking:
                 shutil.rmtree(directory)
             os.makedirs(directory, exist_ok=True)
 
+    def select_points(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if len(self.src_points) < 4:
+                self.src_points.append([x, y])
+                cv2.circle(self.frame, (x, y), 5, (0, 0, 255), -1)
+            elif len(self.dst_points) < 4:
+                self.dst_points.append([x, y])
+                cv2.circle(self.pitch_image, (x, y), 5, (0, 255, 0), -1)
+
+    def define_homography(self):
+        cap = cv2.VideoCapture(self.video_path)
+        ret, self.frame = cap.read()
+        cap.release()
+        self.pitch_image = cv2.imread(self.pitch_image_path)
+
+        cv2.namedWindow('Select Source Points')
+        cv2.setMouseCallback('Select Source Points', self.select_points)
+        
+        while len(self.src_points) < 4:
+            cv2.imshow('Select Source Points', self.frame)
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
+
+        cv2.destroyAllWindows()
+
+        cv2.namedWindow('Select Destination Points')
+        cv2.setMouseCallback('Select Destination Points', self.select_points)
+        
+        while len(self.dst_points) < 4:
+            cv2.imshow('Select Destination Points', self.pitch_image)
+            if cv2.waitKey(1) & 0xFF == 27:
+                break
+
+        cv2.destroyAllWindows()
+
+        self.homography_matrix, _ = cv2.findHomography(np.array(self.src_points), np.array(self.dst_points), cv2.RANSAC, 5.0)
+        np.save('homography_matrix.npy', self.homography_matrix)
+        print("Homography matrix saved!")
+
     def process_video(self):
         cap = cv2.VideoCapture(self.video_path)
         if not cap.isOpened():
@@ -35,100 +71,137 @@ class BallTracking:
             return
 
         self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.time_between_frames = 1 / self.fps
-
         self.cleanup_directories([self.frame_dir, self.processed_frame_dir])
 
-        cnt = 0
+        frame_count = 0
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
 
-            roi = frame
-            cv2.imwrite(f'{self.frame_dir}/{cnt}.png', roi)
+            frame_path = f'{self.frame_dir}/{frame_count}.png'
+            cv2.imwrite(frame_path, frame)
 
-            image_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            results = self.model(frame)
+            detected_balls = []
 
-            lower1 = np.array([0, 100, 0])
-            upper1 = np.array([10, 255, 255])
-            lower2 = np.array([160, 100, 20])
-            upper2 = np.array([180, 255, 255])
+            for result in results:
+                for box in result.boxes.xyxy:
+                    x1, y1, x2, y2 = map(int, box[:4])
+                    center = ((x1 + x2) // 2, (y1 + y2) // 2)
+                    radius = max((x2 - x1) // 2, (y2 - y1) // 2)
+                    detected_balls.append((center, radius))
 
-            lower_mask = cv2.inRange(image_hsv, lower1, upper1)
-            upper_mask = cv2.inRange(image_hsv, lower2, upper2)
-            full_mask = lower_mask + upper_mask
-
-            result = cv2.bitwise_and(frame, frame, mask=full_mask)
-
-            contours, _ = cv2.findContours(full_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-            detected_circles = []
-            for c in contours:
-                blob_area = cv2.contourArea(c)
-                blob_perimeter = cv2.arcLength(c, True)
-
-                if blob_perimeter != 0:
-                    blob_circularity = (4 * 3.1416 * blob_area) / (blob_perimeter**2)
-                    min_circularity = 0.2
-                    min_area = 35
-
-                    (x, y), radius = cv2.minEnclosingCircle(c)
-                    center = (int(x), int(y))
-                    radius = int(radius)
-
-                    if blob_circularity > min_circularity and blob_area > min_area:
-                        detected_circles.append([center, radius, blob_area, blob_circularity])
-
-            if detected_circles:
-                largest_blob = max(detected_circles, key=lambda x: x[2] * x[3])
-                largest_center, largest_radius, _, _ = largest_blob
-
+            if detected_balls:
+                largest_ball = max(detected_balls, key=lambda x: x[1])
+                largest_center, largest_radius = largest_ball
                 self.trajectory_points.append(largest_center)
+                cv2.circle(frame, largest_center, largest_radius, (0, 255, 0), 2)
 
-                pixel_to_height_ratio = 0.01
-                height = largest_center[1] * pixel_to_height_ratio
-                self.heights.append(height)
-
-                cv2.circle(frame, largest_center, largest_radius, (255, 0, 0), 2)
-                cv2.rectangle(frame,
-                              (largest_center[0] - largest_radius, largest_center[1] - largest_radius),
-                              (largest_center[0] + largest_radius, largest_center[1] + largest_radius),
-                              (0, 255, 0), 2)
-
-            cv2.imwrite(f'{self.processed_frame_dir}/processed_frame_{cnt}.png', frame)
-            cnt += 1
+            cv2.imwrite(f'{self.processed_frame_dir}/processed_frame_{frame_count}.png', frame)
+            frame_count += 1
 
         cap.release()
         cv2.destroyAllWindows()
 
-    def calculate_speeds(self):
-        if len(self.trajectory_points) > 1:
-            pixel_to_distance_ratio = 0.01
-            speeds = []
+        np.save('ball_trajectory.npy', self.trajectory_points)
+        print("Ball trajectory saved!")
 
-            for i in range(1, len(self.trajectory_points)):
-                displacement = self.calculate_displacement(self.trajectory_points[i-1], self.trajectory_points[i], pixel_to_distance_ratio)
-                speed = (displacement / self.time_between_frames) * 3.6
-                speeds.append(speed)
+    # def map_trajectory_to_pitch(self):
+    #     pitch = cv2.imread(self.pitch_image_path)
+    #     H = np.load('homography_matrix.npy')
+    #     trajectory_points = np.load('ball_trajectory.npy')
 
-            print("Ball Speed:", np.mean(speeds), "km/h")
-            print("Ball Height:", np.mean(self.heights), "meters")
-        else:
-            print("Not enough points detected to calculate speed and height.")
+    #     points = np.array([trajectory_points], dtype='float32')
 
-    def create_output_video(self, output_filename='output_video.mp4'):
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        frames = sorted(os.listdir(self.processed_frame_dir), key=lambda x: int(re.sub('\\D', '', x)))
+    #     mapped_points = cv2.perspectiveTransform(points, H)
 
-        first_frame = cv2.imread(os.path.join(self.processed_frame_dir, frames[0]))
-        height, width, _ = first_frame.shape
-        size = (width, height)
+    #     for i, point in enumerate(mapped_points[0]):
+    #         x, y = int(point[0]), int(point[1])
 
-        out = cv2.VideoWriter(output_filename, fourcc, self.fps, size)
-        for frame_filename in frames:
-            frame = cv2.imread(os.path.join(self.processed_frame_dir, frame_filename))
-            out.write(frame)
+    #         # Check for out of bounds on the last element (i+1) and first element (i-1)
+    #         if i > 0 and i < len(trajectory_points) - 1:
+    #             # Compare the current point with previous and next to determine color
+    #             color = (0, 255, 255) if trajectory_points[i][1] > trajectory_points[i-1][1] and trajectory_points[i][1] < trajectory_points[i+1][1] else (0, 0, 255)
+    #         else:
+    #             color = (0, 0, 255)  # Default color for the first and last points
 
-        out.release()
-        print(f"Video saved as {output_filename}")
+    #         cv2.circle(pitch, (x, y), 5, color, -1)
+
+    #     cv2.imshow('Mapped Trajectory on Pitch', pitch)
+    #     cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
+    #     cv2.waitKey(0)
+    #     cv2.destroyAllWindows()
+
+    
+    def map_trajectory_to_pitch(self):
+        pitch = cv2.imread(self.pitch_image_path)
+        H = np.load('homography_matrix.npy')
+        trajectory_points = np.load('ball_trajectory.npy')
+
+        points = np.array([trajectory_points], dtype='float32')
+        mapped_points = cv2.perspectiveTransform(points, H)
+
+        # Pitch dimensions
+        pitch_height, pitch_width = pitch.shape[:2]
+
+        # Find the lowest bounce point (smallest Y = top of pitch)
+        lowest_bounce_idx = None
+        min_y = float('inf')  # Start with a large value to find the smallest Y-coordinate
+
+        # Check mapped points before clipping
+        for i, point in enumerate(mapped_points[0]):
+            x, y = point[0], point[1]
+            # Only consider points that are within pitch bounds before clipping
+            if 0 <= x < pitch_width and 0 <= y < pitch_height:
+                if y < min_y:  # Find the smallest Y (the lowest bounce point)
+                    min_y = y
+                    lowest_bounce_idx = i
+
+        if lowest_bounce_idx is None:
+            print("No valid bounce point found within pitch boundaries!")
+            return
+
+        # Clip points to stay within the pitch image
+        mapped_points[0][:, 0] = np.clip(mapped_points[0][:, 0], 0, pitch_width - 1)  # X-axis
+        mapped_points[0][:, 1] = np.clip(mapped_points[0][:, 1], 0, pitch_height - 1)  # Y-axis
+
+        print(f"Lowest Bounce Point Index: {lowest_bounce_idx}, Y-Coordinate: {min_y}")
+
+        # Debugging: Print all mapped points
+        print("All Mapped Points:")
+        for i, point in enumerate(mapped_points[0]):
+            print(f"Point {i}: ({point[0]}, {point[1]})")
+
+        # Mark trajectory points
+        for i, point in enumerate(mapped_points[0]):
+            x, y = int(point[0]), int(point[1])
+            if i == lowest_bounce_idx:
+                color = (0, 255, 255)  # Yellow for lowest bounce
+                print(f"Marking lowest bounce point at: ({x}, {y}) in yellow")
+                with open('bounce_coords.txt', 'w') as f:
+                    f.write(f"{x},{y}\n")
+                    print("BounceCoordinates.txt written")
+            else:
+                color = (0, 0, 255)  # Red for other points
+
+            cv2.circle(pitch, (x, y), 5, color, -1)
+
+        # Show and save the image
+        cv2.imshow('Mapped Trajectory on Pitch', pitch)
+        cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+
+
+if __name__ == "__main__":
+    video_path = 'NetPractice3.mp4'
+    model_path = os.path.join('runs', 'detect', 'train8', 'weights', 'best.pt')
+    pitch_image_path = 'pitch.jpeg'
+
+    tracker = CricketBallTracker(video_path, model_path, pitch_image_path)
+    tracker.define_homography()
+    tracker.process_video()
+    tracker.map_trajectory_to_pitch()
+
