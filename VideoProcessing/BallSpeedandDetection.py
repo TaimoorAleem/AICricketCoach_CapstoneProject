@@ -196,7 +196,7 @@ class CricketBallTracker:
 
 
 if __name__ == "__main__":
-    video_path = 'NetPractice3.mp4'
+    video_path = 'WhiteBall.mp4'
     model_path = os.path.join('runs', 'detect', 'train8', 'weights', 'best.pt')
     pitch_image_path = 'pitch.jpeg'
 
