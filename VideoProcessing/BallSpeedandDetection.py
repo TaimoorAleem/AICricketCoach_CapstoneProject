@@ -15,7 +15,8 @@ class CricketBallTracker:
         self.trajectory_points = []
         self.fps = None
         self.src_points = []
-        self.dst_points = []
+        #self.dst_points = []
+        self.dst_points = [(53, 17), (192, 17), (54, 585), (193, 586)]
         self.homography_matrix = None
 
     @staticmethod
@@ -42,19 +43,9 @@ class CricketBallTracker:
 
         cv2.namedWindow('Select Source Points')
         cv2.setMouseCallback('Select Source Points', self.select_points)
-        
+
         while len(self.src_points) < 4:
             cv2.imshow('Select Source Points', self.frame)
-            if cv2.waitKey(1) & 0xFF == 27:
-                break
-
-        cv2.destroyAllWindows()
-
-        cv2.namedWindow('Select Destination Points')
-        cv2.setMouseCallback('Select Destination Points', self.select_points)
-        
-        while len(self.dst_points) < 4:
-            cv2.imshow('Select Destination Points', self.pitch_image)
             if cv2.waitKey(1) & 0xFF == 27:
                 break
 
@@ -133,8 +124,11 @@ class CricketBallTracker:
     #     cv2.waitKey(0)
     #     cv2.destroyAllWindows()
 
-    
     def map_trajectory_to_pitch(self):
+        # Check if 'bounce_coords.txt' exists and delete it
+        if os.path.exists('bounce_coords.txt'):
+            os.remove('bounce_coords.txt')
+
         pitch = cv2.imread(self.pitch_image_path)
         H = np.load('homography_matrix.npy')
         trajectory_points = np.load('ball_trajectory.npy')
@@ -172,6 +166,9 @@ class CricketBallTracker:
         print("All Mapped Points:")
         for i, point in enumerate(mapped_points[0]):
             print(f"Point {i}: ({point[0]}, {point[1]})")
+            # Save each point to the text file
+            with open('bounce_coords.txt', 'a') as f:
+                f.write(f"{point[0]},{point[1]}\n")  # Append x,y coordinates
 
         # Mark trajectory points
         for i, point in enumerate(mapped_points[0]):
@@ -179,13 +176,16 @@ class CricketBallTracker:
             if i == lowest_bounce_idx:
                 color = (0, 255, 255)  # Yellow for lowest bounce
                 print(f"Marking lowest bounce point at: ({x}, {y}) in yellow")
-                with open('bounce_coords.txt', 'w') as f:
-                    f.write(f"{x},{y}\n")
-                    print("BounceCoordinates.txt written")
             else:
                 color = (0, 0, 255)  # Red for other points
 
             cv2.circle(pitch, (x, y), 5, color, -1)
+
+            # Connect points with lines
+            if i > 0:
+                prev_point = mapped_points[0][i - 1]
+                prev_x, prev_y = int(prev_point[0]), int(prev_point[1])
+                cv2.line(pitch, (prev_x, prev_y), (x, y), (0, 255, 0), 2)  # Green line for trajectory
 
         # Show and save the image
         cv2.imshow('Mapped Trajectory on Pitch', pitch)
@@ -193,10 +193,8 @@ class CricketBallTracker:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-
-
 if __name__ == "__main__":
-    video_path = 'WhiteBall.mp4'
+    video_path = 'NetPractice8.mp4'
     model_path = os.path.join('runs', 'detect', 'train8', 'weights', 'best.pt')
     pitch_image_path = 'pitch.jpeg'
 

@@ -1,24 +1,72 @@
 import cv2
 import numpy as np
 
-# Load the image
 image = cv2.imread('pitch.jpeg')
 
 if image is None:
     raise Exception("Failed to load the image. Check the file path!")
 
 
-try:
-    with open('bounce_coords.txt', 'r') as f:
-        bounce_coords = f.readline().strip()
-        ball_position = tuple(map(int, bounce_coords.split(',')))
-        print(f"Loaded bounce point: {ball_position}")
-except FileNotFoundError:
-    raise Exception("Bounce coordinates file not found!")
 
-#Mark the ball with the red color which is the bounce position.
-cv2.circle(image, ball_position, 5, (0, 0, 255), -1)
 
+def smooth_trajectory(coordinates):
+    # Remove consecutive duplicates to reduce noise
+    smoothed = [coordinates[0]]
+    for i in range(1, len(coordinates)):
+        if coordinates[i] != coordinates[i-1]:
+            smoothed.append(coordinates[i])
+    return smoothed
+
+def detect_bounce_point(coordinates):
+    # Smooth the trajectory to handle noise
+    smoothed_coords = smooth_trajectory(coordinates)
+    
+    x_coords = [coord[0] for coord in smoothed_coords]
+    y_coords = [coord[1] for coord in smoothed_coords]
+    
+    # Look for a pattern: rise -> peak -> fall
+    for i in range(1, len(y_coords)-2):
+        # Check if y is increasing (approaching bounce)
+        if y_coords[i] > y_coords[i-1]:
+            # Check for a rise after this point (post-bounce upward motion)
+            if y_coords[i+1] > y_coords[i]:
+                # Check for a fall after the rise (post-bounce downward motion)
+                if y_coords[i+2] < y_coords[i+1]:
+                    # Map the smoothed index back to the original coordinates
+                    original_index = coordinates.index(smoothed_coords[i])
+                    return coordinates[original_index], original_index
+    
+    # Fallback: return the last point if no bounce is detected
+    return coordinates[-1], len(coordinates)-1
+
+
+def read_coordinates_from_file(filename):
+    coordinates = []
+    with open(filename, 'r') as f:
+        for line in f.readlines():
+            # Each line is expected to be in the format "x,y\n"
+            x, y = map(float, line.strip().split(','))
+            coordinates.append((x, y))
+    return coordinates
+
+
+coordinates = read_coordinates_from_file('bounce_coords.txt')
+
+bounce_point, bounce_index = detect_bounce_point(coordinates)
+
+# Save the bounce point to 'ball_position'
+ball_position =  bounce_point
+
+
+print("Trajectory points from 'bounce_coords.txt':")
+for i, coord in enumerate(coordinates):
+    print(f"Point {i}: {coord}")
+
+print(f"\nDetected bounce point: {bounce_point} at index {bounce_index}")
+print(f"Ball position (detected bounce point): {ball_position}")
+
+
+cv2.circle(image, (int(ball_position[0]), int(ball_position[1])), 5, (0, 0, 255), -1)
 ###################################################################################################################
                                     #Pitch Line#
 ###################################################################################################################
