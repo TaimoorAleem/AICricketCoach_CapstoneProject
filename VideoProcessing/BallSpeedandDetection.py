@@ -14,8 +14,8 @@ class CricketBallTracker:
         self.processed_frame_dir = processed_frame_dir
         self.trajectory_points = []
         self.fps = None
-        self.src_points = []
-        #self.dst_points = []
+        # self.src_points = [(841, 325), (1206, 327), (823, 783), (1285, 782)]
+        self.src_points = [(779, 300),(1090, 300),(758, 780),(1172, 783)]
         self.dst_points = [(53, 17), (192, 17), (54, 585), (193, 586)]
         self.homography_matrix = None
 
@@ -26,31 +26,7 @@ class CricketBallTracker:
                 shutil.rmtree(directory)
             os.makedirs(directory, exist_ok=True)
 
-    def select_points(self, event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            if len(self.src_points) < 4:
-                self.src_points.append([x, y])
-                cv2.circle(self.frame, (x, y), 5, (0, 0, 255), -1)
-            elif len(self.dst_points) < 4:
-                self.dst_points.append([x, y])
-                cv2.circle(self.pitch_image, (x, y), 5, (0, 255, 0), -1)
-
     def define_homography(self):
-        cap = cv2.VideoCapture(self.video_path)
-        ret, self.frame = cap.read()
-        cap.release()
-        self.pitch_image = cv2.imread(self.pitch_image_path)
-
-        cv2.namedWindow('Select Source Points')
-        cv2.setMouseCallback('Select Source Points', self.select_points)
-
-        while len(self.src_points) < 4:
-            cv2.imshow('Select Source Points', self.frame)
-            if cv2.waitKey(1) & 0xFF == 27:
-                break
-
-        cv2.destroyAllWindows()
-
         self.homography_matrix, _ = cv2.findHomography(np.array(self.src_points), np.array(self.dst_points), cv2.RANSAC, 5.0)
         np.save('homography_matrix.npy', self.homography_matrix)
         print("Homography matrix saved!")
@@ -97,32 +73,6 @@ class CricketBallTracker:
 
         np.save('ball_trajectory.npy', self.trajectory_points)
         print("Ball trajectory saved!")
-
-    # def map_trajectory_to_pitch(self):
-    #     pitch = cv2.imread(self.pitch_image_path)
-    #     H = np.load('homography_matrix.npy')
-    #     trajectory_points = np.load('ball_trajectory.npy')
-
-    #     points = np.array([trajectory_points], dtype='float32')
-
-    #     mapped_points = cv2.perspectiveTransform(points, H)
-
-    #     for i, point in enumerate(mapped_points[0]):
-    #         x, y = int(point[0]), int(point[1])
-
-    #         # Check for out of bounds on the last element (i+1) and first element (i-1)
-    #         if i > 0 and i < len(trajectory_points) - 1:
-    #             # Compare the current point with previous and next to determine color
-    #             color = (0, 255, 255) if trajectory_points[i][1] > trajectory_points[i-1][1] and trajectory_points[i][1] < trajectory_points[i+1][1] else (0, 0, 255)
-    #         else:
-    #             color = (0, 0, 255)  # Default color for the first and last points
-
-    #         cv2.circle(pitch, (x, y), 5, color, -1)
-
-    #     cv2.imshow('Mapped Trajectory on Pitch', pitch)
-    #     cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
-    #     cv2.waitKey(0)
-    #     cv2.destroyAllWindows()
 
     def map_trajectory_to_pitch(self):
         # Check if 'bounce_coords.txt' exists and delete it
@@ -187,19 +137,19 @@ class CricketBallTracker:
                 prev_x, prev_y = int(prev_point[0]), int(prev_point[1])
                 cv2.line(pitch, (prev_x, prev_y), (x, y), (0, 255, 0), 2)  # Green line for trajectory
 
-        # Show and save the image
-        cv2.imshow('Mapped Trajectory on Pitch', pitch)
+        
+        #cv2.imshow('Mapped Trajectory on Pitch', pitch)
         cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-if __name__ == "__main__":
-    video_path = 'NetPractice8.mp4'
-    model_path = os.path.join('runs', 'detect', 'train8', 'weights', 'best.pt')
-    pitch_image_path = 'pitch.jpeg'
+# if __name__ == "__main__":
+#     video_path = 'NetPractice6.mp4'
+#     model_path = os.path.join('runs', 'detect', 'train8', 'weights', 'best.pt')
+#     pitch_image_path = 'pitch.jpeg'
 
-    tracker = CricketBallTracker(video_path, model_path, pitch_image_path)
-    tracker.define_homography()
-    tracker.process_video()
-    tracker.map_trajectory_to_pitch()
+#     tracker = CricketBallTracker(video_path, model_path, pitch_image_path)
+#     tracker.define_homography()
+#     tracker.process_video()
+#     tracker.map_trajectory_to_pitch()
 

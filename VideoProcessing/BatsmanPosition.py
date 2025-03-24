@@ -43,7 +43,7 @@ class BatsmanHandednessDetector:
 
                 cv2.putText(frame, f"Batsman: {final_handedness}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-            cv2.imshow('Batsman Handedness', frame)
+            #cv2.imshow('Batsman Handedness', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -66,8 +66,8 @@ class BatsmanHandednessDetector:
             else:
                 return "Left-handed"
 
-if __name__ == "__main__":
-    video_path = "Video.mp4"
-    detector = BatsmanHandednessDetector(video_path)
-    detector.process_video()
+# if __name__ == "__main__":
+#     video_path = "NetPractice6.mp4"
+#     detector = BatsmanHandednessDetector(video_path)
+#     detector.process_video()
 
