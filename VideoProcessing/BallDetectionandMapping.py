@@ -85,7 +85,7 @@ class CricketBallTracker:
             frame_path = f'{self.frame_dir}/{frame_count}.png'
             cv2.imwrite(frame_path, frame)
 
-            # ✅ Run pitch detection on the first frame
+           
             if frame_count == 0 and not pitch_detected:
                 detected_coords = self.detect_pitch_from_first_frame()
                 if detected_coords:
@@ -96,7 +96,7 @@ class CricketBallTracker:
                 else:
                     print("Pitch detection failed.")
 
-            # 🎯 Ball detection starts
+            
             results = self.ball_model(frame)
             detected_balls = []
 
@@ -139,28 +139,9 @@ class CricketBallTracker:
         # Pitch dimensions
         pitch_height, pitch_width = pitch.shape[:2]
 
-        # Find the lowest bounce point (smallest Y = top of pitch)
-        lowest_bounce_idx = None
-        min_y = float('inf')  # Start with a large value to find the smallest Y-coordinate
-
-        # Check mapped points before clipping
-        for i, point in enumerate(mapped_points[0]):
-            x, y = point[0], point[1]
-            # Only consider points that are within pitch bounds before clipping
-            if 0 <= x < pitch_width and 0 <= y < pitch_height:
-                if y < min_y:  # Find the smallest Y (the lowest bounce point)
-                    min_y = y
-                    lowest_bounce_idx = i
-
-        if lowest_bounce_idx is None:
-            print("No valid bounce point found within pitch boundaries!")
-            return
-
         # Clip points to stay within the pitch image
         mapped_points[0][:, 0] = np.clip(mapped_points[0][:, 0], 0, pitch_width - 1)  # X-axis
         mapped_points[0][:, 1] = np.clip(mapped_points[0][:, 1], 0, pitch_height - 1)  # Y-axis
-
-        print(f"Lowest Bounce Point Index: {lowest_bounce_idx}, Y-Coordinate: {min_y}")
 
         # Debugging: Print all mapped points
         print("All Mapped Points:")
@@ -173,11 +154,7 @@ class CricketBallTracker:
         # Mark trajectory points
         for i, point in enumerate(mapped_points[0]):
             x, y = int(point[0]), int(point[1])
-            if i == lowest_bounce_idx:
-                color = (0, 255, 255)  # Yellow for lowest bounce
-                print(f"Marking lowest bounce point at: ({x}, {y}) in yellow")
-            else:
-                color = (0, 0, 255)  # Red for other points
+            color = (0, 0, 255)  # Red for all points
 
             cv2.circle(pitch, (x, y), 5, color, -1)
 
@@ -185,17 +162,15 @@ class CricketBallTracker:
             if i > 0:
                 prev_point = mapped_points[0][i - 1]
                 prev_x, prev_y = int(prev_point[0]), int(prev_point[1])
-                cv2.line(pitch, (prev_x, prev_y), (x, y), (0, 255, 0), 2)  # Green line for trajectory
+                cv2.line(pitch, (prev_x, prev_y), (x, y), (0, 0, 255), 5) # Red Line Trajectory
 
-        
-        #cv2.imshow('Mapped Trajectory on Pitch', pitch)
         cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    video_path = "NetPractice3.mp4"
+    video_path = "videos/NetPractice3.mp4"
     ball_model_path = "runs/detect/train3/weights/best.pt"
     pitch_model_path = "runs/pitch_detection/best.pt"
     pitch_image_path = "pitch.jpeg"

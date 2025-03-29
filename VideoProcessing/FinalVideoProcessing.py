@@ -2,24 +2,28 @@ import os
 import cv2
 import numpy as np
 from BallDetectionandMapping import CricketBallTracker
-from BatsmanPosition import BatsmanHandednessDetector
+from BatsmanPosition import BatsmanPosition
+from BallSpeed import BallSpeed
 
 class FinalVideoProcessing:
 
-    def __init__(self, video_path, model_path, pitch_model_path,pitch_image):
+    def __init__(self, video_path, model_path, pitch_model_path, pitch_image):
         self.video_path = video_path
         self.model_path = model_path
         self.pitch_model_path = pitch_model_path
         self.pitch_image_path = pitch_image
         self.ball_tracker = CricketBallTracker(video_path, model_path, pitch_model_path, pitch_image)
+        self.speed_tracker = BallSpeed(video_path, model_path, scale_factor=0.05, speed_threshold=160)
         print("\nInitializing ball tracking...")
-
-        #self.ball_tracker.define_homography()  
 
     def process_video(self):
         # Call process_video from CricketBallTracker to track ball and save trajectory points
         print("\nProcessing video...")
         self.ball_tracker.process_video()
+
+        print("\nCalculating ball speed...")
+        self.speed_tracker.process_video_for_speed()
+        print("Ball speed data saved to BallSpeed.txt")
 
     def map_trajectory(self):
         # Map the trajectory onto the pitch and save the bounce coordinates
@@ -87,7 +91,7 @@ class BallLength:
     def determine_pitch_length(self):
         pitch_zones = {
             "yorker": [(54, 57), (192, 57), (54, 95), (192, 90)],
-            "full": [(54, 96), (192, 95), (54, 131), (192, 130)],
+            "full": [(54, 96), (192, 95), (54, 132), (192, 130)],
             "good length": [(54, 132), (192, 135), (54, 201), (192, 195)],
             "short pitch": [(54, 210), (192, 200), (54, 300), (192, 300)],
             "bouncer": [(54, 317), (192, 302), (54, 400), (192, 400)]
@@ -132,13 +136,13 @@ def moving_average(data, window_size):
 
 
 if __name__ == "__main__":
-    video_path =  "videos/NetPractice6.mp4" 
+    video_path =  "videos/NetPractice9.mp4" 
     model_path = os.path.join('runs', 'detect', 'train3', 'weights', 'best.pt') 
     pitch_model_path = os.path.join('runs','pitch_detection','best.pt')
     pitch_image_path = 'pitch.jpeg'  
     
     # Initialize FinalVideoProcessing
-    final_processor = FinalVideoProcessing(video_path, model_path,pitch_model_path ,pitch_image_path)
+    final_processor = FinalVideoProcessing(video_path, model_path, pitch_model_path, pitch_image_path)
     
     # Call process_video() to track the ball and save the trajectory points
     final_processor.process_video()
@@ -157,23 +161,29 @@ if __name__ == "__main__":
     bounce_point, bounce_index = final_processor.detect_bounce_point(coordinates)
     ball_position = bounce_point
 
-    # Detect batsman's handedness using BatsmanHandednessDetector
-    detector = BatsmanHandednessDetector(video_path)
-    detector.process_video()
-    batsman_hand = "right" if detector.final_handedness == "Right-handed" else "left"
+    
+    batsman_position = BatsmanPosition()
+
+    batsman_position.mark_batsman_position()
+
+    with open('BatsmanPosition.txt', 'r') as file:
+        coords = file.readline().strip().split(', ')
+        batsman_coords = tuple(map(int, coords))
+
+    batsman_position.map_batsman_to_pitch(batsman_coords, 'pitch.jpeg')
+
 
     # Create BallLine and BallLength instances
-    ball_line = BallLine(ball_position, batsman_hand)
+    ball_line = BallLine(ball_position, batsman_position.batsman_hand)
     pitch_line = ball_line.determine_pitch_line()
 
     ball_length = BallLength(ball_position)
     pitch_length = ball_length.determine_pitch_length()
 
-    print(f"Batsman Position: {batsman_hand.capitalize()}")
+    print(f"Batsman Position: {batsman_position.batsman_hand}")
     print(f"Ball Line: {pitch_line}")
     print(f"Ball Length: {pitch_length}")
 
-    # Read speeds from BallSpeed.txt file
     ball_speeds_mps = read_speeds_from_file('BallSpeed.txt')
 
     # Convert m/s to km/h (multiply by 3.6)

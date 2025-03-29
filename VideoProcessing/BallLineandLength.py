@@ -73,36 +73,36 @@ def read_coordinates_from_file(filename):
             coordinates.append((x, y))
     return coordinates
 
-# if __name__ == "__main__":
-#     image = cv2.imread('pitch.jpeg')
-#     if image is None:
-#         raise Exception("Failed to load the image. Check the file path!")
+if __name__ == "__main__":
+    image = cv2.imread('pitch.jpeg')
+    if image is None:
+        raise Exception("Failed to load the image. Check the file path!")
 
-#     coordinates = read_coordinates_from_file('bounce_coords.txt')
-#     bounce_point, bounce_index = detect_bounce_point(coordinates)
-#     ball_position = bounce_point
+    coordinates = read_coordinates_from_file('bounce_coords.txt')
+    bounce_point, bounce_index = detect_bounce_point(coordinates)
+    ball_position = bounce_point
 
-#     # Use BatsmanHandednessDetector to detect handedness
-#     video_path = "NetPractice6.mp4"
-#     detector = BatsmanHandednessDetector(video_path)
-#     detector.process_video()
-#     batsman_hand = "right" if detector.final_handedness == "Right-handed" else "left"
+    # Use BatsmanHandednessDetector to detect handedness
+    video_path = "NetPractice6.mp4"
+    detector = BatsmanHandednessDetector(video_path)
+    detector.process_video()
+    batsman_hand = "right" if detector.final_handedness == "Right-handed" else "left"
 
-#     # Using the BallLine and BallLength classes
-#     ball_line = BallLine(ball_position, batsman_hand)
-#     pitch_line = ball_line.determine_pitch_line()
+    # Using the BallLine and BallLength classes
+    ball_line = BallLine(ball_position, batsman_hand)
+    pitch_line = ball_line.determine_pitch_line()
 
-#     ball_length = BallLength(ball_position)
-#     pitch_length = ball_length.determine_pitch_length()
+    ball_length = BallLength(ball_position)
+    pitch_length = ball_length.determine_pitch_length()
 
-#     print("Trajectory points from 'bounce_coords.txt':")
-#     for i, coord in enumerate(coordinates):
-#         print(f"Point {i}: {coord}")
+    print("Trajectory points from 'bounce_coords.txt':")
+    for i, coord in enumerate(coordinates):
+        print(f"Point {i}: {coord}")
 
-#     print(f"\nDetected bounce point: {bounce_point} at index {bounce_index}")
-#     print(f"Ball position (detected bounce point): {ball_position}")
-#     print(f"Pitch line: {pitch_line}\nPitch length: {pitch_length}")
+    print(f"\nDetected bounce point: {bounce_point} at index {bounce_index}")
+    print(f"Ball position (detected bounce point): {ball_position}")
+    print(f"Pitch line: {pitch_line}\nPitch length: {pitch_length}")
 
-#     cv2.circle(image, (int(ball_position[0]), int(ball_position[1])), 5, (0, 0, 255), -1)
-#     cv2.waitKey(0)
-#     cv2.destroyAllWindows()
+    cv2.circle(image, (int(ball_position[0]), int(ball_position[1])), 5, (0, 0, 255), -1)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
