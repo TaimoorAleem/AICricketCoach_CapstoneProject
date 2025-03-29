@@ -7,10 +7,10 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies required for OpenCV & Mediapipe
+# Install system dependencies required for OpenCV & Mediapipe and Google Cloud SDK
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
     libglib2.0-0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the requirements file to the working directory
@@ -26,6 +26,4 @@ COPY . /app/
 EXPOSE 8080
 
 # Command to run the application
-#CMD ["python", "app.py"]
 CMD ["gunicorn", "--timeout", "120", "--workers", "4", "--bind", "0.0.0.0:8080", "app:app"]
-

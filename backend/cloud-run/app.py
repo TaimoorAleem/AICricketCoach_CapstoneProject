@@ -4,9 +4,10 @@ import time
 import json
 from datetime import timedelta
 import requests
-from firebase_admin import credentials, auth, firestore, storage
+from firebase_admin import credentials, auth, firestore, storage, messaging
 from flask import Flask, request, jsonify, send_file
 from io import BytesIO
+#from google.cloud import pubsub_v1
 
 
 # Initialize Firebase Admin SDK
@@ -25,13 +26,16 @@ app = Flask(__name__)
 # Firestore client
 db = firestore.client()
 
+# pub_client = pubsub_v1.PublisherClient()
+# sub_client = pubsub_v1.SubscriberClient()
+
 
 
 @app.route('/')
 def home():
     return jsonify({"status": "success", "message": "Welcome to the app!"}), 200
 
-@app.route('/signup', methods=['POST'])
+@app.route('/auth/signup', methods=['POST'])
 def sign_up():
     try:
         # Get request data
@@ -39,14 +43,15 @@ def sign_up():
         email = data['email']
         uid = data['password']
         role = data['role']
+        # if role == 'Coach':
+        #     create_coach_topic(uid)
 
-        # Add the user to Firestore
         user_data = {
             "email": email,
             "uid": uid,
-            "role": role
-        }
+            "role": role}
         db.collection('Users').document(uid).set(user_data)
+
 
         return jsonify({
             "status": "success",
@@ -61,7 +66,7 @@ def sign_up():
             "message": str(e)
         }), 500
 
-@app.route('/login', methods=['POST'])
+@app.route('/auth/login', methods=['POST'])
 def log_in():
     try:
         # Get request data
@@ -99,7 +104,7 @@ def log_in():
             "message": uid
         }), 500
 
-@app.route('/get-players', methods=['GET'])
+@app.route('/coaches/get-players', methods=['GET'])
 def get_players():
     try:
         uid = request.args.get('uid')
@@ -140,8 +145,109 @@ def get_players():
             "message": str(e)
         }), 500
 
+@app.route('/coaches/get-open-players', methods=['GET'])
+def get_open_players():
+    try:
+        all_users = db.collection('Users').stream()
+        all_players =[]
+        open_players = []
+        for user_doc in all_users:
+            user_role = user_doc.to_dict().get('role')
+            if user_role == 'Player':
+                all_players.append(user_doc.to_dict())
+        for player in all_players:
+            if 'coach_id' not in player:
+                open_players.append(player)
 
-@app.route('/edit-profile-picture', methods=['POST'])
+        return jsonify({
+            "status" : "success",
+            "message" : "Retrieved all open players",
+            "players" : open_players
+        }),200
+    except Exception as e:
+        return jsonify({
+            "status" :"error",
+            "message" : str(e)
+        })
+
+@app.route('/coaches/create-pairing', methods=['POST'])
+def create_pairing():
+    try:
+        data = request.get_json()
+        if 'uid' not in data:
+            return jsonify({"status": "error", "message": "Coach Id required."}), 400
+        uid = data['uid']
+        coach_doc_ref = db.collection('Users').document(uid)
+        coach_doc = coach_doc_ref.get()
+
+        if not coach_doc.exists:
+            return jsonify({"status": "error", "message": f"Coach with UID {uid} does not exist."}), 404
+
+        if 'player_id' not in data:
+            return jsonify({"status": "error", "message": "Player Id required."}), 400
+        player_id = data['player_id']
+        player_doc_ref = db.collection('Users').document(player_id)
+        player_doc = player_doc_ref.get()
+
+        if not player_doc.exists:
+            return jsonify({"status": "error", "message": f"Player with UID {player_id} does not exist."}), 404
+
+        player_doc_ref.update({"coach_id": uid})
+
+        pairing_ref = coach_doc_ref.collection("Players").document(player_id)
+        pairing_ref.set({"uid" : player_id})
+
+
+
+        return jsonify({
+            "status": "success",
+            "message": "Pairing created successfuly."
+        }), 200
+
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+# ##@app.route('/create-a-topic', methods=['POST'])
+# def create_coach_topic(coach_id):
+#     try:
+#         # data = request.get_json()
+#         # coach_id = data['coach_id']
+#         topic_name = f'projects/aicc-proj-1/topics/coach_{coach_id}'
+#         pub_client.create_topic(name=topic_name)
+#         subscription_name = f'projects/aicc-proj-1/subscriptions/coach_{coach_id}_subscription'
+
+#         sub_client.create_subscription(
+#             name=subscription_name,
+#             topic=topic_name
+#         )
+#         return "success"
+
+#     except Exception as e:
+#         return str(e)
+
+# ##@app.route('/publish-to-topic', methods=['POST'])
+# def publish_to_topic(coach_id, uid):
+#     try:
+#         # data = request.get_json()
+#         # coach_id = data['coach_id']
+#         # uid = data['uid']
+#         topic_name = f'projects/aicc-proj-1/topics/coach_{coach_id}'
+#         player_ref = db.collection('Users').document(uid)
+#         player_name= f"{player_ref.get().to_dict().get('firstName')} {player_ref.get().to_dict().get('lastName')}"
+#         message = f"{player_name} has uploaded a new delivery."
+#         data = message.encode("utf-8")
+#         pub_client.publish(topic_name, data=data)
+#         return "success"
+
+#     except Exception as e:
+#         return str(e)
+
+
+@app.route('/users/edit-profile-picture', methods=['POST'])
 def edit_profile_picture():
     try:
         if 'file' not in request.files:
@@ -175,7 +281,7 @@ def edit_profile_picture():
             "message" : str(e)
         })
 
-@app.route('/get-profile-picture', methods=['GET'])
+@app.route('/users/get-profile-picture', methods=['GET'])
 def get_profile_picture():
     try:
         blob_url = request.args.get('url')
@@ -190,9 +296,9 @@ def get_profile_picture():
 
         return send_file(
             BytesIO(image_data),
-            mimetype='image/jpg',  # Adjust the MIME type to match the file format (e.g., 'image/png')
-            as_attachment=True,    # Set to True if you want to force download
-            download_name=blob_path # Suggested file name for download (optional)
+            mimetype='image/jpg',
+            as_attachment=True,
+            download_name=blob_path
         )
     except Exception as e:
         return jsonify({
@@ -200,7 +306,7 @@ def get_profile_picture():
             "message": str(e)
         }), 500
 
-@app.route('/edit-profile', methods=['POST'])
+@app.route('/users/edit-profile', methods=['POST'])
 def edit_profile():
     try:
         data = request.get_json()
@@ -237,7 +343,7 @@ def edit_profile():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route('/get-user', methods=['GET'])
+@app.route('/users/get-profile', methods=['GET'])
 def get_user():
     try:
         uid = request.args.get('uid')
@@ -264,9 +370,10 @@ def get_user():
             "message": str(e)
         }), 500
 
-@app.route('/upload-video', methods=["POST"])
+@app.route('/videos/upload', methods=["POST"])
 def upload_video():
     try:
+        video_processed = False
         if 'file' not in request.files:
             return jsonify({"status": "error", "message": "No file found."}), 400
 
@@ -278,7 +385,7 @@ def upload_video():
         fname = file.filename
 
 
-        blob = bucket.blob(f'uploads/{fname}')
+        blob = bucket.blob(f'videos/{fname}')
         blob.upload_from_file(file)
 
         signed_url = blob.generate_signed_url(expiration=timedelta(days=5*365), method='GET')
@@ -292,10 +399,10 @@ def upload_video():
 
 
 
-        ml_url = "https://shot-recommendation-api-607955695192.us-central1.run.app/predict"
+
+        ml_url = "https://shot-recommendation-api-857244658015.us-central1.run.app/predict"
         payload = {
             "Ball Speed": response['BallSpeed'],
-            "Ball Height": response['BallHeight'],
             "Batsman Position": response['BatsmanPosition'],
             "Ball Horizontal Line": "middle stump",
             "Ball Length": "Yorker"
@@ -305,7 +412,9 @@ def upload_video():
         return jsonify({
             "status" : "success",
             "message" : "Delivery video uploaded successfully",
-            "data" : shot_rec.json(),
+            "ballCharacteristics" : response,
+            "idealShot" : shot_rec.json(),
+            "videoUrl" : signed_url,
         }),200
 
     except Exception as e:
@@ -314,7 +423,7 @@ def upload_video():
             "message" : str(e)
         })
 
-@app.route('/delete-account', methods=["POST"])
+@app.route('/users/delete-account', methods=["POST"])
 def delete_account():
     try:
         data = request.get_json()
@@ -347,10 +456,42 @@ def delete_account():
 
     except Exception as e:
         return jsonify({
-            "status": "error"
-        }), 500
+            "status": "error",
+            "message" : str(e)
+        })
 
-@app.route('/add-delivery', methods=["POST"])
+def send_notification(topic, uid, coach_id, session_id, delivery_id):
+    try:
+        player_ref = db.collection('Users').document(uid)
+        player_name= f"{player_ref.get().to_dict().get('firstName')} {player_ref.get().to_dict().get('lastName')}"
+        coach_ref = db.collection('Users').document(coach_id)
+        coach_name = coach_ref.get().to_dict().get('lastName')
+        if (topic == 'feedback-added-topic'):
+            registration_token = player_ref.get().to_dict().get('fcm_token')
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title="New Feedback",
+                    body=f"Coach {coach_name} has reviewed your delivery."
+                ),
+                token=registration_token,
+            )
+        elif (topic == 'delivery-uploaded-topic'):
+            registration_token = coach_ref.get().to_dict().get('fcm_token')
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title="New Delivery",
+                    body=f"Player {player_name} has posted a new delivery."
+                ),
+                token=registration_token,)
+
+        response = messaging.send(message)
+
+        return response
+
+    except Exception as e:
+        raise Exception(f"Error sending notification: {str(e)}")
+
+@app.route('/deliveries/create', methods=["POST"])
 def upload_delivery():
     try :
         data = request.get_json()
@@ -370,16 +511,25 @@ def upload_delivery():
         user_ref = db.collection('Users').document(uid)
         session_ref = user_ref.collection('sessions').document(session)
         delivery_ref = session_ref.collection('deliveries').add({
-            'speed': delivery['speed'],
-            'bounceHeight': delivery['bounceHeight'],
+            'ballSpeed': delivery['ballSpeed'],
             'ballLength': delivery['ballLength'],
-            'horizontalPosition': delivery['horizontalPosition'],
-            'rightHandedBatsman': delivery['rightHandedBatsman'],
-            'accuracy': delivery['accuracy'],
-            'executionRating': delivery['executionRating'],
+            'horizontalLine': delivery['horizontalLine'],
+            'batsmanPosition': delivery['batsmanPosition'],
             'idealShot': delivery['idealShot'],
             'videoUrl' : delivery['videoUrl']
         })
+        delivery_doc_ref = delivery_ref[1]
+        delivery_doc_ref.update({'deliveryId': delivery_doc_ref.id})
+
+
+        coach_id = user_ref.get().to_dict().get('coach_id', None)
+        if coach_id != None:
+            topic ='delivery-uploaded-topic'
+            send_notification(topic, uid, coach_id, session, delivery_doc_ref.id)
+
+            # publish_to_topic(coach_id, uid)
+
+
 
         return jsonify({
             "data" :{
@@ -395,7 +545,64 @@ def upload_delivery():
             "message" : str(e)
         })
 
-@app.route('/get-delivery', methods=["GET"])
+@app.route('/deliveries/feedback/add', methods=['POST'])
+def add_feedback():
+    try:
+        data = request.get_json()
+        player_id = data['playerId']
+        session_id = data['sessionId']
+        delivery_id = data['deliveryId']
+
+        player = db.collection('Users').where('uid', '==', player_id).get()
+        if not player:
+            return jsonify({"status": "error", "message": f"User with UID {player_id} does not exist."}), 404
+
+        user_ref = db.collection('Users').document(player_id)
+        session_ref = user_ref.collection('sessions').document(session_id)
+        delivery_ref = session_ref.collection('deliveries').document(delivery_id)
+        coach_id = user_ref.get().to_dict().get('coach_id')
+
+
+        delivery_doc = delivery_ref.get()
+        if not delivery_doc.exists:
+            return jsonify({"status": "error", "message": f"Delivery with ID {delivery_id} does not exist."}), 404
+
+        update_data = {}
+        if 'battingRating' in data:
+            update_data['battingRating'] = data['battingRating']
+        if 'feedback' in data:
+            update_data['feedback'] = data['feedback']
+
+        if not update_data:
+            return jsonify({"status": "error", "message": "No feedback or rating provided."}), 400
+
+
+        delivery_ref.update(update_data)
+
+        # Send notification after feedback is added
+        message_id = send_notification(
+            topic='feedback-added-topic',
+            uid=player_id,
+            coach_id=coach_id,
+            session_id=session_id,
+            delivery_id=delivery_id
+        )
+
+        return jsonify({
+            "status": "success",
+            "message" : f'Feedback added successfully.',
+            "data" : message_id
+        }), 200
+
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+@app.route('/deliveries/get', methods=["GET"])
 def get_delivery():
     try:
 
@@ -435,7 +642,7 @@ def get_delivery():
             "message": str(e)
         }), 500
 
-@app.route('/create-session', methods=['POST'])
+@app.route('/sessions/create', methods=['POST'])
 def upload_session():
     try :
         data = request.get_json()
@@ -445,11 +652,11 @@ def upload_session():
             return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
 
-        session = data['session']
+
         user_ref = db.collection('Users').document(uid)
 
         session_ref = user_ref.collection('sessions').add({
-            'date' : session['date'],
+            'date' : data['date'],
             'deliveries' : {},
             'performance' : {}
         })
@@ -458,32 +665,11 @@ def upload_session():
         doc_ref.update({"sessionId": doc_ref.id})
         sessionId = doc_ref.id
 
-
-
-        delivery = session['delivery']
-
-        delivery_ref = session_ref[1].collection('deliveries').add({
-            'speed': delivery['speed'],
-            'bounceHeight': delivery['bounceHeight'],
-            'ballLength': delivery['ballLength'],
-            'horizontalPosition': delivery['horizontalPosition'],
-            'rightHandedBatsman': delivery['rightHandedBatsman'],
-            'accuracy': delivery['accuracy'],
-            'executionRating': delivery['executionRating'],
-            'idealShot': delivery['idealShot'],
-            'videoUrl' : delivery['videoUrl']
-        })
-
-        doc_ref = delivery_ref[1]
-        doc_ref.update({"deliveryId": doc_ref.id})
-        deliveryId = delivery_ref[1].id
-
         return jsonify({
             "status": "success",
-            "message": f'Session and Delivery created successfully.',
+            "message": f'Session created successfully.',
             "data" :{
                 "sessionId" : sessionId,
-                "deliveryId" : deliveryId
             }
         }), 200
 
@@ -493,7 +679,7 @@ def upload_session():
             "message" : str(e)
         })
 
-@app.route('/get-sessions', methods=['GET'])
+@app.route('/sessions/get', methods=['GET'])
 def get_sessions():
     try:
 
@@ -564,7 +750,7 @@ def get_sessions():
             "message": str(e)
         }), 500
 
-@app.route('/get-performance-history', methods=['GET'])
+@app.route('/performance/get', methods=['GET'])
 def get_performance_history():
 
     try:
@@ -588,23 +774,19 @@ def get_performance_history():
                     #performance for the session is yet to be calculated
 
                     avg_speed = 0
-                    avg_accuracy = 0
                     avg_exec_rating = 0
                     count = 0
 
                     for delivery_ref in deliveries:
                         delivery = delivery_ref.to_dict()
                         count = count+1
-                        avg_speed = avg_speed + delivery['speed']
-                        avg_accuracy = avg_accuracy + delivery['accuracy']
+                        avg_speed = avg_speed + delivery['ballSpeed']
                         avg_exec_rating = avg_exec_rating + delivery['executionRating']
 
                     avg_speed = avg_speed / count
-                    avg_accuracy = avg_accuracy / count
                     avg_exec_rating = avg_exec_rating / count
                     perf_ref = session_ref.collection('performance').add({
                         "averageSpeed": avg_speed,
-                        "averageAccuracy": avg_accuracy,
                         "averageExecutionRating" : avg_exec_rating
                     })
 
