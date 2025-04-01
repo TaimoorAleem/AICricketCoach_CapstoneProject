@@ -126,7 +126,7 @@ class UserProfileServiceImpl extends UserProfileService {
       });
 
       var response =
-          await sl<DioClient>().post("/edit-profile-picture", data: formData);
+          await sl<DioClient>().post(ApiUrl.editPfp, data: formData);
       if (response.statusCode == 200) {
         sharedPreferences.setString('pfpUrl', response.data['url']);
         return Right(response.data['url']);

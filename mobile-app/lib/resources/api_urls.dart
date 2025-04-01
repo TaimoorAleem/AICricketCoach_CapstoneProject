@@ -2,10 +2,11 @@ class ApiUrl {
 
   static const baseURL = 'https://my-app-image-174827312206.us-central1.run.app/';
 
-  static const signup = 'signup';
-  static const login = 'login';
-  static const editProfile = 'edit-profile';
-  static const getUser = 'get-user';
-  static const getProfilePicture = 'get-profile-picture';
-  static const deleteAccount = 'delete-account';
+  static const signup = 'auth/signup';
+  static const login = 'auth/login';
+  static const editProfile = 'users/edit-profile';
+  static const getUser = 'users/get-profile';
+  static const getProfilePicture = 'users/get-profile-picture';
+  static const deleteAccount = 'users/delete-account';
+  static const editPfp = 'users/edit-profile-picture';
 }

@@ -51,7 +51,7 @@ class AuthApiServiceImpl extends AuthService {
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
       sharedPreferences.setString('token', idToken);
-      await saveFCMToken(response.data.uid);
+      await saveFCMToken(response.data['uid']);
 
       return Right(response.data);
 
