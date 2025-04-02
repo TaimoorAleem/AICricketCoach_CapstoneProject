@@ -1,3 +1,5 @@
+import 'package:ai_cricket_coach/resources/api_urls.dart';
+
 import '../../../../resources/dio_client.dart';
 
 class SessionApiService {
@@ -7,7 +9,7 @@ class SessionApiService {
 
   Future<Map<String, dynamic>> fetchSessions(String playerUid) async {
     final response = await dioClient.get(
-      'get-sessions',
+      ApiUrl.getSessions,
       queryParameters: {'uid': playerUid},
     );
     return response.data as Map<String, dynamic>;

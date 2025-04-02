@@ -27,7 +27,7 @@ class UserProfileServiceImpl extends UserProfileService {
           await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       var response = await sl<DioClient>()
-          .get(ApiUrl.getUser, queryParameters: {"uid": uid});
+          .get(ApiUrl.getUserProfile, queryParameters: {"uid": uid});
 
       return Right(response.data);
     } on DioException catch (e) {
@@ -39,7 +39,7 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> deleteAccount(DeleteAccountReqParams params) async {
     try {
       var userData = await sl<DioClient>()
-          .get(ApiUrl.getUser, queryParameters: {"uid": params.uid});
+          .get(ApiUrl.getUserProfile, queryParameters: {"uid": params.uid});
 
       var email = userData.data['data']['email'];
 
@@ -122,7 +122,7 @@ class UserProfileServiceImpl extends UserProfileService {
       });
 
       var response =
-          await sl<DioClient>().post("/edit-profile-picture", data: formData);
+          await sl<DioClient>().post(ApiUrl.editProfilePicture, data: formData);
       if (response.statusCode == 200) {
         sharedPreferences.setString('pfpUrl', response.data['url']);
         return Right(response.data['url']);

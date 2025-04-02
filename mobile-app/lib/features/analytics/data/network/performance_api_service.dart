@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/resources/api_urls.dart';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
@@ -11,7 +12,7 @@ class PerformanceApiService {
   Future<Either<String, Map<String, dynamic>>> fetchPerformanceHistory({required List<String> playerUids}) async {
     try {
       final response = await dioClient.get(
-        'get-performance-history',
+        ApiUrl.getPerformance,
         queryParameters: {
           'uid_list': jsonEncode(playerUids),
         },
