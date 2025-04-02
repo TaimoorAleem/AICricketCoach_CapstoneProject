@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:dartz/dartz.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,14 +13,19 @@ import '../resources/service_locator.dart';
 import 'features/analytics/presentation/bloc/AuthCubit.dart';
 import 'features/authentication/presentation/pages/loading_page.dart';
 import '../resources/app_theme.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   await requestNotifPermissions();
+  NotifService notifService = NotifService();
+  await notifService.initLocalNotifFirebase();
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) { notifService.showNotifBanner(message);});
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
   // Disable auto-init to prevent auto token refresh
@@ -25,6 +34,7 @@ Future<void> main() async {
   setupServiceLocator();
   runApp(const MyApp());
 }
+
 Future<void> requestNotifPermissions() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   NotificationSettings settings = await messaging.requestPermission(
@@ -33,39 +43,87 @@ Future<void> requestNotifPermissions() async {
     sound: true,
   );
 
-  if(settings.authorizationStatus == AuthorizationStatus.authorized){
+  if (settings.authorizationStatus == AuthorizationStatus.authorized) {
     debugPrint("User granted permissions");
-  }
-  else{
+  } else {
     debugPrint("User denied permissions");
   }
 }
 
-
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("Background message received: ${message.messageId}");
+  NotifService notifService = NotifService();
+  notifService.showNotifBanner(message);
 }
 
+class NotifService {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(
-            statusBarColor: Colors.transparent
-        )
+  // Initialize local notifications
+  Future<void> initLocalNotifFirebase() async {
+    var androidInit = const AndroidInitializationSettings('@drawable/logo');
+    var initSetting = InitializationSettings(
+        android: androidInit
     );
-    return BlocProvider(
-      create: (context) => AuthCubit()..appStarted(),
-      child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.appTheme,
-          home: const LoadingPage()
-      ),
+
+    await _flutterLocalNotificationsPlugin.initialize(initSetting,
+        onDidReceiveNotificationResponse: (NotificationResponse response) {
+          debugPrint('Notification tapped! Payload: ${response.payload}');
+        });
+
+
+  }
+
+  // Show the notification banner
+  Future<void> showNotifBanner(RemoteMessage message) async {
+    // Create an Android Notification Channel
+    const AndroidNotificationChannel androidNotificationChannel =
+    AndroidNotificationChannel(
+      'high_importance_channel',
+      'High Importance Notifications',
+      description: 'This channel is used for important notifications.',
+      importance: Importance.high,
+    );
+
+    // Initialize Notification Details
+    AndroidNotificationDetails androidNotificationDetails = AndroidNotificationDetails(
+      androidNotificationChannel.id,
+      androidNotificationChannel.name,
+      channelDescription: androidNotificationChannel.description,
+      priority: Priority.high, // Make sure this is high
+      importance: Importance.high, // Also, set importance to high
+      ticker: 'ticker',
+      playSound: true,
+    );
+
+    // Show the notification
+    await _flutterLocalNotificationsPlugin.show(
+      Random.secure().nextInt(10000), // Random ID for the notification
+      message.notification?.title ?? 'New Notification',
+      message.notification?.body ?? '',
+      NotificationDetails(android: androidNotificationDetails),
     );
   }
 }
 
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+    );
+
+    return BlocProvider(
+      create: (context) => AuthCubit()..appStarted(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.appTheme,
+        home: const LoadingPage(),
+      ),
+    );
+  }
+}

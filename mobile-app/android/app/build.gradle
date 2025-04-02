@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.ai_cricket_coach"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
