@@ -339,7 +339,7 @@ class UserProfile extends StatelessWidget {
                                       Navigator.of(context)
                                           .pop(); // Close dialog
                                       var done = await sl<LogOutUseCase>().call();// Call logout
-                                      if (done==true){AppNavigator.pushAndRemove(context, LogInPage());}
+                                      if (done==true && context.mounted){AppNavigator.pushAndRemove(context, LogInPage());}
                                     },
                                     child: const Text("Confirm",
                                         style: TextStyle(color: Colors.red)),

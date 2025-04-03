@@ -30,9 +30,14 @@ class LogInPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              _welcomeHeading(),
+              const SizedBox(height: 100),
+              Image.asset(
+                'lib/images/logo.png', // Path to your logo
+                height: 120, // Adjust size as needed
+                width: 120,
+              ),
               const SizedBox(height: 20),
+              _welcomeHeading(),
               const SizedBox(height: 20),
               _loginContainer(context),
               const SizedBox(height: 20),
@@ -47,8 +52,9 @@ class LogInPage extends StatelessWidget {
 
   Widget _welcomeHeading() {
     return const Text(
-      'Welcome to AI Cricket Coach',
+      'Welcome Back!',
       style: TextStyle(
+        fontFamily: 'Nunito',
         fontWeight: FontWeight.bold,
         fontSize: 26,
         color: AppColors.primary,
@@ -61,19 +67,16 @@ class LogInPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _loginText(),
           const SizedBox(height: 20),
-          _fieldLabel('Email'),
           const SizedBox(height: 5),
           _emailField(),
           const SizedBox(height: 20),
-          _fieldLabel('Password'),
           const SizedBox(height: 5),
           _passwordField(),
           const SizedBox(height: 30),
@@ -107,9 +110,26 @@ class LogInPage extends StatelessWidget {
   Widget _emailField() {
     return TextField(
       controller: _emailCon,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Email',
-        border: OutlineInputBorder(),
+        hintStyle: const TextStyle(
+            fontFamily: 'Nunito',
+            color: AppColors.primary,
+            fontWeight: FontWeight.w900),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -118,12 +138,30 @@ class LogInPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       obscureText: true,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Password',
-        border: OutlineInputBorder(),
+        hintStyle: const TextStyle(
+            fontFamily: 'Nunito',
+            color: AppColors.primary,
+            fontWeight: FontWeight.w900),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Make sure all fields match
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        ),
       ),
     );
   }
+
 
   Widget _loginButton(BuildContext context) {
     return Center(
@@ -160,6 +198,7 @@ class LogInPage extends StatelessWidget {
           TextSpan(
             text: 'Forgot Password?',
             style: const TextStyle(
+              fontFamily: 'Nunito',
               color: Colors.blue,
               fontWeight: FontWeight.bold,
             ),
@@ -182,12 +221,14 @@ class LogInPage extends StatelessWidget {
         children: [
           const TextSpan(
             text: "Don't have an account? ",
+            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w900)
           ),
           TextSpan(
             text: 'Sign Up',
             style: const TextStyle(
+              fontFamily: 'Nunito',
               color: Colors.blue,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w900,
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {

@@ -1,6 +1,6 @@
 class ApiUrl {
 
-  static const baseURL = 'https://my-app-image-174827312206.us-central1.run.app/';
+  static const baseURL = 'https://aicc-gateway2-28bbo1fy.uc.gateway.dev/';
 
   static const signup = 'auth/signup';
   static const login = 'auth/login';

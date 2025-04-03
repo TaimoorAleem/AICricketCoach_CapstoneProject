@@ -96,11 +96,16 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-VariableFont_wght.ttf
+          weight: 700
   assets:
     - lib/images/logo.png
     - lib/images/pfp.jpg
     - lib/images/default-pfp.jpg
+    - assets/APIKey.json
 
 
   # To add assets to your application, add an assets section, like this:
