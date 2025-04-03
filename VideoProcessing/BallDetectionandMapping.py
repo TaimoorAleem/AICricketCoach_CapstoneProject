@@ -33,7 +33,7 @@ class CricketBallTracker:
             np.save('homography_matrix.npy', self.homography_matrix)
             print("Homography matrix saved!")
         else:
-            print("❌ Error: Source points not defined!")
+            print("Error: Source points not defined!")
 
     def detect_pitch_from_first_frame(self):
         """ Runs pitch detection on the first frame to extract coordinates. """
@@ -165,16 +165,4 @@ class CricketBallTracker:
                 cv2.line(pitch, (prev_x, prev_y), (x, y), (0, 0, 255), 5) # Red Line Trajectory
 
         cv2.imwrite('mapped_trajectory_on_pitch.png', pitch)
-        cv2.waitKey(0)
         cv2.destroyAllWindows()
-
-
-if __name__ == "__main__":
-    video_path = "videos/NetPractice3.mp4"
-    ball_model_path = "runs/detect/train3/weights/best.pt"
-    pitch_model_path = "runs/pitch_detection/best.pt"
-    pitch_image_path = "pitch.jpeg"
-
-    tracker = CricketBallTracker(video_path, ball_model_path, pitch_model_path, pitch_image_path)
-    tracker.process_video()
-    tracker.map_trajectory_to_pitch()

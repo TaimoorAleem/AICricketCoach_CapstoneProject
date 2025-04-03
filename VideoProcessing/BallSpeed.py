@@ -103,14 +103,3 @@ class BallSpeed:
         cap.release()
         cv2.destroyAllWindows()
         print(f"\nProcessing complete. Valid speeds saved to {self.speed_file}")
-
-# # Example usage:
-# if __name__ == "__main__":
-#     tracker = BallSpeed(
-#         video_path="videos/NetPractice8.mp4",
-#         model_path=os.path.join('runs', 'detect', 'train3', 'weights', 'best.pt'),
-#         scale_factor=0.15,      # Adjust based on your camera calibration
-#         speed_threshold=2.0,    # Ignore speeds below 2 m/s (noise)
-#         max_speed=45.0         # 45 m/s = 162 km/h (professional cricket limit)
-#     )
-#     tracker.process_video_for_speed()

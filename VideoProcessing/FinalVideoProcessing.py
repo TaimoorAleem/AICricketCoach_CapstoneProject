@@ -104,7 +104,7 @@ def moving_average(data, window_size):
     return [np.mean(data[max(0, i - window_size // 2):min(len(data), i + window_size // 2 + 1)]) for i in range(len(data))]
 
 if __name__ == "__main__":
-    video_path = "videos/NetPractice9.mp4"
+    video_path = "videos/NetPractice8.mp4"
     model_path = os.path.join('runs', 'detect', 'train3', 'weights', 'best.pt')
     pitch_model_path = os.path.join('runs', 'pitch_detection', 'best.pt')
     pitch_image_path = 'pitch.jpeg'
