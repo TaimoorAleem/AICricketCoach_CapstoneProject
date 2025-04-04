@@ -19,7 +19,6 @@ class AuthRepoImpl extends AuthRepo {
     }, (data) async {
       final SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
-      sharedPreferences.setString('uid', data['uid']);
       return Right(data);
     });
   }

@@ -2,48 +2,53 @@ plugins {
     id "com.android.application"
     id "kotlin-android"
     id 'com.google.gms.google-services'
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Flutter plugin must be last
     id "dev.flutter.flutter-gradle-plugin"
 }
-
 
 android {
     namespace = "com.example.ai_cricket_coach"
     compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
+    defaultConfig {
+        applicationId = "com.example.ai_cricket_coach"
+        minSdk = 23
+        targetSdk = 35
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        // 👇 Force native libraries for x86 ABI only
+        ndk {
+            abiFilters "x86", "x86_64"
+        }
+
+
+        // This line ensures native .so extraction works properly
+        multiDexEnabled true
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
-
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.ai_cricket_coach"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
-        targetSdk = 33
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        jvmTarget = "17"
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.debug
         }
     }
-
 }
 
 flutter {
     source = "../.."
 }
 
-
+// ✅ This should be outside the android block
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << "-Xlint:deprecation"
+}

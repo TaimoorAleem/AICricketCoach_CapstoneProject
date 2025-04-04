@@ -35,6 +35,7 @@ dependencies:
   image_picker:
   chewie: ^1.7.1
   video_player: ^2.7.0
+  file_picker:
 
   #firebase_core: ^2.16.0
   firebase_core:
@@ -53,7 +54,7 @@ dependencies:
 
   flutter_bloc:
 
-  reactive_button: 0.0.9
+  reactive_button:
 
   dartz:
 
@@ -99,8 +100,52 @@ flutter:
   fonts:
     - family: Nunito
       fonts:
-        - asset: assets/fonts/Nunito-VariableFont_wght.ttf
+        - asset: assets/fonts/static/Nunito-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/static/Nunito-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Light.ttf
+          weight: 300
+        - asset: assets/fonts/static/Nunito-LightItalic.ttf
+          weight: 300
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/static/Nunito-Italic.ttf
+          weight: 400
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/static/Nunito-MediumItalic.ttf
+          weight: 500
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/static/Nunito-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Bold.ttf
           weight: 700
+        - asset: assets/fonts/static/Nunito-BoldItalic.ttf
+          weight: 700
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/static/Nunito-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/static/Nunito-Black.ttf
+          weight: 900
+        - asset: assets/fonts/static/Nunito-BlackItalic.ttf
+          weight: 900
+          style: italic
   assets:
     - lib/images/logo.png
     - lib/images/pfp.jpg

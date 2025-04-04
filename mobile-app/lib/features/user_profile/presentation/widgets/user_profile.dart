@@ -66,30 +66,40 @@ class UserProfile extends StatelessWidget {
                                   10), // Spacing between name and other details
 
                           // Age, City, Country, Team
-                          Text(
-                            '${user.age ?? 'Not available'}, ${user.teamName ?? 'Not available'}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white70,
+                          if ((user.age?.toString().trim().isNotEmpty ??
+                                  false) ||
+                              (user.teamName?.trim().isNotEmpty ?? false))
+                            Text(
+                              '${user.age?.toString().trim().isNotEmpty == true ? user.age : ''}'
+                              '${user.age?.toString().trim().isNotEmpty == true && user.teamName?.trim().isNotEmpty == true ? ' • ' : ''}'
+                              '${user.teamName?.trim().isNotEmpty == true ? user.teamName : ''}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                          Text(
-                            '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'} ',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white70,
+                          if ((user.city?.trim().isNotEmpty ?? false) ||
+                              (user.country?.trim().isNotEmpty ?? false))
+                            Text(
+                              '${user.city?.trim().isNotEmpty == true ? user.city : ''}'
+                              '${user.city?.trim().isNotEmpty == true && user.country?.trim().isNotEmpty == true ? ' • ' : ''}'
+                              '${user.country?.trim().isNotEmpty == true ? user.country : ''}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                          Text(
-                            user.description ?? 'Not available',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white70,
+                          if (user.description?.trim().isNotEmpty ?? false)
+                            Text(
+                              user.description!,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
                           const SizedBox(height: 50), // Spacing before buttons
 
                           // Buttons
@@ -147,30 +157,7 @@ class UserProfile extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                  height: 16), // Spacing between buttons
 
-                              // Log Out Button
-                              ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.logout,
-                                    color: Colors.white),
-                                label: const Text(
-                                  'Log Out',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors
-                                      .secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 120),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
                               const SizedBox(
                                   height: 16), // Spacing between buttons
 
@@ -264,6 +251,7 @@ class UserProfile extends StatelessWidget {
                     'Description: ${user.description ?? 'Not available'}',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  const SizedBox(height: 16),
                   // Buttons
                   Column(
                     children: [
@@ -314,58 +302,7 @@ class UserProfile extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16), // Spacing between buttons
-
-                      // Log Out Button
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Confirm Logout"),
-                                content:
-                                    const Text("Are you sure you want to log out?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context)
-                                          .pop(); // Close dialog
-                                    },
-                                    child: const Text("Cancel"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.of(context)
-                                          .pop(); // Close dialog
-                                      var done = await sl<LogOutUseCase>().call();// Call logout
-                                      if (done==true && context.mounted){AppNavigator.pushAndRemove(context, LogInPage());}
-                                    },
-                                    child: const Text("Confirm",
-                                        style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                        icon: const Icon(Icons.logout, color: Colors.white),
-                        label: const Text(
-                          'Log Out',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 120),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16), // Spacing between buttons
+                      const SizedBox(height: 16),
 
                       // Terms and Agreement Button
                       ElevatedButton.icon(

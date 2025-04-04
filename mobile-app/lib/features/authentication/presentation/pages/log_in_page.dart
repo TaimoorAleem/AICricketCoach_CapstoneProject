@@ -38,7 +38,7 @@ class LogInPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _welcomeHeading(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               _loginContainer(context),
               const SizedBox(height: 20),
               _signupText(context),
@@ -52,10 +52,10 @@ class LogInPage extends StatelessWidget {
 
   Widget _welcomeHeading() {
     return const Text(
-      'Welcome Back!',
+      'AI Cricket Coach',
       style: TextStyle(
         fontFamily: 'Nunito',
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w600,
         fontSize: 26,
         color: AppColors.primary,
       ),
@@ -86,16 +86,7 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  Widget _loginText() {
-    return const Text(
-      'Log In',
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 22,
-        color: AppColors.primary,
-      ),
-    );
-  }
+
 
   Widget _fieldLabel(String text) {
     return Text(
@@ -115,7 +106,7 @@ class LogInPage extends StatelessWidget {
         hintStyle: const TextStyle(
             fontFamily: 'Nunito',
             color: AppColors.primary,
-            fontWeight: FontWeight.w900),
+            fontWeight: FontWeight.w500),
         filled: true,
         fillColor: AppColors.secondary,
         border: OutlineInputBorder(
@@ -143,7 +134,7 @@ class LogInPage extends StatelessWidget {
         hintStyle: const TextStyle(
             fontFamily: 'Nunito',
             color: AppColors.primary,
-            fontWeight: FontWeight.w900),
+            fontWeight: FontWeight.w500),
         filled: true,
         fillColor: AppColors.secondary,
         border: OutlineInputBorder(
@@ -200,7 +191,7 @@ class LogInPage extends StatelessWidget {
             style: const TextStyle(
               fontFamily: 'Nunito',
               color: Colors.blue,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w500,
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
@@ -221,14 +212,14 @@ class LogInPage extends StatelessWidget {
         children: [
           const TextSpan(
             text: "Don't have an account? ",
-            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w900)
+            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w500)
           ),
           TextSpan(
             text: 'Sign Up',
             style: const TextStyle(
               fontFamily: 'Nunito',
               color: Colors.blue,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w500,
             ),
             recognizer: TapGestureRecognizer()
               ..onTap = () {

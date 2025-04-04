@@ -24,41 +24,54 @@ abstract class AuthService {
 
 class AuthApiServiceImpl extends AuthService {
 
-
   @override
   Future<Either> signup(SignupReqParams params) async {
     try {
-
+    // Attempt to create a user with Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: params.email,
-          password: params.password
-      );
+        email: params.email,
+        password: params.password,);
 
       String uid = userCredential.user!.uid;
 
-      final updatedParams = SignupReqParams(email: params.email, password: uid, role: params.role);
-
-      var response = await sl<DioClient>().post(
-          ApiUrl.signup,
-          data: updatedParams.toMap()
+      // Proceed with additional data if user creation is successful
+      final updatedParams = SignupReqParams(
+        email: params.email,
+        password: uid,
+        role: params.role,
+        firstName: params.firstName,
+        lastName: params.lastName,
       );
 
+      var response = await sl<DioClient>().post(
+        ApiUrl.signup,
+        data: updatedParams.toMap(),
+      );
+
+      // Retrieve the Firebase ID token for authentication
       String? idToken = await userCredential.user?.getIdToken();
       if (idToken == null) {
-        return const Left('Failed to generate ID token.');
+        debugPrint("failed to generate token");
+        return Left('Failed to generate ID token.');
+
       }
 
+      // Save token and user details in SharedPreferences
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
       sharedPreferences.setString('token', idToken);
+      sharedPreferences.setString('role', params.role);
+      sharedPreferences.setString('firstName', params.firstName);
+      sharedPreferences.setString('lastName', params.lastName);
       await saveFCMToken(response.data['uid']);
 
-      return Right(response.data);
-
-    } on DioException catch(e) {
-      return Left(e.response!.data['message']);
+      return Right(response); // Return success with the server response
+    } catch (e) {
+    // Catch any errors during signup and return a Left with the error message
+    return Left('Signup failed: $e');
+      }
     }
-  }
+
 
   @override
   Future<Either> createProfile(EditProfileReqParams params) async {

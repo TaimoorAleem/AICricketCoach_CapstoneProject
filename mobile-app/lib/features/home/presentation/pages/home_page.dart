@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:ai_cricket_coach/resources/app_navigator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
 
 import '../../../../resources/app_colors.dart';
+import '../../../video_upload/presentation/pages/upload_video.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -23,6 +25,7 @@ class HomePage extends StatelessWidget {
                       _profileButton(context),
                     ]))));
   }
+
 
   Widget _pageHeading() {
     return const Text(
@@ -47,4 +50,24 @@ class HomePage extends StatelessWidget {
       ,
     );
   }
+
+  Widget  _videoUploadButton(BuildContext context){
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const UploadVideoPage(),
+          ),
+        );
+      },
+      child: const Text('Upload Video'),
+    );
+  }
+
+
 }

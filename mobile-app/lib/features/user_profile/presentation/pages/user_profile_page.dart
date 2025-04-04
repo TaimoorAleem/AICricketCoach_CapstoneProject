@@ -1,5 +1,6 @@
 import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
 import 'package:ai_cricket_coach/features/authentication/presentation/pages/sign_up_page.dart';
+import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
 
 import 'package:ai_cricket_coach/features/user_profile/presentation/widgets/user_profile.dart';
 
@@ -11,6 +12,7 @@ import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
+import '../../../authentication/domain/usecases/logout_usecase.dart';
 import '../../data/models/delete_account_params.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
 
@@ -35,14 +37,87 @@ class UserProfilePage extends StatelessWidget {
         body: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 30),
+                _homeBar(context),
                 const UserProfile(),
+                _logOutButton(context),
+                const SizedBox(height: 5),
                 _deleteButton(context),
               ],
             )
         )
     );
   }
+
+  Widget _homeBar(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.home),
+        onPressed: () {
+          // Replace with your actual home navigation logic
+          AppNavigator.pushAndRemove(context, HomePage());
+        },
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    );
+  }
+
+  Widget _logOutButton(BuildContext context){
+    return ElevatedButton.icon(
+      onPressed: () async {
+        // Make sure the dialog only runs if the context is still active
+        if (!context.mounted) return;
+
+        final shouldLogout = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text("Confirm Logout"),
+              content: const Text("Are you sure you want to log out?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(false); // Cancel
+                  },
+                  child: const Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop(true); // Confirm
+                  },
+                  child: const Text(
+                    "Confirm",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+
+        // Handle the user's decision
+        if (shouldLogout == true && context.mounted) {
+          final success = await sl<LogOutUseCase>().call();
+          if (success && context.mounted) {
+            AppNavigator.pushAndRemove(context, LogInPage());
+          }
+        }
+      },
+      icon: const Icon(Icons.logout, color: Colors.white),
+      label: const Text(
+        'Log Out',
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.secondary,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
 
   Widget _deleteButton(BuildContext context) {
     return ElevatedButton(

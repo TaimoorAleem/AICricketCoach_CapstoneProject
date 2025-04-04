@@ -174,7 +174,8 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
           radius: 30,
           backgroundImage: _pfpPath.isNotEmpty
               ? FileImage(File(_pfpPath)) as ImageProvider
-              : const AssetImage('lib/images/default-pfp.jpg'),
+              : const AssetImage(
+              'lib/images/default-pfp.jpg'),
         )
 
     );
