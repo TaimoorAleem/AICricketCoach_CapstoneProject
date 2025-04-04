@@ -89,6 +89,7 @@ class UserProfileServiceImpl extends UserProfileService {
   @override
   Future<Either<String, String>> getProfilePicture(String url) async {
     try {
+      imageCache.clear();
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -101,6 +102,8 @@ class UserProfileServiceImpl extends UserProfileService {
         // Save the image as a file
         final file = File(filePath);
         await file.writeAsBytes(bytes);
+
+        debugPrint("saved new image at : " + filePath);
 
         // Return the file path on success
         return Right(filePath);

@@ -43,6 +43,10 @@ class HomePage extends StatelessWidget {
   Widget _profileButton(BuildContext context) {
     return Center(
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
+        ),
         onPressed: () {
           AppNavigator.pushAndRemove(context, UserProfilePage());
         },

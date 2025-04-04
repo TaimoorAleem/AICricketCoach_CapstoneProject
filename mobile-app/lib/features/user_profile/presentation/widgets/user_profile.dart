@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../resources/service_locator.dart';
 import '../../../authentication/domain/usecases/logout_usecase.dart';
+import '../../../home/presentation/pages/home_page.dart';
 import '../../domain/entities/user_entity.dart';
 
 class UserProfile extends StatelessWidget {
@@ -28,307 +29,309 @@ class UserProfile extends StatelessWidget {
           if (state is ProfileLoading) {
             return const CircularProgressIndicator();
           }
-          if (state is ProfileLoaded) {
+          if (state is ProfileLoaded)  {
+            debugPrint('HelloHello');
             UserEntity user = state.user; // Get the user from the state
 
+            Widget _homeBar(BuildContext context) {
+              return AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.home_sharp, color: AppColors.primary,),
+                  onPressed: () {
+                    // Replace with your actual home navigation logic
+                    AppNavigator.pushAndRemove(context, HomePage());
+                  },
+                ),
+                actions: [
+                  // Add an icon to the top right
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary,),  // Replace with any icon
+                    onPressed: () async {
+                      AppNavigator.push(
+                          context,
+                          EditUserProfilePage(
+                            user: user,
+                            pfpPath: 'lib/images/default-pfp.jpg',
+                          ));
+                      context.read<ProfileCubit>().getUserProfile();// Fetch fresh data
+
+                    },
+
+                  ),
+                ],
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              );
+            }
+
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(10.0), // Main page padding
               child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //Profile Picture
-                    const Center(
-                      child: CircleAvatar(
-                        radius: 60, // Larger profile image
-                        backgroundImage:
-                            AssetImage('lib/images/default-pfp.jpg'),
-                      ),
-                    ),
-                    const SizedBox(
-                        height: 20), // Spacing between image and name
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _homeBar(context),
 
-                    // User Information
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Name
-                          Text(
-                            '${user.firstName} ${user.lastName}',
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                  const SizedBox(height: 16), // Optional spacing after AppBar
+
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0), // Or whatever padding you prefer
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Row for Profile Picture and User Info
+                        Row(
+                          children: [
+                            // Profile Picture
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage:
+                              const AssetImage('lib/images/default-pfp.jpg'),
                             ),
+                            const SizedBox(width: 30),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.email ?? 'Not available'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.firstName} ${user.lastName}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 30,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user.age ?? 'Not available'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey, fontSize: 20),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Team ${user.teamName ?? 'Not available'}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          '${user.description ?? 'Not available'}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
                           ),
-                          const SizedBox(
-                              height:
-                                  10), // Spacing between name and other details
+                        ),
 
-                          // Age, City, Country, Team
-                          if ((user.age?.toString().trim().isNotEmpty ??
-                                  false) ||
-                              (user.teamName?.trim().isNotEmpty ?? false))
-                            Text(
-                              '${user.age?.toString().trim().isNotEmpty == true ? user.age : ''}'
-                              '${user.age?.toString().trim().isNotEmpty == true && user.teamName?.trim().isNotEmpty == true ? ' • ' : ''}'
-                              '${user.teamName?.trim().isNotEmpty == true ? user.teamName : ''}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          if ((user.city?.trim().isNotEmpty ?? false) ||
-                              (user.country?.trim().isNotEmpty ?? false))
-                            Text(
-                              '${user.city?.trim().isNotEmpty == true ? user.city : ''}'
-                              '${user.city?.trim().isNotEmpty == true && user.country?.trim().isNotEmpty == true ? ' • ' : ''}'
-                              '${user.country?.trim().isNotEmpty == true ? user.country : ''}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          if (user.description?.trim().isNotEmpty ?? false)
-                            Text(
-                              user.description!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          const SizedBox(height: 50), // Spacing before buttons
-
-                          // Buttons
-                          Column(
-                            children: [
-                              // Edit Profile Button
-                              ElevatedButton.icon(
-                                onPressed: () async {
-                                  AppNavigator.push(
-                                      context,
-                                      EditUserProfilePage(
-                                        user: user,
-                                        pfpPath: 'lib/images/default-pfp.jpg',
-                                      ));
-                                },
-                                icon:
-                                    const Icon(Icons.edit, color: Colors.white),
-                                label: const Text(
-                                  'Edit Profile',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors
-                                      .secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 111),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                  height: 16), // Spacing between buttons
-
-                              // Settings Button
-                              ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.settings,
-                                    color: Colors.white),
-                                label: const Text(
-                                  'Settings',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors
-                                      .secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 120),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-
-                              const SizedBox(
-                                  height: 16), // Spacing between buttons
-
-                              // Terms and Agreement Button
-                              ElevatedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.library_books,
-                                    color: Colors.white),
-                                label: const Text(
-                                  'Terms and Agreement',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors
-                                      .secondary, // Button background color
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 12, horizontal: 70),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        const SizedBox(height: 40),
+                      ],
                     ),
-                  ]),
+                  ),
+
+                  // Buttons section comes here if you have it
+                ],
+              ),
             );
+
+
           }
           if (state is ProfileLoadedWithPicture) {
             debugPrint('HelloHello');
             UserEntity user = state.user; // Get the user from the state
             String profilePicturePath = state.profilePicturePath;
 
+            Widget _homeBar(BuildContext context) {
+              return AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.home_sharp, color: AppColors.primary,),
+                  onPressed: () {
+                    // Replace with your actual home navigation logic
+                    AppNavigator.pushAndRemove(context, HomePage());
+                  },
+                ),
+                actions: [
+                  // Add an icon to the top right
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary,),  // Replace with any icon
+                    onPressed: () async {
+                      AppNavigator.push(
+                          context,
+                          EditUserProfilePage(
+                            user: user,
+                            pfpPath: profilePicturePath,
+                          ));
+                      context.read<ProfileCubit>().getUserProfile();// Fetch fresh data
+
+                    },
+
+                  ),
+                ],
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              );
+            }
+
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(10.0), // Main page padding
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 30, // Larger profile image
-                    backgroundImage:
-                        FileImage(File(profilePicturePath)), // Use stored image
-                    onBackgroundImageError: (_, __) => const AssetImage(
-                        'lib/images/default-pfp.jpg'), // Fallback
-                  ),
-                  const SizedBox(height: 16),
+                  _homeBar(context),
 
-                  // Display user's first and last name
-                  Text(
-                    '${user.firstName} ${user.lastName}',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16), // Optional spacing after AppBar
 
-                  // Display user's role and team
-                  Text(
-                    'Role: ${user.role ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  Text(
-                    'Team: ${user.teamName ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 16),
 
-                  // Display user's other details
-                  Text(
-                    'Email: ${user.email ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'Age: ${user.age ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'City: ${user.city ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  Text(
-                    'Country: ${user.country ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Display description
-                  Text(
-                    'Description: ${user.description ?? 'Not available'}',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  // Buttons
-                  Column(
-                    children: [
-                      // Edit Profile Button
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          AppNavigator.push(
-                              context,
-                              EditUserProfilePage(
-                                user: user,
-                                pfpPath: profilePicturePath,
-                              ));
-                        },
-                        icon: const Icon(Icons.edit, color: Colors.white),
-                        label: const Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0), // Or whatever padding you prefer
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Row for Profile Picture and User Info
+                        Row(
+                          children: [
+                            // Profile Picture
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: FileImage(File(profilePicturePath)),
+                              onBackgroundImageError: (_, __) =>
+                              const AssetImage('lib/images/default-pfp.jpg'),
+                            ),
+                            const SizedBox(width: 30),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.email ?? 'Not available'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.firstName} ${user.lastName}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 30,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user.age ?? 'Not available'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey, fontSize: 20),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Team ${user.teamName ?? 'Not available'}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 111),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          '${user.description ?? 'Not available'}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16), // Spacing between buttons
 
-                      // Settings Button
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.settings, color: Colors.white),
-                        label: const Text(
-                          'Settings',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 120),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Terms and Agreement Button
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.library_books,
-                            color: Colors.white),
-                        label: const Text(
-                          'Terms and Agreement',
-                          style: TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.secondary, // Button background color
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 70),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                      ),
-                    ],
+                        const SizedBox(height: 40),
+                      ],
+                    ),
                   ),
+
+                  // Buttons section comes here if you have it
                 ],
               ),
             );
+
+
           }
           if (state is ProfileLoadingFailed) {
             return Text(state.errorMessage);
