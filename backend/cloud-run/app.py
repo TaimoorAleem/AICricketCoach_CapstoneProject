@@ -1,6 +1,5 @@
 import os
 import firebase_admin
-import time
 import json
 from datetime import timedelta
 import requests
@@ -26,9 +25,6 @@ app = Flask(__name__)
 # Firestore client
 db = firestore.client()
 
-# pub_client = pubsub_v1.PublisherClient()
-# sub_client = pubsub_v1.SubscriberClient()
-
 
 
 @app.route('/')
@@ -43,13 +39,17 @@ def sign_up():
         email = data['email']
         uid = data['password']
         role = data['role']
+        firstName = data['firstName']
+        lastName = data['lastName']
         # if role == 'Coach':
         #     create_coach_topic(uid)
 
         user_data = {
             "email": email,
             "uid": uid,
-            "role": role}
+            "role": role,
+            "firstName": firstName,
+            "lastName": lastName}
         db.collection('Users').document(uid).set(user_data)
 
 
@@ -118,6 +118,9 @@ def get_players():
 
         # Reference to the user document
         user_ref = db.collection('Users').document(uid)
+        userRole = user_ref.get().to_dict().get('role')
+        if userRole != 'Coach':
+            return jsonify({"status": "Forbidden", "message": f"User does not have permissions to access this resource."}), 403
 
         # Get the sessions subcollection for the user
         players_ref = user_ref.collection('Players')
@@ -177,20 +180,34 @@ def create_pairing():
         if 'uid' not in data:
             return jsonify({"status": "error", "message": "Coach Id required."}), 400
         uid = data['uid']
+
+        if not uid:
+            return jsonify({"status": "error", "message": "Please provide a valid Coach ID."}), 400
+
         coach_doc_ref = db.collection('Users').document(uid)
         coach_doc = coach_doc_ref.get()
 
         if not coach_doc.exists:
             return jsonify({"status": "error", "message": f"Coach with UID {uid} does not exist."}), 404
 
+        if coach_doc.to_dict().get('role') != 'Coach':
+            return jsonify({"status": "Forbidden", "message": f"User {uid} must be a coach to access this resource."}), 403
+
         if 'player_id' not in data:
             return jsonify({"status": "error", "message": "Player Id required."}), 400
         player_id = data['player_id']
+
+        if not player_id:
+            return jsonify({"status": "error", "message": "Please provide a valid Coach ID."}), 400
+
         player_doc_ref = db.collection('Users').document(player_id)
         player_doc = player_doc_ref.get()
 
         if not player_doc.exists:
             return jsonify({"status": "error", "message": f"Player with UID {player_id} does not exist."}), 404
+
+        if player_doc.to_dict().get('role') != 'Player':
+            return jsonify({"status": "Forbidden", "message": f"Invalid player ID {player_id}"}), 400
 
         player_doc_ref.update({"coach_id": uid})
 
@@ -210,41 +227,6 @@ def create_pairing():
             "status": "error",
             "message": str(e)
         }), 500
-
-# ##@app.route('/create-a-topic', methods=['POST'])
-# def create_coach_topic(coach_id):
-#     try:
-#         # data = request.get_json()
-#         # coach_id = data['coach_id']
-#         topic_name = f'projects/aicc-proj-1/topics/coach_{coach_id}'
-#         pub_client.create_topic(name=topic_name)
-#         subscription_name = f'projects/aicc-proj-1/subscriptions/coach_{coach_id}_subscription'
-
-#         sub_client.create_subscription(
-#             name=subscription_name,
-#             topic=topic_name
-#         )
-#         return "success"
-
-#     except Exception as e:
-#         return str(e)
-
-# ##@app.route('/publish-to-topic', methods=['POST'])
-# def publish_to_topic(coach_id, uid):
-#     try:
-#         # data = request.get_json()
-#         # coach_id = data['coach_id']
-#         # uid = data['uid']
-#         topic_name = f'projects/aicc-proj-1/topics/coach_{coach_id}'
-#         player_ref = db.collection('Users').document(uid)
-#         player_name= f"{player_ref.get().to_dict().get('firstName')} {player_ref.get().to_dict().get('lastName')}"
-#         message = f"{player_name} has uploaded a new delivery."
-#         data = message.encode("utf-8")
-#         pub_client.publish(topic_name, data=data)
-#         return "success"
-
-#     except Exception as e:
-#         return str(e)
 
 
 @app.route('/users/edit-profile-picture', methods=['POST'])
@@ -328,7 +310,7 @@ def edit_profile():
 
         if not update_data:
             return jsonify({"status": "error", "message": "No fields provided for update."}), 400
-
+        user_data = db.collection('Users').document(uid).get().to_dict()
 
         user_doc_ref.update(update_data)
         user_data = db.collection('Users').document(uid).get().to_dict()
@@ -374,17 +356,16 @@ def get_user():
 def upload_video():
     try:
         video_processed = False
+        rsp = None
+
         if 'file' not in request.files:
             return jsonify({"status": "error", "message": "No file found."}), 400
-
-
 
         file = request.files['file']
         if file.filename == '':
             return jsonify({"status":"error", "message":"No video selected."}), 400
+
         fname = file.filename
-
-
         blob = bucket.blob(f'videos/{fname}')
         blob.upload_from_file(file)
 
@@ -393,35 +374,52 @@ def upload_video():
         vp_url = "https://my-vp-app-174827312206.us-central1.run.app/process-video"
         payload = {"video_url": signed_url}
 
+        rsp = requests.post(vp_url, json=payload, timeout=180)  # 180 seconds timeout
 
-        rsp = requests.post(vp_url, json=payload)
-        response = rsp.json()
+        try:
+            response = rsp.json()
+        except ValueError:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid JSON response from video processing API",
+                "vp": video_processed,
+                "rsp_text": rsp.text
+            }), 500
 
-
-
+        video_processed = True
 
         ml_url = "https://shot-recommendation-api-857244658015.us-central1.run.app/predict"
         payload = {
-            "Ball Speed": response['BallSpeed'],
-            "Batsman Position": response['BatsmanPosition'],
-            "Ball Horizontal Line": "middle stump",
-            "Ball Length": "Yorker"
+            "Ball Speed": response.get('BallSpeed'),
+            "Batsman Position": response.get('BatsmanPosition'),
+            "Ball Horizontal Line": response.get('BallLine'),
+            "Ball Length": response.get('BallLength')
         }
 
         shot_rec = requests.post(ml_url, json=payload)
+
+        if shot_rec.status_code != 200:
+            return jsonify({
+                "status": "error",
+                "message": f"ML API error {shot_rec.status_code}: {shot_rec.text}"
+            }), 500
+
         return jsonify({
             "status" : "success",
             "message" : "Delivery video uploaded successfully",
             "ballCharacteristics" : response,
             "idealShot" : shot_rec.json(),
             "videoUrl" : signed_url,
-        }),200
+        }), 200
 
     except Exception as e:
         return jsonify({
             "status" :"error",
-            "message" : str(e)
+            "message" : str(e),
+            "vp": video_processed,
+            "rsp": rsp.text if rsp else None
         })
+
 
 @app.route('/users/delete-account', methods=["POST"])
 def delete_account():
@@ -460,7 +458,7 @@ def delete_account():
             "message" : str(e)
         })
 
-def send_notification(topic, uid, coach_id, session_id, delivery_id):
+def send_notification(topic, uid, coach_id):
     try:
         player_ref = db.collection('Users').document(uid)
         player_name= f"{player_ref.get().to_dict().get('firstName')} {player_ref.get().to_dict().get('lastName')}"
@@ -502,19 +500,23 @@ def upload_delivery():
         users_check = db.collection('Users').where('uid', '==', uid).get()
         if not users_check:
             return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+        userRole = db.collection('Users').document(uid).get().to_dict().get('role')
+        if userRole == 'Coach':
+            return jsonify({"status": "Forbidden", "message": f"User does not have permissions to access this resource."}), 403
         session = data['sessionId']
         sessions_check = db.collection('Users').document(uid).collection('sessions').where('sessionId', '==', session).get()
         if not sessions_check:
             return jsonify({"status": "error", "message": f"Session with SessionId {session} does not exist."}), 404
 
         delivery = data['delivery']
+        ball_characteristics = delivery['ballCharacteristics']
         user_ref = db.collection('Users').document(uid)
         session_ref = user_ref.collection('sessions').document(session)
         delivery_ref = session_ref.collection('deliveries').add({
-            'ballSpeed': delivery['ballSpeed'],
-            'ballLength': delivery['ballLength'],
-            'horizontalLine': delivery['horizontalLine'],
-            'batsmanPosition': delivery['batsmanPosition'],
+            'BallSpeed': ball_characteristics['ballSpeed'],
+            'BallLength': ball_characteristics['ballLength'],
+            'BallLine': ball_characteristics['ballLine'],
+            'BatsmanPosition': ball_characteristics['batsmanPosition'],
             'idealShot': delivery['idealShot'],
             'videoUrl' : delivery['videoUrl']
         })
@@ -525,7 +527,7 @@ def upload_delivery():
         coach_id = user_ref.get().to_dict().get('coach_id', None)
         if coach_id != None:
             topic ='delivery-uploaded-topic'
-            send_notification(topic, uid, coach_id, session, delivery_doc_ref.id)
+            send_notification(topic, uid, coach_id)
 
             # publish_to_topic(coach_id, uid)
 
@@ -549,27 +551,40 @@ def upload_delivery():
 def add_feedback():
     try:
         data = request.get_json()
+        uid = data['uid']
+        user_ref = db.collection('Users').where('uid', '==', uid).get()
+        if not user_ref:
+            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+        userRole = db.collection('Users').document(uid).get().to_dict().get('role')
+        if userRole != 'Coach':
+            return jsonify({"status": "Forbidden", "message": "User does not have permissions to access this resource."}), 403
+
         player_id = data['playerId']
         session_id = data['sessionId']
         delivery_id = data['deliveryId']
 
         player = db.collection('Users').where('uid', '==', player_id).get()
         if not player:
-            return jsonify({"status": "error", "message": f"User with UID {player_id} does not exist."}), 404
+            return jsonify({"status": "error", "message": f"Player with UID {player_id} does not exist."}), 404
 
         user_ref = db.collection('Users').document(player_id)
         session_ref = user_ref.collection('sessions').document(session_id)
         delivery_ref = session_ref.collection('deliveries').document(delivery_id)
         coach_id = user_ref.get().to_dict().get('coach_id')
+        if coach_id != uid:
+            return jsonify({"status": "Forbidden", "message": "User does not have permissions to access this resource."}), 403
 
+        sessions_doc = session_ref.get()
+        if not sessions_doc.exists:
+            return jsonify({"status": "error", "message": f"Session with ID {session_id} does not exist."}), 404
 
         delivery_doc = delivery_ref.get()
         if not delivery_doc.exists:
             return jsonify({"status": "error", "message": f"Delivery with ID {delivery_id} does not exist."}), 404
 
         update_data = {}
-        if 'battingRating' in data:
-            update_data['battingRating'] = data['battingRating']
+        if 'executionRating' in data:
+            update_data['executionRating'] = data['executionRating']
         if 'feedback' in data:
             update_data['feedback'] = data['feedback']
 
@@ -606,34 +621,36 @@ def add_feedback():
 def get_delivery():
     try:
 
+        # Get query params
         uid = request.args.get('uid')
-        if not uid:
-            return jsonify({"status": "error", "message": "UID is missing."}), 400
-
-        users_check = db.collection('Users').where('uid', '==', uid).get()
-        if not users_check:
-            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
         sessionId = request.args.get('sessionId')
-        sessions_check = users_check.collection('sessions').where('sessionId', '==', sessionId).get()
-        if not sessions_check:
-            return jsonify({"status": "error", "message": f"Session with SessionId {sessionId} does not exist."}), 404
-
         deliveryId = request.args.get('deliveryId')
-        deliveries_check = sessions_check.collection('deliveries').where('deliveryId', '==', deliveryId).get()
-        if not deliveries_check:
-            return jsonify({"status": "error", "message": f"Delivery with deliveryId {deliveryId} does not exist."}), 404
 
+        # Basic validation
+        if not all([uid, sessionId, deliveryId]):
+            return jsonify({"status": "error", "message": "uid, sessionId, and deliveryId are required."}), 400
 
-        # Reference to the user document
-        delivery_ref = ((db.collection('Users').document(uid)).collection('sessions').document(sessionId)).collection('deliveries').document(deliveryId)
+        # Get user document
+        user_ref = db.collection('Users').document(uid)
+        user_doc = user_ref.get()
+        if not user_doc.exists:
+            return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
 
-        delivery = delivery_ref.get()
+        # Get session document
+        session_ref = user_ref.collection('sessions').document(sessionId)
+        session_doc = session_ref.get()
+        if not session_doc.exists:
+            return jsonify({"status": "error", "message": f"Session with ID {sessionId} does not exist."}), 404
 
-        result = [delivery.to_dict()]
+        # Get delivery document
+        delivery_ref = session_ref.collection('deliveries').document(deliveryId)
+        delivery_doc = delivery_ref.get()
+        if not delivery_doc.exists:
+            return jsonify({"status": "error", "message": f"Delivery with ID {deliveryId} does not exist."}), 404
 
         return jsonify({
             "status": "success",
-            "sessions": result
+            "delivery": delivery_doc.to_dict()
         }), 200
 
     except Exception as e:
@@ -654,6 +671,10 @@ def upload_session():
 
 
         user_ref = db.collection('Users').document(uid)
+        if user_ref.get().to_dict().get('role') == 'Coach':
+            return jsonify({
+                "status": "Forbidden",
+                "message": "User does not have permission to access this resource."}), 403
 
         session_ref = user_ref.collection('sessions').add({
             'date' : data['date'],
@@ -761,12 +782,20 @@ def get_performance_history():
             uid = request.args.get('uid')
             if not uid:
                 return jsonify({"status": "error", "message": "UID is missing."}), 400
+            userRole = db.collection('Users').document(uid).get().to_dict().get('role')
+            if userRole == 'Coach':
+                return jsonify({"status": "Forbidden", "message": "User does not have permissions to access this resource."}), 403
             sessionId= request.args.get('sessionId')
             user_ref = db.collection('Users').document(uid)
             if sessionId:
                 # Get the sessions subcollection for the user
                 session_ref = user_ref.collection('sessions').document(sessionId)
                 deliveries = session_ref.collection('deliveries').get()
+
+                performances= session_ref.collection('performance').get() #to recalculate
+                if len(performances) == 1:
+                    for performance in performances:
+                        performance.reference.delete()
 
                 performances= session_ref.collection('performance').get()
 
@@ -775,16 +804,20 @@ def get_performance_history():
 
                     avg_speed = 0
                     avg_exec_rating = 0
-                    count = 0
+                    s_count = 0
+                    er_count = 0
 
                     for delivery_ref in deliveries:
                         delivery = delivery_ref.to_dict()
-                        count = count+1
-                        avg_speed = avg_speed + delivery['ballSpeed']
-                        avg_exec_rating = avg_exec_rating + delivery['executionRating']
+                        s_count = s_count+1
+                        avg_speed = avg_speed + delivery['BallSpeed']
 
-                    avg_speed = avg_speed / count
-                    avg_exec_rating = avg_exec_rating / count
+                        if 'executionRating' in delivery:
+                            er_count = er_count + 1
+                            avg_exec_rating += delivery['executionRating']
+
+                    avg_speed = avg_speed / s_count
+                    avg_exec_rating = avg_exec_rating / er_count
                     perf_ref = session_ref.collection('performance').add({
                         "averageSpeed": avg_speed,
                         "averageExecutionRating" : avg_exec_rating
@@ -801,6 +834,10 @@ def get_performance_history():
 
             if not users:
                 return jsonify({"status": "error", "message": f"User with UID {uid} does not exist."}), 404
+
+            userRole = db.collection('Users').document(uid).get().to_dict().get('role')
+            if userRole != 'Player':
+                return jsonify({"status": "Forbidden", "message": "User does not have permissions to access this resource."}), 403
 
 
             # Reference to the user document

@@ -1,24 +1,73 @@
-# openapi2-run.yaml
 swagger: '2.0'
 info:
-  title: AICC API
-  description: API Gateway with a Cloud Run backend
-  version: 1.0.0
+  title: AI Cricket Coach API
+  description: This is the AI Cricket Coach server. Alternative Documentation available at [AICC Postman Documentation](https://documenter.getpostman.com/view/23483769/2sAYBbeV4m).
+  version: 1.5.4
+host: aicc-gateway2-28bbo1fy.uc.gateway.dev
 schemes:
   - https
 produces:
   - application/json
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: x-api-key
 x-google-backend:
   address: https://my-app-image-174827312206.us-central1.run.app/
+  path_translation: APPEND_PATH_TO_ADDRESS
+  deadline: 120.0
+
 paths:
-  /signup:
+  /auth/signup:
     post:
+      tags:
+        - Authentication
+      security:
+        - api_key: []
       summary: Register a new user
       operationId: signUpUser
       parameters:
         - in: body
           name: data
-          description: The user email and uid
+          description: The user email and uid and role
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - role
+              - firstName
+              - lastName
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              role:
+                type: string
+              firstName:
+                type: string
+              lastName:
+                type: string
+      responses:
+        '200':
+          description: User registration was successful.
+        '500':
+          description: Internal server error.
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      security:
+        - api_key: []
+      summary: Log in an existing user
+      operationId: logInUser
+      parameters:
+        - in: body
+          name: data
+          description: The user email and token
           schema:
             type: object
             required:
@@ -29,25 +78,146 @@ paths:
                 type: string
               password:
                 type: string
-
       responses:
         '200':
-          description: User registration was successful.
-
+          description: User logged in successfully.
+        '404':
+          description: User not found.
         '500':
           description: Internal server error.
-
-  /login:
+  /users/edit-profile-picture:
     post:
-      summary: Log in an existing user
-      operationId: logInUser
+      tags:
+        - User Account
+      summary: Edit user's profile picture
+      security:
+        - api_key: []
+      operationId: editPfp
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: file
+          in: formData
+          type: string
+          required: true
+          description: The profile picture to upload
+      responses:
+        '200':
+          description: Profile Picture Updated
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /users/get-profile-picture:
+    get:
+      tags:
+        - User Account
+      summary: Retrieve profile picture.
+      security:
+        - api_key: []
+      operationId: getPfp
+      parameters:
+        - in: query
+          name: url
+          description: Url of the image
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Profile Picture Retrieved
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /users/edit-profile:
+    post:
+      tags:
+        - User Account
+      summary: Update Profile Information
+      security:
+        - api_key: []
+      operationId: editProfile
       parameters:
         - in: body
           name: data
-          description: The user email and token
+          description: Profile data
           schema:
             type: object
             required:
+              - uid
+            properties:
+              uid:
+                type: string
+                description: Unique user identifier
+      responses:
+        '200':
+          description: Profile updated successfully.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /users/get-profile:
+    get:
+      tags:
+        - User Account
+      summary: Retrieve user's profile data
+      security:
+        - api_key: []
+      operationId: getProfile
+      parameters:
+        - in: query
+          name: uid
+          type: string
+          required: true
+          description: unique user identifier
+      responses:
+        '200':
+          description: Profile retrieved successfully.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /videos/upload:
+    post:
+      tags:
+        - Sessions & Deliveries
+        - Players
+      summary: Upload a delivery video for storage and processing
+      security:
+        - api_key: []
+      operationId: uploadVideo
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: file
+          in: formData
+          type: string
+          required: true
+          description: The video file to upload
+      responses:
+        '200':
+          description: Video processed.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+
+  /users/delete-account:
+    post:
+      tags:
+        - User Account
+      summary: Delete user's profile data, videos, auth identity
+      security:
+        - api_key: []
+      operationId: deleteAccount
+      parameters:
+        - in: body
+          name: data
+          description: The user uid and 'password' (token)
+          schema:
+            type: object
+            required:
+              - uid
               - password
             properties:
               email:
@@ -56,10 +226,331 @@ paths:
                 type: string
       responses:
         '200':
-          description: User logged in successfully.
-
-        '404':
-          description: User not found.
-
+          description: Account deleted.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
         '500':
           description: Internal server error.
+  /deliveries/create:
+    post:
+      tags:
+        - Sessions & Deliveries
+        - Players
+      summary: Upload delivery to user's document.
+      operationId: createDelivery
+      security:
+        - api_key: []
+      parameters:
+        - in: body
+          name: data
+          description: The delivery data
+          required: true
+          schema:
+            type: object
+            required:
+              - uid
+              - sessionId
+              - delivery
+            properties:
+              uid:
+                type: string
+                description: The unique ID of the user.
+              sessionId:
+                type: string
+                description: The session ID to associate the delivery with.
+              delivery:
+                type: object
+                required:
+                  - ballCharacteristics
+                  - idealShot
+                  - videoUrl
+                properties:
+                  ballCharacteristics:
+                    type: object
+                    required:
+                      - BallSpeed
+                      - BatsmanPosition
+                      - BallLine
+                      - BallLength
+                    properties:
+                      BallSpeed:
+                        type: number
+                        format: float
+                        description: Speed of the ball in km/h.
+                      BatsmanPosition:
+                        type: number
+                        format: float
+                        description: Position of the batsman.
+                      BallLine:
+                        type: string
+                        description: The line of the ball.
+                      BallLength:
+                        type: string
+                        description: The length of the ball.
+                  idealShot:
+                    type: object
+                    required:
+                      - predicted_ideal_shots
+                    properties:
+                      predicted_ideal_shots:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            confidence_score:
+                              type: number
+                              format: float
+                              description: Confidence score for the predicted shot.
+                            shot:
+                              type: string
+                              description: Name of the ideal shot.
+                        description: List of predicted ideal shots with confidence scores.
+                  videoUrl:
+                    type: string
+                    description: URL of the video recording of the delivery.
+      responses:
+        '200':
+          description: Delivery Created.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+
+
+
+
+  /deliveries/feedback/add:
+    post:
+      tags:
+        - Sessions & Deliveries
+        - Coach
+      summary: Add feedback to a player's delivery.
+      operationId: addFeedback
+      security:
+        - api_key: []
+      parameters:
+        - in: body
+          name: data
+          schema:
+            type: object
+            required:
+              - playerId
+              - sessionId
+              - deliveryId
+            properties:
+              playerId:
+                type: string
+              sessionId:
+                type: string
+              deliveryId:
+                type: string
+              battingRating:
+                type: number
+              feedback:
+                type: string
+      responses:
+        '200':
+          description: Feedback Added.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /deliveries/get:
+    get:
+      tags:
+        - Sessions & Deliveries
+        - Coach
+        - Players
+      summary: Get all deliveries in a session / One delivery by id
+      operationId: getDelivery
+      security:
+        - api_key: []
+      parameters:
+        - name: uid
+          in: query
+          description: The unique identifier for the user.
+          required: true
+          type: string
+        - name: sessionId
+          in: "query"
+          description: The unique identifier for the session.
+          required: true
+          type: string
+        - name: deliveryId
+          in: query
+          description: The unique identifier for the delivery.
+          required: true
+          type: string
+
+      responses:
+        '200':
+          description: Retrieved successfully.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /sessions/create:
+    post:
+      tags:
+        - Sessions & Deliveries
+        - Players
+      summary: Create new session
+      operationId: createSession
+      security:
+        - api_key: []
+      parameters:
+        - in: body
+          name: data
+          description: Session data for the user
+          required: true
+          schema:
+            type: object
+            required:
+              - uid
+              - date
+            properties:
+              uid:
+                type: string
+                description: The unique identifier for the user.
+              date:
+                type: string
+                format: date
+                description: The date when the session took place.
+      responses:
+        '200':
+          description: Session Created.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /sessions/get:
+    get:
+      tags:
+        - Sessions & Deliveries
+        - Coach
+        - Players
+      summary: Get session by id, or all sessions by uid
+      operationId: getSession
+      security:
+        - api_key: []
+      parameters:
+        - name: uid
+          in: query
+          description: The unique identifier for the user.
+          required: true
+          type: string
+        - name: sessionId
+          in: query
+          description: The unique identifier for the session.
+          type: string
+      responses:
+        '200':
+          description: Session Retrieved.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /performance/get:
+    get:
+      tags:
+        - Sessions & Deliveries
+        - Coach
+        - Players
+      summary: Generate, Retrieve Player's Performance History
+      operationId: getPerformance
+      security:
+        - api_key: []
+      parameters:
+        - name: uid_list
+          in: query
+          description: List of players' uids
+          type: string
+        - name: uid
+          in: query
+          description: player's uid
+          type: string
+        - name: sessionId
+          in: query
+          description: player's uid
+          type: string
+
+      responses:
+        '200':
+          description: Performance History Retrieved.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /coaches/get-players:
+    get:
+      tags:
+        - Coach
+      summary: Lists all players paired with one coach
+      security:
+        - api_key: []
+      operationId: getPlayers
+      parameters:
+        - in: query
+          name: uid
+          description: UID of the coach
+          type: string
+          required: true
+      responses:
+        '200':
+          description: Coach's trainee retrieval was successful.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /coaches/get-open-players:
+    get:
+      tags:
+        - Coach
+      summary: Lists all players unpaired with a Coach
+      security:
+        - api_key: []
+      operationId: getAvailablePlayers
+      responses:
+        '200':
+          description: Available trainees sucessfully retrieved.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+  /coaches/create-pairing:
+    post:
+      tags:
+        - Coach
+      summary: Pair a coach with a players
+      security:
+        - api_key: []
+      operationId: createPairing
+      parameters:
+        - in: body
+          name: data
+          description: The uids of coach and player
+          schema:
+            type: object
+            required:
+              - uid
+              - player_id
+            properties:
+              uid:
+                type: string
+              player_id:
+                type: string
+      responses:
+        '200':
+          description: Pairing created.
+        '401':
+          $ref: '#/responses/UnauthorizedError'
+        '500':
+          description: Internal server error.
+
+
+responses:
+  UnauthorizedError:
+    description: API key is missing or invalid
+    headers:
+      WWW_Authenticate:
+        type: string

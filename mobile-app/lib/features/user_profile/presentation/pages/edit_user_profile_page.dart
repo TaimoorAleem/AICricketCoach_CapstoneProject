@@ -116,11 +116,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
           _fieldLabel('Profile picture'),
           _pfp(),
           const SizedBox(height: 30),
-          _fieldLabel('First Name'),
-          _firstNameField(),
-          const SizedBox(height: 20),
-          _fieldLabel('Last Name'),
-          _lastNameField(),
+          _names(),
           const SizedBox(height: 5),
           const SizedBox(height: 20),
           _fieldLabel('Age'),
@@ -180,23 +176,63 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     );
   }
 
+  Widget _names() {
+    return Row(
+      children: [
+        Expanded(child: _firstNameField()),
+        SizedBox(width: 10),
+        Expanded(child: _lastNameField())
+      ],
+    );
+  }
 
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
       decoration: InputDecoration(
-        hintText: widget.user.firstName,
-        border: const OutlineInputBorder(),
+        hintText: 'First Name',
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
-
   Widget _lastNameField() {
     return TextField(
       controller: _lastNameCon,
       decoration: InputDecoration(
-        hintText: widget.user.lastName,
-        border: const OutlineInputBorder(),
+        hintText: 'LastName',
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -212,12 +248,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   }
 
   Widget _ageField() {
-    return TextField(
+    return TextFormField(
       controller: _ageCon,
-      decoration: InputDecoration(
-        hintText: widget.user.age,
-        border: const OutlineInputBorder(),
+      keyboardType: TextInputType.number,
+      decoration: const InputDecoration(
+        labelText: 'Age',
+        border: OutlineInputBorder(),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your age';
+        }
+        final age = int.tryParse(value);
+        if (age == null) {
+          return 'Enter a valid number';
+        }
+        if (age < 13 || age > 100) {
+          return 'Age must be between 13 and 100';
+        }
+        return null;
+      },
     );
   }
 
@@ -274,7 +324,8 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
         width: 10,
         height: 30,
         activeColor: AppColors.primary,
-        onPressed: () async => sl<EditProfileUseCase>().call(
+        onPressed: () async {
+          sl<EditProfileUseCase>().call(
           params: EditProfileReqParams(
               uid: await _getUid(),
               age: _ageCon.text.isEmpty ? widget.user.age! : _ageCon.text,
@@ -293,7 +344,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
               teamName: _teamNameCon.text.isEmpty
                   ? widget.user.teamName!
                   : _teamNameCon.text),
-        ),
+        );},
         onSuccess: () {
           AppNavigator.pushAndRemove(context, UserProfilePage());
         },

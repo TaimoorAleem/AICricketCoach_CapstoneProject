@@ -15,6 +15,7 @@ import '../../../../resources/service_locator.dart';
 import '../../../authentication/domain/usecases/logout_usecase.dart';
 import '../../data/models/delete_account_params.dart';
 import '../../domain/usecases/delete_account_usecase.dart';
+import 'edit_user_profile_page.dart';
 
 class UserProfilePage extends StatelessWidget {
   UserProfilePage({super.key});
@@ -34,33 +35,119 @@ class UserProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return Scaffold(
-        body: SingleChildScrollView(
-            child: Column(
+        body: Column(
               children: [
-                _homeBar(context),
                 const UserProfile(),
-                _logOutButton(context),
-                const SizedBox(height: 5),
-                _deleteButton(context),
+                _allButtons(context)
               ],
-            )
+
         )
     );
   }
 
-  Widget _homeBar(BuildContext context) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.home),
-        onPressed: () {
-          // Replace with your actual home navigation logic
-          AppNavigator.pushAndRemove(context, HomePage());
-        },
-      ),
-      backgroundColor: Colors.transparent,
-      elevation: 0,
+  Widget _allButtons(BuildContext context){
+    return Column(
+    mainAxisAlignment: MainAxisAlignment.end, // Pushes content to the bottom
+    children: [
+      const SizedBox(height: 30),
+      _otherButtons(context),
+      const SizedBox(height: 30),
+      _otherButtons2(context),
+      const SizedBox(height: 160),
+      _logOutAndDeleteButtons(context)
+    ],
     );
   }
+  Widget _otherButtons(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center, // Center the row of buttons
+      children: [
+        const SizedBox(width: 20),
+        // Settings Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.settings, color: AppColors.primary,),
+            label: const Text(
+              'Settings',
+              style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Nunito'
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary, // Button background color
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+            ),
+          ),
+        ), // Space between buttons
+        // Terms and Agreement Button
+
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+  Widget _otherButtons2(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center, // Center the row of buttons
+      children: [
+        const SizedBox(width: 20),
+        // Settings Button
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.library_books, color: AppColors.primary,),
+            label: const Text(
+                'Terms and Agreement',
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Nunito'
+                ),
+                textAlign: TextAlign.center, // Ensure text is centered when wrapping
+
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary, // Button background color
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+            ),
+          ),
+        ), // Space between buttons
+        // Terms and Agreement Button
+
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+
+  Widget _logOutAndDeleteButtons(BuildContext context){
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center, // Center buttons horizontally
+      children: [
+        const SizedBox(width: 20),
+        Expanded(
+          child: _logOutButton(context), // Logout button takes equal space
+        ),
+        const SizedBox(width: 20), // Space between buttons
+        Expanded(
+          child: _deleteButton(context), // Delete button takes equal space
+        ),
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+
+
+
+
+
 
   Widget _logOutButton(BuildContext context){
     return ElevatedButton.icon(
@@ -106,15 +193,8 @@ class UserProfilePage extends StatelessWidget {
       icon: const Icon(Icons.logout, color: Colors.white),
       label: const Text(
         'Log Out',
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.secondary,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 120),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+
     );
   }
 
@@ -126,7 +206,9 @@ class UserProfilePage extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text("Delete Account"),
+              title: const Text(
+                "Delete Account",
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -184,7 +266,8 @@ class UserProfilePage extends StatelessWidget {
           },
         );
       },
-      child: const Text("Delete Account"),
+      child: const Text("Delete Account",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
     );
   }
 

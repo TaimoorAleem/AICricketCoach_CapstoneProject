@@ -1,73 +1,83 @@
-import mediapipe as mp
+import os
 import cv2
+import mediapipe as mp
+from inference_sdk import InferenceHTTPClient  
 
-class BatsmanHandednessDetector:
-    def __init__(self, video_path):
-        self.video_path = video_path
-        self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose()
-        self.final_handedness = None
+class BatsmanPosition:
+    def __init__(self, frame_dir='Frame'):
+        roboflow_creds= os.getenv('ROBOFLOW_CREDENTIALS')
+        self.frame_dir = frame_dir
+        self.batsman_coords = None  # Store batsman bounding box
+        self.batsman_hand = None  # Store batsman's handedness
+        # Initialize the model client
+        self.CLIENT = InferenceHTTPClient(
+            api_url="https://detect.roboflow.com/",
+            api_key=roboflow_creds
+        )
 
-    def process_video(self):
+    def mark_batsman_position(self):
+        """Detects and marks the batsman position in the first frame, then determines handedness."""
+        image_path = os.path.join(self.frame_dir, "0.png")
         
-        cap = cv2.VideoCapture(self.video_path)
+        
+        result = self.CLIENT.infer(image_path, model_id="batsman-detection-2kajl/3")
 
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
+        # Load the image with OpenCV
+        image = cv2.imread(image_path)
 
-            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            results = self.pose.process(rgb_frame)
-
-            if results.pose_landmarks:
-                # Get keypoints for left and right wrists
-                left_wrist = results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_WRIST]
-                right_wrist = results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_WRIST]
-
-                # Get keypoints for left and right ankles
-                left_ankle = results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.LEFT_ANKLE]
-                right_ankle = results.pose_landmarks.landmark[self.mp_pose.PoseLandmark.RIGHT_ANKLE]
-
-                # Draw the keypoints on the frame
-                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                cv2.circle(frame, (int(left_wrist.x * frame.shape[1]), int(left_wrist.y * frame.shape[0])), 5, (0, 255, 0), -1)
-                cv2.circle(frame, (int(right_wrist.x * frame.shape[1]), int(right_wrist.y * frame.shape[0])), 5, (0, 0, 255), -1)
-                cv2.circle(frame, (int(left_ankle.x * frame.shape[1]), int(left_ankle.y * frame.shape[0])), 5, (255, 255, 0), -1)
-                cv2.circle(frame, (int(right_ankle.x * frame.shape[1]), int(right_ankle.y * frame.shape[0])), 5, (255, 0, 255), -1)
-
-                final_handedness = self.determine_handedness(left_ankle, right_ankle, left_wrist, right_wrist)
-
-                self.final_handedness = final_handedness
-
-                cv2.putText(frame, f"Batsman: {final_handedness}", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-
-            cv2.imshow('Batsman Handedness', frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        if self.final_handedness:
-            print(f"Batsman Handedness: {self.final_handedness} batsman")
-
-        cap.release()
-        cv2.destroyAllWindows()
-
-    def determine_handedness(self, left_ankle, right_ankle, left_wrist, right_wrist):
-        """Determine handedness based on ankle and wrist positions."""
-        if left_ankle.x > right_ankle.x:  
-            return "Right-handed"
-        elif right_ankle.x > left_ankle.x:  
-            return "Left-handed"
+        # Check if image is loaded successfully
+        if image is None:
+            print("Failed to load image!")
+            return
         else:
-            if left_wrist.x > right_wrist.x:
-                return "Right-handed"
-            else:
-                return "Left-handed"
+            print("Image loaded successfully.")
 
-if __name__ == "__main__":
-    video_path = "Video.mp4"
-    detector = BatsmanHandednessDetector(video_path)
-    detector.process_video()
+        for detection in result['predictions']:
+            # Get the bounding box coordinates
+            x_min = int(detection['x'] - detection['width'] / 2)
+            y_min = int(detection['y'] - detection['height'] / 2)
+            x_max = int(detection['x'] + detection['width'] / 2)
+            y_max = int(detection['y'] + detection['height'] / 2)
+
+            # Save bounding box coordinates
+            self.batsman_coords = (x_min, y_min, x_max, y_max)
+            print(f"Detected Batsman Bounding Box: {self.batsman_coords}")
+
+            # Crop the batsman region
+            batsman_image = image[y_min:y_max, x_min:x_max]
+
+            # Determine handedness using MediaPipe Pose
+            handedness = self.detect_handedness(batsman_image)
+            print(f"Batsman Handedness: {handedness}")
+            self.batsman_hand = handedness
+
+            # Draw the bounding box on the original image
+            cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            cv2.putText(image, handedness, (x_min, y_min - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+                        1, (0, 255, 0), 2)
+
+    def detect_handedness(self, batsman_image):
+        """Uses MediaPipe Pose to determine if the batsman is right-handed or left-handed."""
+        mp_pose = mp.solutions.pose
+        pose = mp_pose.Pose(static_image_mode=True)
+
+        # Convert image to RGB for MediaPipe
+        image_rgb = cv2.cvtColor(batsman_image, cv2.COLOR_BGR2RGB)
+
+        # Process Image
+        results = pose.process(image_rgb)
+
+        if results.pose_landmarks:
+            # Get wrist positions
+            left_wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST]
+            right_wrist = results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST]
+
+            # Determine handedness
+            if left_wrist.x < right_wrist.x:  # Left wrist closer to bowler
+                return "left"
+            else:
+                return "right"
+        else:
+            return "Handedness Not Detected"
+
 
