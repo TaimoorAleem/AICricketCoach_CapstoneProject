@@ -146,6 +146,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   }
 
   Future<void> uploadVideo() async {
+    await _loadApiKey();
     if (_videoPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a video first')),
@@ -157,28 +158,27 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       _isUploading = true; // Show loading bar
     });
 
-    await _loadApiKey();
-
     try {
-      var request = http.MultipartRequest('POST',
-          Uri.parse(
-            'https://my-app-image-174827312206.us-central1.run.app/upload-video',));
-      request.headers['x-api-key'] = apiKey;
-      request.files.add(await http.MultipartFile.fromPath('file', _videoPath!));
+        var request = http.MultipartRequest('POST',
+            Uri.parse(
+              'https://aicc-gateway2-28bbo1fy.uc.gateway.dev/videos/upload',));
+          request.headers['x-api-key'] = apiKey;
+          request.files.add(await http.MultipartFile.fromPath('file', _videoPath!));
 
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
 
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Video uploaded successfully: ${response.body}')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${response.body}')),
-        );
-      }
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Video uploaded successfully: ${response.body[1]}')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Upload failed: ${response.body}')),
+          );
+        }
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),

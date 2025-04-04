@@ -23,6 +23,7 @@ class HomePage extends StatelessWidget {
                       const SizedBox(height: 30),
                       _pageHeading(),
                       _profileButton(context),
+                      _videoUploadButton(context),
                     ]))));
   }
 
