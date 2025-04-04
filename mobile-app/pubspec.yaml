@@ -99,7 +99,9 @@ flutter:
 
   assets:
     - lib/images/logo.png
-
+    - lib/images/pfp.jpg
+    - lib/images/default-pfp.jpg
+    - assets/APIKey.json
 
   # To add assets to your application, add an assets section, like this:
 

@@ -52,3 +52,5 @@ app.*.map.json
 
 # Environment files
 .env
+
+mobile-app/assets/APIKey.json

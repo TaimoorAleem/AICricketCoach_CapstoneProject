@@ -1,5 +1,5 @@
 class ApiUrl {
-  static const baseURL = 'https://my-app-image-174827312206.us-central1.run.app/';
+  static const baseURL = 'https://aicc-gateway2-28bbo1fy.uc.gateway.dev/';
 
   // Authentication
   static const signup = 'auth/signup';
@@ -22,7 +22,7 @@ class ApiUrl {
 
   // Video Upload & Processing
   static const uploadVideo = 'videos/upload';
-  static const processVideo = 'https://my-vp-app-174827312206.us-central1.run.app/process-video';
+  static const processVideo = 'process-video';
 
   // Shot Prediction (external service)
   static const predictShot = 'https://shot-recommendation-api-857244658015.us-central1.run.app/predict';
