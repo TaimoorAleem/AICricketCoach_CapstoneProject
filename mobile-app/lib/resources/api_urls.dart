@@ -14,8 +14,8 @@ class ApiUrl {
   // Sessions & Deliveries
   static const createSession = 'sessions/create';
   static const getSessions = 'sessions/get';
-  static const createDelivery = 'deliveries/create';
-  static const addDeliveryFeedback = 'deliveries/feedback/add';
+  static const addDelivery = 'deliveries/create';
+  static const addFeedback = 'deliveries/feedback/add';
 
   // Performance Analytics
   static const getPerformance = 'performance/get';

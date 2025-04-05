@@ -1,13 +1,7 @@
 import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
-import 'package:ai_cricket_coach/features/authentication/presentation/pages/sign_up_page.dart';
-
 import 'package:ai_cricket_coach/features/user_profile/presentation/widgets/user_profile.dart';
-
 import 'package:flutter/material.dart';
-import 'package:reactive_button/reactive_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';

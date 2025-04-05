@@ -1,118 +1,152 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../../resources/service_locator.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import '../../../../resources/session_cache.dart';
+import '../../../idealshot/presentation/pages/ideal_shot_page.dart';
 import '../../domain/entities/delivery.dart';
-import '../../../../resources/dio_client.dart';
 
 class DeliveryDetailsPage extends StatefulWidget {
-  final Delivery delivery;
   final String sessionId;
+  final String deliveryId;
   final String playerId;
 
   const DeliveryDetailsPage({
-    Key? key,
-    required this.delivery,
+    super.key,
     required this.sessionId,
+    required this.deliveryId,
     required this.playerId,
-  }) : super(key: key);
+  });
 
   @override
-  _DeliveryDetailsPageState createState() => _DeliveryDetailsPageState();
+  State<DeliveryDetailsPage> createState() => _DeliveryDetailsPageState();
 }
 
 class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
+  Delivery? delivery;
+  bool isCoach = false;
+
   final TextEditingController _feedbackController = TextEditingController();
   double _battingRating = 5.0;
   bool isSubmitting = false;
-  bool isCoach = false;
 
-  late Delivery _updatedDelivery;
+  VideoPlayerController? _videoPlayerController;
+  ChewieController? _chewieController;
 
   @override
   void initState() {
     super.initState();
-    _updatedDelivery = widget.delivery;
+    _loadDelivery();
     _checkUserRole();
   }
 
+  void _loadDelivery() {
+    delivery = SessionCache().getDeliveryById(widget.sessionId, widget.deliveryId);
+    if (delivery != null) {
+      _feedbackController.text = delivery!.feedback ?? '';
+      _battingRating = delivery!.battingRating ?? 5.0;
+      _initializeVideoPlayer(delivery!.videoUrl);
+    }
+  }
+
+  Future<void> _initializeVideoPlayer(String url) async {
+    _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
+    await _videoPlayerController!.initialize();
+    _videoPlayerController!.setVolume(0); // 🔇 Mute video
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController!,
+      autoPlay: true,
+      looping: true,
+    );
+
+    setState(() {});
+  }
+
   Future<void> _checkUserRole() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? role = prefs.getString('role');
-    setState(() {
-      isCoach = role == 'coach';
-    });
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString('role');
+    setState(() => isCoach = role == 'coach');
   }
 
   Future<void> _submitFeedback() async {
     setState(() => isSubmitting = true);
 
-    final DioClient dioClient = sl<DioClient>();
-    final String url = "add-feedback";
+    SessionCache().submitFeedback(
+      sessionId: widget.sessionId,
+      deliveryId: widget.deliveryId,
+      rating: _battingRating,
+      feedback: _feedbackController.text,
+    );
 
-    final Map<String, dynamic> requestBody = {
-      "playerId": widget.playerId,
-      "sessionId": widget.sessionId,
-      "deliveryId": widget.delivery.deliveryId,
-      "battingRating": _battingRating,
-      "feedback": _feedbackController.text,
-    };
+    setState(() => isSubmitting = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Feedback submitted')),
+    );
+  }
 
-    try {
-      final response = await dioClient.post(url, data: requestBody);
-      if (response.statusCode == 200) {
-        setState(() {
-          _updatedDelivery = Delivery(
-            deliveryId: _updatedDelivery.deliveryId,
-            speed: _updatedDelivery.speed,
-            bounceHeight: _updatedDelivery.bounceHeight,
-            ballLength: _updatedDelivery.ballLength,
-            horizontalPosition: _updatedDelivery.horizontalPosition,
-            rightHandedBatsman: _updatedDelivery.rightHandedBatsman,
-            accuracy: _updatedDelivery.accuracy,
-            executionRating: _updatedDelivery.executionRating,
-            idealShot: _updatedDelivery.idealShot,
-            videoUrl: _updatedDelivery.videoUrl,
-            feedback: _feedbackController.text,
-            battingRating: _battingRating,
-          );
-        });
+  void _navigateToIdealShotPage() {
+    if (delivery == null) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => IdealShotPage(
+          ballCharacteristics: {
+            "Ball Speed": delivery!.ballSpeed,
+            "Ball Length": delivery!.ballLength,
+            "Ball Horizontal Line": delivery!.ballLine,
+            "Batsman Position": delivery!.batsmanPosition,
+          },
+          shots: delivery!.idealShots,
+        ),
+      ),
+    );
+  }
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Feedback added successfully")),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to submit feedback: $e")),
-      );
-    } finally {
-      setState(() => isSubmitting = false);
-    }
+  @override
+  void dispose() {
+    _videoPlayerController?.dispose();
+    _chewieController?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (delivery == null) {
+      return const Scaffold(
+        body: Center(child: Text("Delivery not found.")),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('Delivery Details')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Details:', style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8.0),
-            Text('Speed: ${_updatedDelivery.speed} km/h'),
-            Text('Ball Length: ${_updatedDelivery.ballLength}'),
-            Text('Horizontal Position: ${_updatedDelivery.horizontalPosition}'),
-            Text('Ideal Shot: ${_updatedDelivery.idealShot}'),
-            if (_updatedDelivery.feedback != null && _updatedDelivery.feedback!.isNotEmpty)
-              Text('Feedback: ${_updatedDelivery.feedback!}'),
-            if (_updatedDelivery.battingRating != null)
-              Text('Batting Rating: ${_updatedDelivery.battingRating!.toStringAsFixed(1)} / 10'),
+            if (_chewieController != null &&
+                _chewieController!.videoPlayerController.value.isInitialized)
+              AspectRatio(
+                aspectRatio:
+                _chewieController!.videoPlayerController.value.aspectRatio,
+                child: Chewie(controller: _chewieController!),
+              )
+            else
+              const Center(child: CircularProgressIndicator()),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+            Text('Speed: ${delivery!.ballSpeed} km/h'),
+            Text('Ball Line: ${delivery!.ballLine}'),
+            Text('Ball Length: ${delivery!.ballLength}'),
+            const SizedBox(height: 24),
 
+            ElevatedButton(
+              onPressed: _navigateToIdealShotPage,
+              child: const Text("View Ideal Shot"),
+            ),
+
+            const SizedBox(height: 24),
             if (isCoach) _buildFeedbackSection(),
           ],
         ),
@@ -124,35 +158,36 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Coach Feedback:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 10),
+        const Text("Coach Feedback",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         TextField(
           controller: _feedbackController,
+          maxLines: 3,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
-            hintText: "Enter feedback...",
+            hintText: "Enter your feedback...",
           ),
-          maxLines: 3,
         ),
         const SizedBox(height: 10),
-        const Text("Batting Rating (Out of 10):", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        const Text("Batting Rating (1–10):"),
         Slider(
           value: _battingRating,
           min: 1,
           max: 10,
           divisions: 9,
-          label: _battingRating.toString(),
+          label: _battingRating.toStringAsFixed(1),
           onChanged: (value) {
-            setState(() {
-              _battingRating = value;
-            });
+            setState(() => _battingRating = value);
           },
         ),
         const SizedBox(height: 10),
         Center(
           child: ElevatedButton(
             onPressed: isSubmitting ? null : _submitFeedback,
-            child: isSubmitting ? const CircularProgressIndicator() : const Text("Submit Feedback"),
+            child: isSubmitting
+                ? const CircularProgressIndicator()
+                : const Text("Submit Feedback"),
           ),
         ),
       ],

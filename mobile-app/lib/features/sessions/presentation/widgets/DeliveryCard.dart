@@ -4,10 +4,10 @@ import '../pages/delivery_details_page.dart';
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
-  final String sessionId; // ✅ Session ID required for feedback
-  final String playerId;  // ✅ Player ID added for tracking
+  final String sessionId;
+  final String playerId;
 
-  const DeliveryCard({Key? key, required this.delivery, required this.sessionId, required this.playerId}) : super(key: key);
+  const DeliveryCard({super.key, required this.delivery, required this.sessionId, required this.playerId});
 
   @override
   Widget build(BuildContext context) {
@@ -18,22 +18,21 @@ class DeliveryCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Speed: ${delivery.speed} km/h'),
-            Text('Accuracy: ${delivery.accuracy}%'),
-            Text('Ideal Shot: ${delivery.idealShot}'),
-            Text('Execution Rating: ${delivery.executionRating}'),
+            Text('Speed: ${delivery.ballSpeed} km/h'),
+            Text('Ball Line: ${delivery.ballLine}'),
+            Text('Ball Length: ${delivery.ballLength}'),
+            if (delivery.feedback != null) Text('Feedback: ${delivery.feedback}'),
           ],
         ),
         trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          // Navigate to the DeliveryDetailsPage and pass sessionId & playerId
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DeliveryDetailsPage(
-                delivery: delivery,
-                sessionId: sessionId, // ✅ Ensure sessionId is passed
-                playerId: playerId,   // ✅ Ensure playerId is passed
+              builder: (_) => DeliveryDetailsPage(
+                sessionId: sessionId,
+                deliveryId: delivery.deliveryId,
+                playerId: playerId,
               ),
             ),
           );

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../entities/session.dart';
+import '../entities/delivery.dart';
 
 abstract class SessionsRepository {
   Future<Either<String, List<Session>>> getSessions({required String playerUid});
@@ -10,5 +11,9 @@ abstract class SessionsRepository {
     required double battingRating,
     required String feedback,
   });
+  Future<Either<String, void>> addDelivery({
+    required String playerId,
+    required String sessionId,
+    required Delivery delivery,
+  });
 }
-

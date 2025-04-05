@@ -1,24 +1,21 @@
 import 'package:dartz/dartz.dart';
+import '../entities/delivery.dart';
 import '../repositories/session_repository.dart';
 
-class AddFeedbackUseCase {
+class AddDeliveryUseCase {
   final SessionsRepository repository;
 
-  AddFeedbackUseCase(this.repository);
+  AddDeliveryUseCase(this.repository);
 
   Future<Either<String, void>> call({
     required String playerId,
     required String sessionId,
-    required String deliveryId,
-    required double battingRating,
-    required String feedback,
+    required Delivery delivery,
   }) {
-    return repository.addFeedback(
+    return repository.addDelivery(
       playerId: playerId,
       sessionId: sessionId,
-      deliveryId: deliveryId,
-      battingRating: battingRating,
-      feedback: feedback,
+      delivery: delivery,
     );
   }
 }
