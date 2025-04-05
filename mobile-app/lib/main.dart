@@ -1,16 +1,14 @@
 import 'dart:async';
 import 'dart:math';
-
-import 'package:dartz/dartz.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'features/authentication/presentation/bloc/AuthCubit.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../resources/service_locator.dart';
-import 'features/analytics/presentation/bloc/AuthCubit.dart';
 import 'features/authentication/presentation/pages/loading_page.dart';
 import '../resources/app_theme.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

@@ -54,7 +54,7 @@ void setupServiceLocator() {
   sl.registerLazySingleton<UserProfileService>(() => UserProfileServiceImpl());
   sl.registerLazySingleton<SessionApiService>(() => SessionApiService(sl<DioClient>()));
   sl.registerLazySingleton<PerformanceApiService>(() => PerformanceApiService(sl<DioClient>()));
-  sl.registerLazySingleton<ShotPredictionRepository>(() => ShotPredictionRepositoryImpl(sl<DioClient>()));
+  // sl.registerLazySingleton<ShotPredictionRepository>(() => ShotPredictionRepositoryImpl(sl<DioClient>()));
   sl.registerLazySingleton<PlayerApiService>(() => PlayerApiService());
 
   // **Repositories**

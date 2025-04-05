@@ -18,7 +18,7 @@ class AuthRepoImpl extends AuthRepo {
       return Left(error);
     }, (data) async {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       return Right(data);
     });
   }
@@ -51,7 +51,7 @@ class AuthRepoImpl extends AuthRepo {
       return Left(error);
     }, (data) async {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', data['uid']);
       sharedPreferences.setString('role', data['role']);
       debugPrint(sharedPreferences.getString('uid'));
@@ -63,7 +63,7 @@ class AuthRepoImpl extends AuthRepo {
   @override
   Future<bool> isAuthenticated() async {
     final SharedPreferences sharedPreferences =
-        await SharedPreferences.getInstance();
+    await SharedPreferences.getInstance();
     var token = sharedPreferences.getString('token');
     if (token == null) {
       return false;

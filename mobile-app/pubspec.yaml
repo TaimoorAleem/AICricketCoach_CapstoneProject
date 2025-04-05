@@ -33,19 +33,12 @@ dependencies:
   cached_network_image: ^3.4.1
 
   get:
-  image_picker:
-  chewie: ^1.7.1
-  video_player: ^2.7.0
   file_picker: ^10.0.0
 
   #firebase_core: ^2.16.0
   firebase_core:
 
   firebase_auth:
-
-  firebase_analytics:
-
-  firebase_messaging: ^15.2.2
 
   flutter_local_notifications: ^19.0.0
 
@@ -59,8 +52,6 @@ dependencies:
   dartz:
 
   dio:
-
-  http:
 
   logger:
 
