@@ -28,7 +28,7 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> getProfileInfo() async {
     try {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       var response = await sl<DioClient>()
           .get(ApiUrl.getUser, queryParameters: {"uid": uid});
@@ -48,7 +48,7 @@ class UserProfileServiceImpl extends UserProfileService {
       var email = userData.data['data']['email'];
 
       UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: params.password,
       );
@@ -60,7 +60,7 @@ class UserProfileServiceImpl extends UserProfileService {
         return const Left('Failed to generate ID token.');
       }
       final updatedParams =
-          DeleteAccountReqParams(uid: params.uid, password: idToken);
+      DeleteAccountReqParams(uid: params.uid, password: idToken);
 
       var response = await sl<DioClient>()
           .post(ApiUrl.deleteAccount, data: updatedParams.toMap());
@@ -77,9 +77,7 @@ class UserProfileServiceImpl extends UserProfileService {
   @override
   Future<Either> editProfileInfo(EditProfileReqParams params) async {
     try {
-      var response =
-          await sl<DioClient>().post(ApiUrl.editProfile, data: params.toMap());
-
+      var response = await sl<DioClient>().post(ApiUrl.editProfile, data: params.toMap());
       return Right(response.data);
     } on DioException catch (e) {
       return Left(e.response!.data['message']);
@@ -89,10 +87,10 @@ class UserProfileServiceImpl extends UserProfileService {
   @override
   Future<Either<String, String>> getProfilePicture(String url) async {
     try {
-      imageCache.clear();
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
+        imageCache.clear();
         final bytes = response.bodyBytes; // Image bytes
 
         // Get the application documents directory
@@ -102,8 +100,6 @@ class UserProfileServiceImpl extends UserProfileService {
         // Save the image as a file
         final file = File(filePath);
         await file.writeAsBytes(bytes);
-
-        debugPrint("saved new image at : " + filePath);
 
         // Return the file path on success
         return Right(filePath);
@@ -120,7 +116,7 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> editProfilePicture(String path) async {
     try {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       FormData formData = FormData.fromMap({
         "uid": uid, // Send UID as text
@@ -129,7 +125,7 @@ class UserProfileServiceImpl extends UserProfileService {
       });
 
       var response =
-          await sl<DioClient>().post(ApiUrl.editPfp, data: formData);
+      await sl<DioClient>().post(ApiUrl.editPfp, data: formData);
       if (response.statusCode == 200) {
         sharedPreferences.setString('pfpUrl', response.data['url']);
         return Right(response.data['url']);

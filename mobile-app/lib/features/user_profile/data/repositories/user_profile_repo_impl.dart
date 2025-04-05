@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ai_cricket_coach/features/user_profile/domain/repositories/user_profile_repo.dart';
 import 'package:ai_cricket_coach/resources/user_mapper.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../resources/service_locator.dart';
@@ -19,6 +20,7 @@ class UserProfileRepoImpl extends UserProfileRepo {
       return Left(error);
     }, (data) {
       var user = UserMapper.toEntity(UserModel.fromJson(data['data']));
+
       return Right(user);
     });
   }
@@ -35,10 +37,13 @@ class UserProfileRepoImpl extends UserProfileRepo {
 
   @override
   Future<Either> editProfileInfo(EditProfileReqParams params) async {
+    debugPrint("made it to editProfileInfo");
     var returnedData = await sl<UserProfileService>().editProfileInfo(params);
     return returnedData.fold((error) {
+      debugPrint("in userrepoimpl error");
       return Left(error);
     }, (data) {
+      debugPrint("in userrepoimpl data");
       var user = UserMapper.toEntity(UserModel.fromJson(data['user']));
       return Right(user);
     });
