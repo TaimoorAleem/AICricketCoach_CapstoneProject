@@ -143,38 +143,39 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
 
   Widget _pfp() {
     return GestureDetector(
-      onTap: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) {
-            return Wrap(
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: const Text("Choose from Gallery"),
-                  onTap: () {
-                    Navigator.pop(context); // Close modal
-                    _pickImage(ImageSource.gallery); // Open gallery
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: const Text("Take a Photo"),
-                  onTap: () {
-                    Navigator.pop(context); // Close modal
-                    _pickImage(ImageSource.camera); // Open camera
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (context) {
+              return Wrap(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: const Text("Choose from Gallery"),
+                    onTap: () {
+                      Navigator.pop(context); // Close modal
+                      _pickImage(ImageSource.gallery); // Open gallery
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.camera_alt),
+                    title: const Text("Take a Photo"),
+                    onTap: () {
+                      Navigator.pop(context); // Close modal
+                      _pickImage(ImageSource.camera); // Open camera
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        },
         child: CircleAvatar(
           radius: 30,
           backgroundImage: _pfpPath.isNotEmpty
               ? FileImage(File(_pfpPath)) as ImageProvider
-              : const AssetImage('lib/images/default-pfp.jpg'),
+              : const AssetImage(
+              'lib/images/default-pfp.jpg'),
         )
 
     );

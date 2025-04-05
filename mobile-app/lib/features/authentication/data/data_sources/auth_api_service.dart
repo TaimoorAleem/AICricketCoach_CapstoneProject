@@ -14,72 +14,91 @@ import '../models/signup_req_params.dart';
 import '../models/update_fcmtoken_params.dart';
 
 abstract class AuthService {
-  Future<Either<String, Map<String, dynamic>>> signup(SignupReqParams params);
-  Future<Either<String, Map<String, dynamic>>> login(LoginReqParams params);
-  Future<Either<String, Map<String, dynamic>>> resetpassword(ResetPWParams params);
-  Future<Either<String, Map<String, dynamic>>> createProfile(EditProfileReqParams params);
+
+  Future<Either> signup(SignupReqParams params);
+  Future<Either> login(LoginReqParams params);
+  Future<Either> resetpassword(ResetPWParams params);
+  Future<Either> createProfile(EditProfileReqParams params);
 }
+
 
 class AuthApiServiceImpl extends AuthService {
 
   @override
-  Future<Either<String, Map<String, dynamic>>> signup(SignupReqParams params) async {
+  Future<Either> signup(SignupReqParams params) async {
     try {
+    // Attempt to create a user with Firebase Auth
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: params.email,
-        password: params.password,
-      );
+        password: params.password,);
 
       String uid = userCredential.user!.uid;
-      final updatedParams = SignupReqParams(email: params.email, password: uid, role: params.role);
+
+      // Proceed with additional data if user creation is successful
+      final updatedParams = SignupReqParams(
+        email: params.email,
+        password: uid,
+        role: params.role,
+        firstName: params.firstName,
+        lastName: params.lastName,
+      );
 
       var response = await sl<DioClient>().post(
         ApiUrl.signup,
         data: updatedParams.toMap(),
       );
 
+      // Retrieve the Firebase ID token for authentication
       String? idToken = await userCredential.user?.getIdToken();
       if (idToken == null) {
-        return const Left('Failed to generate ID token.');
+        debugPrint("failed to generate token");
+        return Left('Failed to generate ID token.');
+
       }
 
+      // Save token and user details in SharedPreferences
       final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', uid);
       sharedPreferences.setString('token', idToken);
-      await saveFCMToken(response.data.uid);
+      sharedPreferences.setString('role', params.role);
+      sharedPreferences.setString('firstName', params.firstName);
+      sharedPreferences.setString('lastName', params.lastName);
+      await saveFCMToken(response.data['uid']);
 
-      return Right(response.data);
-    } on DioException catch (e) {
-      return Left(e.response?.data['message'] ?? "Signup failed");
+      return Right(response); // Return success with the server response
+    } catch (e) {
+    // Catch any errors during signup and return a Left with the error message
+    return Left('Signup failed: $e');
+      }
     }
-  }
+
 
   @override
-  Future<Either<String, Map<String, dynamic>>> createProfile(EditProfileReqParams params) async {
+  Future<Either> createProfile(EditProfileReqParams params) async {
     try {
       var response = await sl<DioClient>().post(
-        ApiUrl.editProfile,
-        data: params.toMap(),
+          ApiUrl.editProfile,
+          data: params.toMap()
       );
       debugPrint('meo1');
       return Right(response.data);
-    } on DioException catch (e) {
-      return Left(e.response?.data['message'] ?? "Profile creation failed");
+    } on DioException catch(e) {
+      return Left(e.response!.data['message']);
     }
   }
 
   @override
-  Future<Either<String, Map<String, dynamic>>> resetpassword(ResetPWParams params) async {
+  Future<Either> resetpassword(ResetPWParams params) async {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: params.email);
-      return const Right({"message": "Password reset email sent"});
+      return const Right(null); // Success case
     } catch (e) {
-      return Left("Reset password failed: ${e.toString()}");
+      return Left(e.toString()); // Convert any error into a Left<String>
     }
   }
 
   @override
-  Future<Either<String, Map<String, dynamic>>> login(LoginReqParams params) async {
+  Future<Either> login(LoginReqParams params) async {
     try {
 
       //Authenticate the user with Firebase
@@ -120,6 +139,7 @@ class AuthApiServiceImpl extends AuthService {
 
 
       return Right(response.data);
+
     } on DioException catch (e) {
       return Left(e.response!.data['message']);
     } catch (e) {

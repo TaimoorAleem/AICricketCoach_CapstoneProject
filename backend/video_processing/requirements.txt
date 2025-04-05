@@ -1,0 +1,9 @@
+opencv-python-headless==4.8.1.78
+numpy==1.26.3
+Flask==2.1.1
+google-cloud-storage==2.10.0
+gunicorn==20.1.0
+werkzeug==2.1.1
+ultralytics==8.3.98
+inference-sdk==0.45.0
+mediapipe==0.10.21

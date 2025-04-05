@@ -18,5 +18,11 @@ resource "google_cloud_run_service" "container" {
         }
       }
     }
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/minScale" = "0"
+        "autoscaling.knative.dev/maxScale" = "5"
+      }
+    }
   }
 }

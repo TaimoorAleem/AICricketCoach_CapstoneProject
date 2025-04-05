@@ -22,7 +22,14 @@ class ResetPasswordPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
+              _backBar(context),
+              const SizedBox(height: 100),
+              Image.asset(
+                'lib/images/logo.png', // Path to your logo
+                height: 120, // Adjust size as needed
+                width: 120,
+              ),
+              const SizedBox(height: 20),
               _welcomeHeading(),
               const SizedBox(height: 20),
               const SizedBox(height: 20),
@@ -38,9 +45,10 @@ class ResetPasswordPage extends StatelessWidget {
 
   Widget _welcomeHeading() {
     return const Text(
-      'Welcome to AI Cricket Coach',
+      'AI Cricket Coach',
       style: TextStyle(
-        fontWeight: FontWeight.bold,
+        fontFamily: 'Nunito',
+        fontWeight: FontWeight.w600,
         fontSize: 26,
         color: AppColors.primary,
       ),
@@ -52,14 +60,14 @@ class ResetPasswordPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _loginText(),
-
+          const SizedBox(height: 20),
           _emailField(),
           const SizedBox(height: 20),
           const SizedBox(height: 5),
@@ -71,21 +79,52 @@ class ResetPasswordPage extends StatelessWidget {
 
   Widget _loginText() {
     return const Text(
-      'Log In',
+      'Forgot your password? Enter your email address to receive your password reset information.',
       style: TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 22,
-        color: AppColors.primary,
+        fontFamily: 'Nunito',
+        fontWeight: FontWeight.w500,
+        fontSize: 15,
+        color: Colors.white,
       ),
+    );
+  }
+  Widget _backBar(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () {
+          // Replace with your actual home navigation logic
+          AppNavigator.pushAndRemove(context, LogInPage());
+        },
+      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
     );
   }
 
   Widget _emailField() {
     return TextField(
       controller: _emailCon,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Email',
-        border: OutlineInputBorder(),
+        hintStyle: const TextStyle(
+            fontFamily: 'Nunito',
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
