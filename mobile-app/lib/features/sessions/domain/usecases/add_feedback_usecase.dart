@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import '../repositories/session_repository.dart';
+import '../repositories/sessions_repository.dart';
 
 class AddFeedbackUseCase {
   final SessionsRepository repository;

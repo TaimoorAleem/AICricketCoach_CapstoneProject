@@ -60,7 +60,7 @@ class HomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SessionsHistoryPage(playerUid: playerUid),
+                        builder: (context) => SessionsHistoryPage(playerId: playerUid),
                       ),
                     );
                   },

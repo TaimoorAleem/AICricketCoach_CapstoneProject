@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../entities/session.dart';
-import '../repositories/session_repository.dart';
+import '../repositories/sessions_repository.dart';
 
 class GetSessionsUseCase {
   final SessionsRepository repository;

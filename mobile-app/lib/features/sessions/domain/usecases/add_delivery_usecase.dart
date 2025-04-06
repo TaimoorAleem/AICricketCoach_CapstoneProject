@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import '../entities/delivery.dart';
-import '../repositories/session_repository.dart';
+import '../repositories/sessions_repository.dart';
 
 class AddDeliveryUseCase {
   final SessionsRepository repository;

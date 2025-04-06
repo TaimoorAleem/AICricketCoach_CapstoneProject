@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../features/sessions/data/data_sources/session_api_service.dart';
 import '../resources/dio_client.dart';
 
 // Auth
@@ -24,9 +25,8 @@ import '../features/user_profile/domain/usecases/get_user_profile.dart';
 import '../features/user_profile/domain/usecases/get_profile_picture.dart';
 
 // Sessions
-import '../features/sessions/data/services/sessions_api_service.dart';
-import '../features/sessions/data/repositories/session_repository_impl.dart';
-import '../features/sessions/domain/repositories/session_repository.dart';
+import '../features/sessions/data/repositories/sessions_repository_impl.dart';
+import '../features/sessions/domain/repositories/sessions_repository.dart';
 import '../features/sessions/domain/usecases/get_sessions_usecase.dart';
 
 // Analytics
@@ -42,10 +42,10 @@ import '../features/coaches/domain/repositories/player_repository.dart';
 import '../features/coaches/domain/usecases/get_players_usecase.dart';
 import '../features/coaches/domain/usecases/get_players_performance_usecase.dart';
 
-// Feedback
-import '../features/feedback/data/repositories/shot_prediction_repository_impl.dart';
-import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
-import '../features/feedback/domain/usecases/predict_shot_usecase.dart';
+// Feedback (commented for now; uncomment if you add it later)
+// import '../features/feedback/data/repositories/shot_prediction_repository_impl.dart';
+// import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
+// import '../features/feedback/domain/usecases/predict_shot_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -59,7 +59,7 @@ Future<void> setupServiceLocator() async {
   // API Services
   sl.registerLazySingleton<AuthService>(() => AuthApiServiceImpl());
   sl.registerLazySingleton<UserProfileService>(() => UserProfileServiceImpl());
-  sl.registerLazySingleton<SessionsApiService>(() => SessionsApiServiceImpl());
+  sl.registerLazySingleton<SessionsApiService>(() => SessionsApiServiceImpl(sl<DioClient>()));
   sl.registerLazySingleton<PerformanceApiService>(() => PerformanceApiService(sl<DioClient>()));
   sl.registerLazySingleton<PlayerApiService>(() => PlayerApiService(sl<DioClient>()));
 
@@ -85,10 +85,12 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<GetProfilePictureUseCase>(() => GetProfilePictureUseCase());
   sl.registerLazySingleton<EditProfileUseCase>(() => EditProfileUseCase());
   sl.registerLazySingleton<DeleteAccountUseCase>(() => DeleteAccountUseCase());
-  sl.registerLazySingleton<GetSessionsUseCase>(() => GetSessionsUseCase(repository: sl<SessionsRepository>()));
+  sl.registerLazySingleton<GetSessionsUseCase>(() => GetSessionsUseCase(sl<SessionsRepository>()));
   sl.registerLazySingleton<GetPerformanceHistoryUseCase>(() => GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()));
   sl.registerLazySingleton<GetPlayersUseCase>(() => GetPlayersUseCase(repository: sl<PlayerRepository>()));
   sl.registerLazySingleton<GetPlayersPerformanceUseCase>(() => GetPlayersPerformanceUseCase(repository: sl<PlayerRepository>()));
-  sl.registerLazySingleton<PredictShotUseCase>(() => PredictShotUseCase(sl<ShotPredictionRepository>()));
-}
 
+  // Feedback (if needed later)
+  // sl.registerLazySingleton<ShotPredictionRepository>(() => ShotPredictionRepositoryImpl(sl<DioClient>()));
+  // sl.registerLazySingleton<PredictShotUseCase>(() => PredictShotUseCase(sl<ShotPredictionRepository>()));
+}
