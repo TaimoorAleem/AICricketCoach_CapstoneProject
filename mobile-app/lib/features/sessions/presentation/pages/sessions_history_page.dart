@@ -39,7 +39,7 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
         });
       },
           (fetchedSessions) {
-        SessionCache().storeSessions(fetchedSessions); // ✅ Cache updated
+        SessionCache().storeSessions(fetchedSessions); idr
         setState(() {
           sessions = fetchedSessions;
           isLoading = false;

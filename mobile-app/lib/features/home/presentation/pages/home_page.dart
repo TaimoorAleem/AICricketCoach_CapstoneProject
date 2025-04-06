@@ -1,3 +1,4 @@
+import 'package:ai_cricket_coach/features/home/presentation/pages/sessions_manager_page.dart';
 import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,102 +7,93 @@ import '../../../../resources/app_colors.dart';
 import '../../../sessions/presentation/pages/sessions_history_page.dart';
 import '../../../user_profile/presentation/pages/user_profile_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Future<String?> _getPlayerUid() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString('uid');
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+  String? playerUid;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUid();
+  }
+
+  Future<void> _loadUid() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      playerUid = prefs.getString('uid');
+    });
+  }
+
+  static const List<Widget> _pages = [
+    SessionsManagerPage(),
+    UploadVideoPage(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (playerUid == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Home',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: AppColors.secondary,
       ),
-      body: FutureBuilder<String?>(
-        future: _getPlayerUid(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final playerUid = snapshot.data!;
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => UserProfilePage()),
-                    );
-                  },
-                  child: const Text('Go to User Profile'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SessionsHistoryPage(playerId: playerUid),
-                      ),
-                    );
-                  },
-                  child: const Text('Go to Sessions History'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => UploadVideoPage(),
-                      ),
-                    );
-                  },
-                  child: const Text('Upload Video'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AnalyticsPage.singlePlayer(playerUid: playerUid),
-                      ),
-                    );
-                  },
-                  child: const Text('Go to Analytics Page'),
-                ),
-              ],
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: AppColors.secondary),
+              child: Text('Navigation', style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
-          );
-        },
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('User Profile'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => UserProfilePage()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Sessions History'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => SessionsHistoryPage(playerId: playerUid!)));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.analytics),
+              title: const Text('Analytics Page'),
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => AnalyticsPage.singlePlayer(playerUid: playerUid!)));
+              },
+            ),
+          ],
+        ),
+      ),
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.sports_cricket), label: 'Session'),
+          BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColors.primary,
+        onTap: _onItemTapped,
       ),
     );
   }

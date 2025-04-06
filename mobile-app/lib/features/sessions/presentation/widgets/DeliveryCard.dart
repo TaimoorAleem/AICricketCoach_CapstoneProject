@@ -32,7 +32,6 @@ class DeliveryCard extends StatelessWidget {
               builder: (_) => DeliveryDetailsPage(
                 sessionId: sessionId,
                 deliveryId: delivery.deliveryId,
-                playerId: playerId,
               ),
             ),
           );

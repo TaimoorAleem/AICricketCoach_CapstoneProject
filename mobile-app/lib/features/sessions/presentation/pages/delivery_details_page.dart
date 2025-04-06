@@ -9,13 +9,11 @@ import '../../domain/entities/delivery.dart';
 class DeliveryDetailsPage extends StatefulWidget {
   final String sessionId;
   final String deliveryId;
-  final String playerId;
 
   const DeliveryDetailsPage({
     super.key,
     required this.sessionId,
     required this.deliveryId,
-    required this.playerId,
   });
 
   @override
@@ -72,7 +70,7 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
   Future<void> _submitFeedback() async {
     setState(() => isSubmitting = true);
 
-    SessionCache().submitFeedback(
+    SessionCache().updateDeliveryFeedback(
       sessionId: widget.sessionId,
       deliveryId: widget.deliveryId,
       rating: _battingRating,
