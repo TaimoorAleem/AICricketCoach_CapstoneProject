@@ -113,31 +113,41 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _fieldLabel('Profile picture'),
-          _pfp(),
-          const SizedBox(height: 30),
-          _fieldLabel('First Name'),
-          _firstNameField(),
-          const SizedBox(height: 20),
-          _fieldLabel('Last Name'),
-          _lastNameField(),
-          const SizedBox(height: 5),
-          const SizedBox(height: 20),
-          _fieldLabel('Age'),
-          _ageField(),
-          _fieldLabel('City'),
-          _cityField(),
-          _fieldLabel('Country'),
-          _countryField(),
-          _fieldLabel('Team Name'),
-          _teamNameField(),
+          _homeBar(context),
+          const SizedBox(height: 10),
+          _nameLabels(),
+          _names(),
+          const SizedBox(height: 40),
+          _locationLabels(),
+          _location(),
+          const SizedBox(height: 40),
+          _teamAndAgeLabels(),
+          _teamAndAge(),
+          const SizedBox(height: 40),
           _fieldLabel('Description'),
           _descriptionField(),
-          const SizedBox(height: 5),
           const SizedBox(height: 30),
           _saveButton(context),
         ],
       ),
+    );
+  }
+  Widget _homeBar(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back, color: AppColors.primary,),
+        onPressed: () {
+          // Replace with your actual home navigation logic
+          AppNavigator.pushAndRemove(context, UserProfilePage());
+        },
+        color: AppColors.background,
+        focusColor: AppColors.background,
+        hoverColor: AppColors.background,
+        highlightColor: AppColors.background,
+        splashColor: AppColors.background,
+      ),
+
     );
   }
 
@@ -181,13 +191,90 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     );
   }
 
+  Widget _names() {
+    return Row(
+      children: [
+        _pfp(),
+        SizedBox(width: 10),
+        Expanded(child: _firstNameField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _lastNameField()),
+      ],
+    );
+  }
+  Widget _nameLabels() {
+    return Row(
+      children: [
+        Align(child: _fieldLabel('Profile\nPicture\n')),
+        SizedBox(width: 15),
+        Expanded(child: _fieldLabel('First Name')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Last Name')),
+      ],
+    );
+  }
+  Widget _location(){
+    return Row(
+      children: [
+        Expanded(child: _cityField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _countryField()),
+      ],
+    );
+  }
+  Widget _locationLabels(){
+    return Row(
+      children: [
+        Expanded(child: _fieldLabel('City')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Country')),
+      ],
+    );
+  }
+  Widget _teamAndAge(){
+    return Row(
+      children: [
+        Expanded(child: _teamNameField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _ageField()),
+      ],
+    );
+  }
+  Widget _teamAndAgeLabels(){
+    return Row(
+      children: [
+        Expanded(child: _fieldLabel('Team')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Age')),
+      ],
+    );
+  }
+
+
+
 
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
       decoration: InputDecoration(
         hintText: widget.user.firstName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -197,7 +284,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _lastNameCon,
       decoration: InputDecoration(
         hintText: widget.user.lastName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -207,7 +310,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _teamNameCon,
       decoration: InputDecoration(
         hintText: widget.user.teamName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -217,7 +336,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _ageCon,
       decoration: InputDecoration(
         hintText: widget.user.age,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -227,7 +362,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _cityCon,
       decoration: InputDecoration(
         hintText: widget.user.city,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -237,7 +388,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _countryCon,
       decoration: InputDecoration(
         hintText: widget.user.country,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -247,7 +414,23 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _descriptionCon,
       decoration: InputDecoration(
         hintText: widget.user.description,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -256,6 +439,8 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     return Text(
       text,
       style: const TextStyle(
+        color: Colors.white,
+        fontFamily: 'Nunito',
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
