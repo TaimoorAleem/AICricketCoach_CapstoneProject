@@ -53,7 +53,7 @@ class UserProfilePage extends StatelessWidget {
       _otherButtons(context),
       const SizedBox(height: 30),
       _otherButtons2(context),
-      const SizedBox(height: 160),
+      const SizedBox(height: 100),
       _logOutAndDeleteButtons(context)
     ],
     );

@@ -360,6 +360,9 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
         ),
       ),
       validator: (value){
+        if(value==null || value.isEmpty){
+          return null;
+        }
         if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value!)) {
           return 'Team name can only contain letters, numbers, and spaces';
         }

@@ -168,7 +168,7 @@ class UserProfile extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -321,7 +321,7 @@ class UserProfile extends StatelessWidget {
                           ),
                         ),
 
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
