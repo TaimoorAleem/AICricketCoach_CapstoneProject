@@ -1,6 +1,6 @@
-import 'package:dio/dio.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart'; // To load local files
+import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'api_urls.dart';
 import 'interceptors.dart';
 
@@ -8,36 +8,41 @@ class DioClient {
   late final Dio _dio;
   String? apiKey;
 
-  DioClient() {
-    _loadApiKey().then((value) {
-      _dio = Dio(
-        BaseOptions(
-          baseUrl: ApiUrl.baseURL,
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8',
-            'x-api-key': apiKey ?? '', // Add the apiKey here
-          },
-          responseType: ResponseType.json,
-          sendTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
-        ),
-      )..interceptors.addAll([AuthorizationInterceptor(), LoggerInterceptor()]);
-    });
+  DioClient._internal(); // Private named constructor
+
+  static Future<DioClient> init() async {
+    final client = DioClient._internal();
+    await client._loadApiKey();
+
+    client._dio = Dio(
+      BaseOptions(
+        baseUrl: ApiUrl.baseURL,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-api-key': client.apiKey ?? '',
+        },
+        responseType: ResponseType.json,
+        sendTimeout: const Duration(minutes: 2),
+        receiveTimeout: const Duration(minutes: 2),
+      ),
+    )..interceptors.addAll([
+      AuthorizationInterceptor(),
+      LoggerInterceptor(),
+    ]);
+
+    return client;
   }
 
-  // Load the API key from the local JSON file
   Future<void> _loadApiKey() async {
     try {
       final String response = await rootBundle.loadString('assets/APIKey.json');
       final Map<String, dynamic> data = json.decode(response);
-
-      apiKey = data['x-api-key'];  // Assign the value from JSON to apiKey
+      apiKey = data['x-api-key'];
     } catch (e) {
       print('Error loading API key: $e');
     }
   }
 
-  // GET METHOD
   Future<Response> get(
       String url, {
         Map<String, dynamic>? queryParameters,
@@ -46,7 +51,7 @@ class DioClient {
         ProgressCallback? onReceiveProgress,
       }) async {
     try {
-      final Response response = await _dio.get(
+      final response = await _dio.get(
         url,
         queryParameters: queryParameters,
         options: options,
@@ -59,7 +64,6 @@ class DioClient {
     }
   }
 
-  // POST METHOD
   Future<Response> post(
       String url, {
         data,
@@ -69,9 +73,10 @@ class DioClient {
         ProgressCallback? onReceiveProgress,
       }) async {
     try {
-      final Response response = await _dio.post(
+      final response = await _dio.post(
         url,
         data: data,
+        queryParameters: queryParameters,
         options: options,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -82,7 +87,6 @@ class DioClient {
     }
   }
 
-  // PUT METHOD
   Future<Response> put(
       String url, {
         dynamic data,
@@ -93,7 +97,7 @@ class DioClient {
         ProgressCallback? onReceiveProgress,
       }) async {
     try {
-      final Response response = await _dio.put(
+      final response = await _dio.put(
         url,
         data: data,
         queryParameters: queryParameters,
@@ -108,7 +112,6 @@ class DioClient {
     }
   }
 
-  // DELETE METHOD
   Future<dynamic> delete(
       String url, {
         data,
@@ -117,7 +120,7 @@ class DioClient {
         CancelToken? cancelToken,
       }) async {
     try {
-      final Response response = await _dio.delete(
+      final response = await _dio.delete(
         url,
         data: data,
         queryParameters: queryParameters,

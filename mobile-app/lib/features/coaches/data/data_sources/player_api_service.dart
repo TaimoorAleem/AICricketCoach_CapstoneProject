@@ -1,35 +1,59 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+
+import '../../../../resources/api_urls.dart';
+import '../../../../resources/dio_client.dart';
 import '../../../analytics/domain/entities/performance.dart';
 import '../../domain/entities/player.dart';
 
-class PlayerApiService {
-  static const String baseUrl = "https://my-app-image-174827312206.us-central1.run.app";
+abstract class PlayerService {
+  Future<Either<String, List<Player>>> fetchPlayers(String coachUid);
+  Future<Either<String, Map<String, List<Performance>>>> fetchPlayersPerformance(List<String> playerUids);
+}
 
-  Future<List<Player>> fetchPlayers(String coachUid) async {
-    final response = await http.get(Uri.parse("$baseUrl/get-players?uid=$coachUid"));
+class PlayerApiService implements PlayerService {
+  final DioClient dioClient;
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data["status"] == "success") {
-        final playersMap = data["players"] as Map<String, dynamic>;
-        return playersMap.values.map((p) => Player.fromJson(p)).toList();
-      }
+  PlayerApiService(this.dioClient);
+
+  @override
+  Future<Either<String, List<Player>>> fetchPlayers(String coachUid) async {
+    try {
+      final response = await dioClient.get(
+        ApiUrl.getPlayers,
+        queryParameters: {'uid': coachUid},
+      );
+
+      final playersMap = response.data['players'] as Map<String, dynamic>;
+      final players = playersMap.values.map((p) => Player.fromJson(p)).toList();
+      return Right(players);
+    } on DioException catch (e) {
+      return Left(e.response?.data?['message'] ?? 'Failed to fetch players.');
+    } catch (e) {
+      return Left('An unexpected error occurred: $e');
     }
-    throw Exception("Failed to fetch players.");
   }
 
-  Future<Map<String, List<Performance>>> fetchPlayersPerformance(List<String> playerUids) async {
-    final response = await http.get(Uri.parse("https://my-app-image-174827312206.us-central1.run.app/get-performance-history?uid_list=${playerUids.toString()}"));
+  @override
+  Future<Either<String, Map<String, List<Performance>>>> fetchPlayersPerformance(List<String> playerUids) async {
+    try {
+      final response = await dioClient.get(
+        ApiUrl.getPerformance,
+        queryParameters: {'uid_list': jsonEncode(playerUids)},
+      );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data["status"] == "success") {
-        final playerData = data["data"] as Map<String, dynamic>;
-        return playerData.map((uid, sessions) => MapEntry(uid, (sessions as List).map((s) => Performance.fromJson(s)).toList()));
-      }
+      final playerData = response.data['data'] as Map<String, dynamic>;
+      final mapped = playerData.map((uid, sessions) => MapEntry(
+        uid,
+        (sessions as List).map((s) => Performance.fromJson(s)).toList(),
+      ));
+
+      return Right(mapped);
+    } on DioException catch (e) {
+      return Left(e.response?.data?['message'] ?? 'Failed to fetch performance data.');
+    } catch (e) {
+      return Left('An unexpected error occurred: $e');
     }
-    throw Exception("Failed to fetch players' performance.");
   }
-
 }

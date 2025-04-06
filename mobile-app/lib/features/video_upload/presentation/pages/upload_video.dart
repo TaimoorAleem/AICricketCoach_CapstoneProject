@@ -1,15 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
-import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as Path;
 
 import '../../../../resources/api_urls.dart';
 import '../../../../resources/dio_client.dart';
-import '../../../../resources/service_locator.dart';
 
 class UploadVideoPage extends StatefulWidget {
   const UploadVideoPage({Key? key}) : super(key: key);
@@ -22,8 +21,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   VideoPlayerController? _videoController;
   String? _videoPath;
   final ImagePicker _picker = ImagePicker();
-  bool _isUploading = false; // Added for tracking upload state
-  var apiKey;
+  bool _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +48,8 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
                     child: const Text('Select Video from Gallery'),
                   ),
                   const SizedBox(height: 20),
-                  if (_videoPath != null && _videoController != null &&
+                  if (_videoPath != null &&
+                      _videoController != null &&
                       _videoController!.value.isInitialized)
                     Column(
                       children: [
@@ -72,14 +71,13 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
               children: [
-                if (_isUploading) // Show loading bar when uploading
+                if (_isUploading)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: CircularProgressIndicator(),
                   ),
                 ElevatedButton(
                   onPressed: _isUploading ? null : uploadVideo,
-                  // Disable button while uploading
                   child: _isUploading
                       ? const Text('Uploading...')
                       : const Text('Upload Video'),
@@ -100,7 +98,9 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
           });
         },
         child: Icon(
-          _videoController!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+          _videoController!.value.isPlaying
+              ? Icons.pause
+              : Icons.play_arrow,
         ),
       )
           : null,
@@ -115,7 +115,8 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
 
   Future<void> pickVideo() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.video);
+      type: FileType.video,
+    );
 
     if (result != null) {
       String path = result.files.single.path!;
@@ -146,7 +147,6 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   }
 
   Future<void> uploadVideo() async {
-    await _loadApiKey();
     if (_videoPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a video first')),
@@ -154,60 +154,48 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       return;
     }
 
-    setState(() {
-      _isUploading = true; // Show loading bar
-    });
+    setState(() => _isUploading = true);
 
     try {
-        var request = http.MultipartRequest('POST',
-            Uri.parse(
-              'https://aicc-gateway2-28bbo1fy.uc.gateway.dev/videos/upload',));
-          request.headers['x-api-key'] = apiKey;
-          request.files.add(await http.MultipartFile.fromPath('file', _videoPath!));
+      final file = File(_videoPath!);
+      final fileName = Path.basename(file.path);
 
-        var streamedResponse = await request.send();
-        var response = await http.Response.fromStream(streamedResponse);
+      FormData formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: fileName),
+      });
 
-        if (response.statusCode == 200) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text('Video uploaded successfully: ${response.body[1]}')),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Upload failed: ${response.body}')),
-          );
-        }
+      final dioClient = await DioClient.init();
 
+      final response = await dioClient.post(
+        ApiUrl.uploadVideo,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Video uploaded successfully!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: ${response.data}')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: $e')),
       );
     } finally {
-      setState(() {
-        _isUploading = false; // Hide loading bar
-      });
+      setState(() => _isUploading = false);
     }
   }
-
-
-
-
-
 
   void replayVideo() {
     _videoController?.seekTo(Duration.zero);
     _videoController?.play();
   }
-
-  Future<void> _loadApiKey() async {
-    try {
-      final String response = await rootBundle.loadString('assets/APIKey.json');
-      final Map<String, dynamic> data = json.decode(response);
-      apiKey = data['x-api-key'];  // Assign the value from JSON to apiKey
-    } catch (e) {
-      print('Error loading API key: $e');
-    }
-  }
-
 }

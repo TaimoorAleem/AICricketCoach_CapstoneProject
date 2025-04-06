@@ -1,12 +1,10 @@
+import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
-import 'package:ai_cricket_coach/features/feedback/presentation/pages/ideal_shot_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
 import '../../../../resources/app_colors.dart';
-import '../../../../resources/service_locator.dart';
 import '../../../sessions/presentation/pages/sessions_history_page.dart';
 import '../../../user_profile/presentation/pages/user_profile_page.dart';
-import '../../../feedback/domain/usecases/predict_shot_usecase.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -78,13 +76,11 @@ class HomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => IdealShotPage(
-                          predictShot: sl<PredictShotUseCase>(),
-                        ),
+                        builder: (context) => UploadVideoPage(),
                       ),
                     );
                   },
-                  child: const Text('Go to Feedback Page'),
+                  child: const Text('Upload Video'),
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
@@ -95,7 +91,9 @@ class HomePage extends StatelessWidget {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AnalyticsPage.singlePlayer(playerUid: playerUid)),
+                      MaterialPageRoute(
+                        builder: (context) => AnalyticsPage.singlePlayer(playerUid: playerUid),
+                      ),
                     );
                   },
                   child: const Text('Go to Analytics Page'),
