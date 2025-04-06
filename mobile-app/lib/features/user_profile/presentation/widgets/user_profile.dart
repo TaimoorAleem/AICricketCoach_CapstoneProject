@@ -29,14 +29,17 @@ class UserProfile extends StatelessWidget {
           if (state is ProfileLoading) {
             return const CircularProgressIndicator();
           }
-          if (state is ProfileLoaded)  {
+          if (state is ProfileLoaded) {
             debugPrint('HelloHello');
             UserEntity user = state.user; // Get the user from the state
 
             Widget _homeBar(BuildContext context) {
               return AppBar(
                 leading: IconButton(
-                  icon: const Icon(Icons.home_sharp, color: AppColors.primary,),
+                  icon: const Icon(
+                    Icons.home_sharp,
+                    color: AppColors.primary,
+                  ),
                   onPressed: () {
                     // Replace with your actual home navigation logic
                     AppNavigator.pushAndRemove(context, HomePage());
@@ -45,7 +48,10 @@ class UserProfile extends StatelessWidget {
                 actions: [
                   // Add an icon to the top right
                   IconButton(
-                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary,),  // Replace with any icon
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      color: AppColors.primary,
+                    ), // Replace with any icon
                     onPressed: () async {
                       AppNavigator.push(
                           context,
@@ -53,10 +59,10 @@ class UserProfile extends StatelessWidget {
                             user: user,
                             pfpPath: 'lib/images/default-pfp.jpg',
                           ));
-                      context.read<ProfileCubit>().getUserProfile();// Fetch fresh data
-
+                      context
+                          .read<ProfileCubit>()
+                          .getUserProfile(); // Fetch fresh data
                     },
-
                   ),
                 ],
                 backgroundColor: Colors.transparent,
@@ -73,9 +79,176 @@ class UserProfile extends StatelessWidget {
 
                   const SizedBox(height: 16), // Optional spacing after AppBar
 
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0), // Or whatever padding you prefer
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Row for Profile Picture and User Info
+                        Row(
+                          children: [
+                            // Profile Picture
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundImage: const AssetImage(
+                                  'lib/images/default-pfp.jpg'),
+                            ),
+                            const SizedBox(width: 30),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.email ?? 'Not available'}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.firstName} ${user.lastName}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 30,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${user.age ?? ''}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                                color: Colors.grey,
+                                                fontSize: 20),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        '${user.teamName != null && user.teamName!.isNotEmpty ? "Team: ${user.teamName}" : ""}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${(user.city?.isNotEmpty ?? false) && (user.country?.isNotEmpty ?? false)
+                                            ? '${user.city}, ${user.country}'
+                                            : (user.city?.isNotEmpty ?? false)
+                                            ? user.city
+                                            : (user.country?.isNotEmpty ?? false)
+                                            ? user.country
+                                            : ''}',
+                                        style: const TextStyle(
+                                          fontFamily: 'Nunito',
+                                          fontSize: 15,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        // Description
+                        Text(
+                          '${user.description ?? ''}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 15,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+                      ],
+                    ),
+                  ),
+
+                  // Buttons section comes here if you have it
+                ],
+              ),
+            );
+          }
+          if (state is ProfileLoadedWithPicture) {
+            debugPrint('HelloHello');
+            UserEntity user = state.user; // Get the user from the state
+            String profilePicturePath = state.profilePicturePath;
+
+            Widget _homeBar(BuildContext context) {
+              return AppBar(
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.home_sharp,
+                    color: AppColors.primary,
+                  ),
+                  onPressed: () {
+                    // Replace with your actual home navigation logic
+                    AppNavigator.pushAndRemove(context, HomePage());
+                  },
+                ),
+                actions: [
+                  // Add an icon to the top right
+                  IconButton(
+                    icon: const Icon(
+                      Icons.edit_outlined,
+                      color: AppColors.primary,
+                    ), // Replace with any icon
+                    onPressed: () async {
+                      AppNavigator.push(
+                          context,
+                          EditUserProfilePage(
+                            user: user,
+                            pfpPath: profilePicturePath,
+                          ));
+                      context
+                          .read<ProfileCubit>()
+                          .getUserProfile(); // Fetch fresh data
+                    },
+                  ),
+                ],
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(10.0), // Main page padding
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _homeBar(context),
+
+                  const SizedBox(height: 16), // Optional spacing after AppBar
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0), // Or whatever padding you prefer
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0), // Or whatever padding you prefer
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -86,160 +259,10 @@ class UserProfile extends StatelessWidget {
                             CircleAvatar(
                               radius: 40,
                               backgroundImage:
-                              const AssetImage('lib/images/default-pfp.jpg'),
-                            ),
-                            const SizedBox(width: 30),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.email ?? 'Not available'}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.firstName} ${user.lastName}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 30,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${user.age ?? 'Not available'}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.grey, fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Team ${user.teamName ?? 'Not available'}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Description
-                        Text(
-                          '${user.description ?? 'Not available'}',
-                          style: const TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 15,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-                      ],
-                    ),
-                  ),
-
-                  // Buttons section comes here if you have it
-                ],
-              ),
-            );
-
-
-          }
-          if (state is ProfileLoadedWithPicture) {
-            debugPrint('HelloHello');
-            UserEntity user = state.user; // Get the user from the state
-            String profilePicturePath = state.profilePicturePath;
-
-            Widget _homeBar(BuildContext context) {
-              return AppBar(
-                leading: IconButton(
-                  icon: const Icon(Icons.home_sharp, color: AppColors.primary,),
-                  onPressed: () {
-                    // Replace with your actual home navigation logic
-                    AppNavigator.pushAndRemove(context, HomePage());
-                  },
-                ),
-                actions: [
-                  // Add an icon to the top right
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined, color: AppColors.primary,),  // Replace with any icon
-                    onPressed: () async {
-                      AppNavigator.push(
-                          context,
-                          EditUserProfilePage(
-                            user: user,
-                            pfpPath: profilePicturePath,
-                          ));
-                      context.read<ProfileCubit>().getUserProfile();// Fetch fresh data
-
-                    },
-
-                  ),
-                ],
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.all(10.0), // Main page padding
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _homeBar(context),
-
-                  const SizedBox(height: 16), // Optional spacing after AppBar
-
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0), // Or whatever padding you prefer
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row for Profile Picture and User Info
-                        Row(
-                          children: [
-                            // Profile Picture
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: FileImage(File(profilePicturePath)),
+                              FileImage(File(profilePicturePath)),
                               onBackgroundImageError: (_, __) =>
-                              const AssetImage('lib/images/default-pfp.jpg'),
+                              const AssetImage(
+                                  'lib/images/default-pfp.jpg'),
                             ),
                             const SizedBox(width: 30),
                             Expanded(
@@ -247,7 +270,8 @@ class UserProfile extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         '${user.email ?? 'Not available'}',
@@ -259,7 +283,8 @@ class UserProfile extends StatelessWidget {
                                     ],
                                   ),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         '${user.firstName} ${user.lastName}',
@@ -271,19 +296,22 @@ class UserProfile extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        '${user.age ?? 'Not available'}',
+                                        '${user.age ?? ''}',
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyMedium
-                                            ?.copyWith(color: Colors.grey, fontSize: 20),
+                                            ?.copyWith(
+                                            color: Colors.grey,
+                                            fontSize: 20),
                                       ),
                                     ],
                                   ),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Team ${user.teamName ?? 'Not available'}',
+                                        '${user.teamName != null && user.teamName!.isNotEmpty ? "Team: ${user.teamName}" : ""}',
                                         style: const TextStyle(
                                           fontFamily: 'Nunito',
                                           fontSize: 15,
@@ -292,7 +320,13 @@ class UserProfile extends StatelessWidget {
                                         ),
                                       ),
                                       Text(
-                                        '${user.city ?? 'Not available'}, ${user.country ?? 'Not available'}',
+                                        '${(user.city?.isNotEmpty ?? false) && (user.country?.isNotEmpty ?? false)
+                                            ? '${user.city}, ${user.country}'
+                                            : (user.city?.isNotEmpty ?? false)
+                                            ? user.city
+                                            : (user.country?.isNotEmpty ?? false)
+                                            ? user.country
+                                            : ''}',
                                         style: const TextStyle(
                                           fontFamily: 'Nunito',
                                           fontSize: 15,
@@ -312,7 +346,7 @@ class UserProfile extends StatelessWidget {
 
                         // Description
                         Text(
-                          '${user.description ?? 'Not available'}',
+                          '${user.description ?? ''}',
                           style: const TextStyle(
                             fontFamily: 'Nunito',
                             fontSize: 15,
@@ -330,8 +364,6 @@ class UserProfile extends StatelessWidget {
                 ],
               ),
             );
-
-
           }
           if (state is ProfileLoadingFailed) {
             return Text(state.errorMessage);

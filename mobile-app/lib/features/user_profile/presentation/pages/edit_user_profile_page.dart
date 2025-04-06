@@ -559,22 +559,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
         onPressed: () async => sl<EditProfileUseCase>().call(
           params: EditProfileReqParams(
               uid: await _getUid(),
-              age: _ageCon.text.isEmpty ? widget.user.age! : _ageCon.text,
-              city: _cityCon.text.isEmpty ? widget.user.city! : _cityCon.text,
-              country: _countryCon.text.isEmpty
-                  ? widget.user.country!
+              age: _ageCon.text.trim().isEmpty
+                  ? widget.user.age ?? ""
+                  : _ageCon.text,
+              city: _cityCon.text.trim().isEmpty
+                  ? widget.user.city ?? ""
+                  : _cityCon.text,
+              country: _countryCon.text.trim().isEmpty
+                  ? widget.user.country ?? ""
                   : _countryCon.text,
-              description: _descriptionCon.text.isEmpty
-                  ? widget.user.description!
+              description: _descriptionCon.text.trim().isEmpty
+                  ? widget.user.description ?? ""
                   : _descriptionCon.text,
-              firstName: _firstNameCon.text.isEmpty
-                  ? widget.user.firstName!
+              firstName: _firstNameCon.text.trim().isEmpty
+                  ? widget.user.firstName ?? ""
                   : _firstNameCon.text,
-              lastName: _lastNameCon.text.isEmpty
-                  ? widget.user.lastName!
+              lastName: _lastNameCon.text.trim().isEmpty
+                  ? widget.user.lastName ?? ""
                   : _lastNameCon.text,
-              teamName: _teamNameCon.text.isEmpty
-                  ? widget.user.teamName!
+              teamName: _teamNameCon.text.trim().isEmpty
+                  ? widget.user.teamName ?? ""
                   : _teamNameCon.text),
         ),
         onSuccess: () {

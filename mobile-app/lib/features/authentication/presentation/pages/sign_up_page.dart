@@ -15,14 +15,37 @@ import '../../data/models/signup_req_params.dart';
 import '../../domain/usecases/signup_usecase.dart';
 import 'log_in_page.dart';
 
-class SignupPage extends StatelessWidget {
+class SignupPage extends StatefulWidget {
   SignupPage({super.key});
+
+  @override
+  _SignUpPageState createState() => _SignUpPageState();
+}
+class _SignUpPageState extends State<SignupPage> {
+  final _formKey = GlobalKey<FormState>();
+  late bool _isFormValid;
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
   final TextEditingController _firstNameCon = TextEditingController();
   final TextEditingController _lastNameCon = TextEditingController();
-  Role _selectedRole = Role.player;
+  late Role _selectedRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedRole = Role.player;
+    _isFormValid = false;
+  }
+
+  @override
+  void dispose() {
+    _emailCon.dispose();
+    _firstNameCon.dispose();
+    _lastNameCon.dispose();
+    _passwordCon.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,20 +59,23 @@ class SignupPage extends StatelessWidget {
               height: 90, // Adjust size as needed
               width: 90,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 15),
             _welcomeHeading(),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _signupContainer(context),
-                      const SizedBox(height: 30),
-                      _loginText(context),
-                    ],
-                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _signupContainer(context),
+                        const SizedBox(height: 10),
+                        _loginText(context),
+                      ],
+                    ),
+                  )
                 ),
               ),
             ),
@@ -75,7 +101,7 @@ class SignupPage extends StatelessWidget {
 
   Widget _signupContainer(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
@@ -83,7 +109,6 @@ class SignupPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 22),
           _names(),
           const SizedBox(height: 22),
           _emailField(),
@@ -92,7 +117,7 @@ class SignupPage extends StatelessWidget {
           const SizedBox(height: 22),
           _rolePickField(context),
           const SizedBox(height: 15),
-          _signupButton(context),
+          _validateAndSignUp(context)
         ],
       ),
     );
@@ -121,7 +146,7 @@ class SignupPage extends StatelessWidget {
     );
   }
   Widget _firstNameField() {
-    return TextField(
+    return TextFormField(
       controller: _firstNameCon,
       decoration: InputDecoration(
         hintText: 'First Name',
@@ -143,10 +168,21 @@ class SignupPage extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
         ),
       ),
+      onChanged: (_){
+        setState(() {
+          _isFormValid = false; // Show tick icon after successful validation
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your name';
+        }
+        return null;  // Return null if the input is valid
+      },
     );
   }
   Widget _lastNameField() {
-    return TextField(
+    return TextFormField(
       controller: _lastNameCon,
       decoration: InputDecoration(
         hintText: 'LastName',
@@ -168,11 +204,22 @@ class SignupPage extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
         ),
       ),
+      onChanged: (_){
+        setState(() {
+          _isFormValid = false; // Show tick icon after successful validation
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your name';
+        }
+        return null;  // Return null if the input is valid
+      },
     );
   }
 
   Widget _emailField() {
-    return TextField(
+    return TextFormField(
       controller: _emailCon,
       decoration: InputDecoration(
         hintText: 'Email',
@@ -194,11 +241,25 @@ class SignupPage extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
         ),
       ),
+      onChanged: (_){
+        setState(() {
+          _isFormValid = false; // Show tick icon after successful validation
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email';
+        }
+        else if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+          return 'Please enter a valid email';
+        }
+        return null;  // Return null if the input is valid
+      },
     );
   }
 
   Widget _passwordField() {
-    return TextField(
+    return TextFormField(
       controller: _passwordCon,
       obscureText: true,
       decoration: InputDecoration(
@@ -221,11 +282,63 @@ class SignupPage extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.primary, width: 2), // Optional focus border
         ),
       ),
+      onChanged: (_){
+        setState(() {
+          _isFormValid = false; // Show tick icon after successful validation
+        });
+      },
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your password';
+        }
+        // Regex to check for at least one uppercase, one numeric, and one special character
+        RegExp passwordRegExp = RegExp(
+          r'^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).{6,}$',
+        );
+        if (!passwordRegExp.hasMatch(value)) {
+          return 'Password must contain at least one uppercase letter, one number, and one special character';
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _validateButton(BuildContext context) {
+    return IconButton(
+        icon: Icon(
+          Icons.check, // The tick icon
+          color: _isFormValid
+              ? AppColors.primary
+              : Colors.grey,
+        ),
+        onPressed: () {
+          if (!_isFormValid) {
+            if (_formKey.currentState!.validate()) {
+              setState(() {
+                _isFormValid = true; // Show tick icon after successful validation
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Form is valid!")),
+              );
+            }
+          }
+        });
+  }
+  
+  Widget _validateAndSignUp(BuildContext context){
+    return Row(
+      children: [
+        if (!_isFormValid) ...[
+          _validateButton(context),
+        ],
+        if (_isFormValid) ...[
+          _signupButton(context)
+        ]
+      ],
     );
   }
 
   Widget _signupButton(BuildContext context) {
-    String uid;
     return Center(
       child: ReactiveButton(
         title: 'Sign Up',
@@ -333,5 +446,7 @@ class SignupPage extends StatelessWidget {
       ),
     );
   }
+
+
 
 }
