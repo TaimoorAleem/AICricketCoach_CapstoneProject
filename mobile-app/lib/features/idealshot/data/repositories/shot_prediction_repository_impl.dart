@@ -1,3 +1,4 @@
+// import 'package:ai_cricket_coach/resources/api_urls.dart';
 // import 'package:dio/dio.dart';
 // import '../../domain/entities/shot_prediction.dart';
 // import '../../domain/repositories/shot_prediction_repository.dart';
@@ -13,7 +14,7 @@
 //   Future<ShotPrediction> predictShot(Map<String, dynamic> ballMetrics) async {
 //     try {
 //       final Response response = await dioClient.post(
-//         '/predict',
+//         ApiUrl.predictShot,
 //         data: ballMetrics,
 //         overrideBaseUrl: "https://shot-recommendation-api-857244658015.us-central1.run.app",
 //       );

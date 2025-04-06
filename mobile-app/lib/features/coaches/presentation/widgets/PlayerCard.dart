@@ -20,9 +20,7 @@ class PlayerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: compareMode
-          ? _buildCheckboxTile()
-          : _buildDefaultCard(context),
+      child: compareMode ? _buildCheckboxTile() : _buildDefaultCard(context),
     );
   }
 
@@ -39,7 +37,7 @@ class PlayerCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => SessionsHistoryPage(playerUid: player.uid),
+              builder: (context) => SessionsHistoryPage(playerId: player.uid),
             ),
           );
         },
