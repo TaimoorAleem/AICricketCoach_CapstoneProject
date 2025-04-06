@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../resources/session_cache.dart';
+import '../../../home/data/data_sources/session_cache.dart';
 import '../../../../resources/service_locator.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/usecases/get_sessions_usecase.dart';
@@ -39,7 +39,7 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
         });
       },
           (fetchedSessions) {
-        SessionCache().storeSessions(fetchedSessions); idr
+        SessionCache().storeSessions(fetchedSessions);
         setState(() {
           sessions = fetchedSessions;
           isLoading = false;

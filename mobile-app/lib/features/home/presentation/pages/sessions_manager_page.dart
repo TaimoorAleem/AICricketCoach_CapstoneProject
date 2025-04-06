@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ai_cricket_coach/resources/session_cache.dart';
 import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
 import 'package:ai_cricket_coach/features/sessions/presentation/pages/delivery_details_page.dart';
+import 'package:ai_cricket_coach/resources/api_urls.dart';
+import 'package:ai_cricket_coach/resources/dio_client.dart';
+import 'package:ai_cricket_coach/features/home/presentation/widgets/session_manager.dart';
 import '../../../sessions/domain/entities/session.dart';
+import '../../data/data_sources/session_cache.dart';
 
 class SessionsManagerPage extends StatefulWidget {
   const SessionsManagerPage({Key? key}) : super(key: key);
@@ -22,10 +25,51 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
   }
 
   Future<void> _loadActiveSession() async {
-    final session = await SessionCache().getActiveSession();
+    final session = SessionCache().getActiveSession();
     setState(() {
       activeSession = session;
     });
+  }
+
+  Future<void> endSession() async {
+    final sessionId = SessionCache().activeSessionId;
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('uid');
+
+    if (sessionId == null || uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No active session to end.')),
+      );
+      return;
+    }
+
+    try {
+      final dioClient = await DioClient.init();
+      final response = await dioClient.get( // this line exception thrown
+        ApiUrl.getPerformance,
+        queryParameters: {
+          'uid': uid,
+          'sessionId': sessionId,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        await SessionManager.clearActiveSession();
+        SessionCache().clearActiveSession();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Session ended and performance saved.')),
+        );
+
+        setState(() => activeSession = null);
+      } else {
+        throw Exception('Failed to end session: ${response.data}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -60,17 +104,30 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Add New Delivery'),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const UploadVideoPage(),
+            child: Column(
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add New Delivery'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const UploadVideoPage(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.stop_circle_outlined),
+                  label: const Text('End Session'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
                   ),
-                );
-              },
+                  onPressed: endSession,
+                ),
+              ],
             ),
           ),
         ],

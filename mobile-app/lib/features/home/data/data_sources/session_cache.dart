@@ -1,10 +1,10 @@
-import '../features/sessions/domain/entities/delivery.dart';
-import '../features/sessions/domain/entities/session.dart';
+import '../../../sessions/domain/entities/delivery.dart';
+import '../../../sessions/domain/entities/session.dart';
 
 class SessionCache {
   static final SessionCache _instance = SessionCache._internal();
   final Map<String, Session> _sessionMap = {};
-  String? _activeSessionId; // 🟡 Track the active session ID
+  String? _activeSessionId;
 
   SessionCache._internal();
 
@@ -76,10 +76,23 @@ class SessionCache {
     required String sessionId,
     required Delivery newDelivery,
   }) {
-    final session = _sessionMap[sessionId];
-    if (session == null) return;
+    final existingSession = _sessionMap[sessionId];
 
-    session.deliveries.add(newDelivery);
+    if (existingSession != null) {
+      final updatedDeliveries = List<Delivery>.from(existingSession.deliveries)..add(newDelivery);
+      final updatedSession = existingSession.copyWith(deliveries: updatedDeliveries);
+      _sessionMap[sessionId] = updatedSession;
+    } else {
+      // ✅ If the session doesn't exist, create a new one with this delivery
+      _sessionMap[sessionId] = Session(
+        sessionId: sessionId,
+        date: DateTime.now().toIso8601String(),
+        deliveries: [newDelivery],
+        performance: {},
+      );
+    }
+
+    _activeSessionId = sessionId;
   }
 
   void clear() {

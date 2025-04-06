@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import '../../../../resources/session_cache.dart';
+import '../../../home/data/data_sources/session_cache.dart';
 import '../../../idealshot/presentation/pages/ideal_shot_page.dart';
 import '../../domain/entities/delivery.dart';
 

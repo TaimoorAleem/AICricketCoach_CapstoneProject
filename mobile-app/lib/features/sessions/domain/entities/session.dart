@@ -12,4 +12,18 @@ class Session {
     required this.deliveries,
     required this.performance,
   });
+
+  Session copyWith({
+    String? sessionId,
+    String? date,
+    List<Delivery>? deliveries,
+    Map<String, dynamic>? performance,
+  }) {
+    return Session(
+      sessionId: sessionId ?? this.sessionId,
+      date: date ?? this.date,
+      deliveries: deliveries ?? this.deliveries,
+      performance: performance ?? this.performance,
+    );
+  }
 }

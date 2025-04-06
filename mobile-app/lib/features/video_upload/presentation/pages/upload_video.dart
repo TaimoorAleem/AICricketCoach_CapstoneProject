@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:ai_cricket_coach/features/home/presentation/pages/sessions_manager_page.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +11,10 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../resources/api_urls.dart';
 import '../../../../resources/dio_client.dart';
-import '../../../../resources/session_cache.dart';
+import '../../../home/data/data_sources/session_cache.dart';
 import '../../../home/presentation/widgets/session_manager.dart';
 import '../../../idealshot/domain/entities/ideal_shot.dart';
+import '../../../sessions/data/dtos/AddDeliveryDTO.dart';
 import '../../../sessions/domain/entities/delivery.dart';
 import '../../../sessions/presentation/pages/delivery_details_page.dart';
 
@@ -167,8 +169,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       final fileName = Path.basename(file.path);
 
       // Check or create session
-      final sessionId =
-          await SessionManager.getActiveSessionId() ?? await SessionManager.createSession();
+      final sessionId = await SessionManager.getActiveSessionId() ?? await SessionManager.createSession();
 
       // Upload video
       final dioClient = await DioClient.init();
@@ -188,65 +189,71 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
 
       final deliveryData = response.data;
 
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Confirm Delivery'),
-          content: const Text('Are you satisfied with the response?'),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Retake')),
-            ElevatedButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirm')),
-          ],
-        ),
-      ) ??
-          false;
-
-      if (!confirmed) return;
 
       // Create delivery
       final prefs = await SharedPreferences.getInstance();
       final playerId = prefs.getString('uid')!;
 
-      final delivery = Delivery(
-        deliveryId: deliveryData['deliveryId'],
-        ballLength: deliveryData['ballCharacteristics']['BallLength'],
-        ballLine: deliveryData['ballCharacteristics']['BallLine'],
-        ballSpeed: deliveryData['ballCharacteristics']['BallSpeed'],
-        batsmanPosition: deliveryData['ballCharacteristics']['BatsmanPosition'],
+      final ballCharacteristics = deliveryData['ballCharacteristics'];
+      final idealShotsList = deliveryData['idealShot']['predicted_ideal_shots'] as List;
+
+      final deliveryDTO = AddDeliveryDTO(
+        uid: playerId,
+        sessionId: sessionId,
         videoUrl: deliveryData['videoUrl'],
-        idealShots: (deliveryData['idealShot']['predicted_ideal_shots'] as List)
-            .map((s) => IdealShot(
-          shot: s['shot'],
-          confidenceScore: s['confidence_score'].toDouble(),
-        ))
-            .toList(),
+        ballLength: ballCharacteristics['BallLength'],
+        ballLine: ballCharacteristics['BallLine'],
+        ballSpeed: ballCharacteristics['BallSpeed'],
+        batsmanPosition: ballCharacteristics['BatsmanPosition'],
+        predictedIdealShots: idealShotsList.map<Map<String, dynamic>>((s) => {
+          'shot': s['shot'],
+          'confidence_score': s['confidence_score'],
+        }).toList(),
       );
 
-      await dioClient.post(ApiUrl.addDelivery, data: {
-        'playerId': playerId,
-        'sessionId': sessionId,
-        'deliveryId': delivery.deliveryId,
-        'BallLength': delivery.ballLength,
-        'BallLine': delivery.ballLine,
-        'BallSpeed': delivery.ballSpeed,
-        'BatsmanPosition': delivery.batsmanPosition,
-        'videoUrl': delivery.videoUrl,
-        'idealShot': {
-          'predicted_ideal_shots': delivery.idealShots
-              .map((s) => {'shot': s.shot, 'confidence_score': s.confidenceScore})
-              .toList(),
-        },
-      });
 
-      SessionCache().addDeliveryToSession(sessionId: sessionId, newDelivery: delivery);
+      final addDeliveryResponse = await dioClient.post(
+        ApiUrl.addDelivery,
+        data: deliveryDTO.toJson(),
+      );
+
+      final _deliveryId = addDeliveryResponse.data['data']['deliveryId'];
+      final _ballength = deliveryData['ballCharacteristics']['BallLength'];
+      final _ballLine = deliveryData['ballCharacteristics']['BallLine'];
+      final _ballSpeed = (deliveryData['ballCharacteristics']['BallSpeed'] as num).toDouble();
+      final _batsmanPosition = deliveryData['ballCharacteristics']['BatsmanPosition'];
+      final _videoUrl = deliveryData['videoUrl'];
+      final _idealShots = (deliveryData['idealShot']['predicted_ideal_shots'] as List)
+          .map<IdealShot>((s) => IdealShot(
+        shot: s['shot'],
+        confidenceScore: (s['confidence_score'] as num).toDouble(),
+      ))
+          .toList();
+
+      // Check if the response is valid
+      if (addDeliveryResponse.statusCode != 200 || _deliveryId == null) {
+        throw Exception('Add delivery failed: ${addDeliveryResponse.data}');
+      }
+
+      final newDelivery = Delivery(
+        deliveryId: _deliveryId,
+        ballLength: _ballength,
+        ballLine: _ballLine,
+        ballSpeed: _ballSpeed,
+        batsmanPosition: _batsmanPosition,
+        videoUrl: _videoUrl,
+        idealShots: _idealShots
+      );
+
+      SessionCache().addDeliveryToSession(
+        sessionId: sessionId,
+        newDelivery: newDelivery,
+      );
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DeliveryDetailsPage(
-            sessionId: sessionId,
-            deliveryId: delivery.deliveryId,
-          ),
+          builder: (context) => SessionsManagerPage(),
         ),
       );
     } catch (e) {

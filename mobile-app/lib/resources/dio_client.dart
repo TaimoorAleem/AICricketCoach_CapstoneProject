@@ -51,7 +51,7 @@ class DioClient {
         ProgressCallback? onReceiveProgress,
       }) async {
     try {
-      final response = await _dio.get(
+      final response = await _dio.get( // this line exception thrown
         url,
         queryParameters: queryParameters,
         options: options,
