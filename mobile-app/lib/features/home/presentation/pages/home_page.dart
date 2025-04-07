@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   String? playerUid;
+  late List<Widget> _pages;
 
   @override
   void initState() {
@@ -26,15 +27,17 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _loadUid() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      playerUid = prefs.getString('uid');
-    });
+    final uid = prefs.getString('uid');
+    if (uid != null) {
+      setState(() {
+        playerUid = uid;
+        _pages = [
+          SessionsHistoryPage(playerId: uid),
+          UploadVideoPage(),
+        ];
+      });
+    }
   }
-
-  static const List<Widget> _pages = [
-    SessionsManagerPage(),
-    UploadVideoPage(),
-  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -51,8 +54,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-      ),
+      appBar: AppBar(),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -87,8 +89,8 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.sports_cricket), label: 'Session'),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.sports_cricket), label: 'History'),
           BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
         ],
         currentIndex: _selectedIndex,
