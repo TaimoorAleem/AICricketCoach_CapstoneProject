@@ -1,11 +1,10 @@
-import 'package:ai_cricket_coach/features/home/presentation/pages/sessions_manager_page.dart';
-import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
+import 'package:ai_cricket_coach/features/sessions/presentation/pages/sessions_history_page.dart';
 import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import '../../../../resources/app_colors.dart';
-import '../../../sessions/presentation/pages/sessions_history_page.dart';
-import '../../../user_profile/presentation/pages/user_profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -33,7 +32,9 @@ class _HomePageState extends State<HomePage> {
         playerUid = uid;
         _pages = [
           SessionsHistoryPage(playerId: uid),
-          UploadVideoPage(),
+          const UploadVideoPage(),
+          AnalyticsPage.singlePlayer(playerUid: uid),
+          UserProfilePage(),
         ];
       });
     }
@@ -47,55 +48,41 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (playerUid == null) {
+    if (playerUid == null || _pages.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: AppColors.secondary),
-              child: Text('Navigation', style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('User Profile'),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => UserProfilePage()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('Sessions History'),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => SessionsHistoryPage(playerId: playerUid!)));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.analytics),
-              title: const Text('Analytics Page'),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) => AnalyticsPage.singlePlayer(playerUid: playerUid!)));
-              },
-            ),
-          ],
-        ),
+      appBar: AppBar(
+        title: const Text('AI Cricket Coach'),
+        centerTitle: true,
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.sports_cricket), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
-        ],
         currentIndex: _selectedIndex,
         selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            label: 'Sessions',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.upload),
+            label: 'Upload',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.analytics),
+            label: 'Analytics',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
       ),
     );
   }

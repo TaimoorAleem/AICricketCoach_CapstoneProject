@@ -6,7 +6,7 @@ import 'package:ai_cricket_coach/resources/api_urls.dart';
 import 'package:ai_cricket_coach/resources/dio_client.dart';
 import 'package:ai_cricket_coach/features/home/presentation/widgets/session_manager.dart';
 import '../../../sessions/domain/entities/session.dart';
-import '../../data/data_sources/session_cache.dart';
+import '../../../home/data/data_sources/session_cache.dart';
 
 class SessionsManagerPage extends StatefulWidget {
   const SessionsManagerPage({Key? key}) : super(key: key);

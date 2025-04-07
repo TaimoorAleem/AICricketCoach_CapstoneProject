@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:ai_cricket_coach/features/home/presentation/pages/sessions_manager_page.dart';
+import 'package:ai_cricket_coach/features/video_upload/presentation/pages/sessions_manager_page.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
