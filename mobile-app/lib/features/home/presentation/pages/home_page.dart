@@ -34,16 +34,16 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         playerUid = uid;
         _pages = [
-          SessionsHistoryPage(playerId: uid),
+          UserProfilePage(),
           UploadVideoPage(
             navigateToTab: _onItemTapped,
             openSessionsManager: _showSessionsManager,
           ),
+          SessionsHistoryPage(playerId: uid),
           AnalyticsPage.singlePlayer(
             playerUid: uid,
             useHardcoded: true, // server response was invalid :( Will fix after defense presentation
           ),
-          UserProfilePage(),
         ];
       });
     }
