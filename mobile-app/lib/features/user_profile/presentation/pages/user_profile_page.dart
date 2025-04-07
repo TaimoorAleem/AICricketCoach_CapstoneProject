@@ -3,6 +3,7 @@ import 'package:ai_cricket_coach/features/authentication/presentation/pages/sign
 import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
 
 import 'package:ai_cricket_coach/features/user_profile/presentation/widgets/user_profile.dart';
+import 'package:dartz/dartz.dart';
 
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
@@ -22,197 +23,177 @@ class UserProfilePage extends StatelessWidget {
 
   final TextEditingController _passwordCon = TextEditingController();
 
-
-
   Future<String?> get_uid() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    final SharedPreferences sharedPreferences =
+        await SharedPreferences.getInstance();
     var uid = sharedPreferences.getString('uid');
     return uid;
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         body: Column(
-              children: [
-                const UserProfile(),
-                _allButtons(context)
-              ],
+      children: [const UserProfile(), _allButtons(context)],
+    ));
+  }
 
+  Widget _allButtons(BuildContext context) {
+    return Padding(
+        padding: EdgeInsets.only(left: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: _otherButtons(context),
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.center,
+              child: _otherButtons2(context),
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.center,
+              child: _logOutButton(context),
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.center,
+              child: _deleteButton(context),
+            ),
+          ],
         )
     );
   }
 
-  Widget _allButtons(BuildContext context){
-    return Column(
-    mainAxisAlignment: MainAxisAlignment.end, // Pushes content to the bottom
-    children: [
-      const SizedBox(height: 30),
-      _otherButtons(context),
-      const SizedBox(height: 30),
-      _otherButtons2(context),
-      const SizedBox(height: 160),
-      _logOutAndDeleteButtons(context)
-    ],
-    );
-  }
   Widget _otherButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center, // Center the row of buttons
-      children: [
-        const SizedBox(width: 20),
-        // Settings Button
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.settings, color: AppColors.primary,),
-            label: const Text(
-              'Settings',
-              style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Nunito'
-              ),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary, // Button background color
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-          ),
-        ), // Space between buttons
-        // Terms and Agreement Button
-
-        const SizedBox(width: 20),
-      ],
-    );
-  }
-  Widget _otherButtons2(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center, // Center the row of buttons
-      children: [
-        const SizedBox(width: 20),
-        // Settings Button
-        Expanded(
-          child: ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.library_books, color: AppColors.primary,),
-            label: const Text(
-                'Terms and Agreement',
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Nunito'
-                ),
-                textAlign: TextAlign.center, // Ensure text is centered when wrapping
-
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.secondary, // Button background color
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-          ),
-        ), // Space between buttons
-        // Terms and Agreement Button
-
-        const SizedBox(width: 20),
-      ],
-    );
-  }
-
-  Widget _logOutAndDeleteButtons(BuildContext context){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center, // Center buttons horizontally
-      children: [
-        const SizedBox(width: 20),
-        Expanded(
-          child: _logOutButton(context), // Logout button takes equal space
-        ),
-        const SizedBox(width: 20), // Space between buttons
-        Expanded(
-          child: _deleteButton(context), // Delete button takes equal space
-        ),
-        const SizedBox(width: 20),
-      ],
-    );
-  }
-
-
-
-
-
-
-  Widget _logOutButton(BuildContext context){
     return ElevatedButton.icon(
-      onPressed: () async {
-        // Make sure the dialog only runs if the context is still active
-        if (!context.mounted) return;
-
-        final shouldLogout = await showDialog<bool>(
-          context: context,
-          builder: (BuildContext dialogContext) {
-            return AlertDialog(
-              title: const Text("Confirm Logout"),
-              content: const Text("Are you sure you want to log out?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop(false); // Cancel
-                  },
-                  child: const Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop(true); // Confirm
-                  },
-                  child: const Text(
-                    "Confirm",
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-
-        // Handle the user's decision
-        if (shouldLogout == true && context.mounted) {
-          final success = await sl<LogOutUseCase>().call();
-          if (success && context.mounted) {
-            AppNavigator.pushAndRemove(context, LogInPage());
-          }
-        }
-      },
-      icon: const Icon(Icons.logout, color: Colors.white),
+      onPressed: () {},
+      icon: const Icon(
+        Icons.settings,
+        color: AppColors.primary,
+      ),
       label: const Text(
-        'Log Out',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
-
+        'Settings',
+        style: const TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Nunito'),
+      ),
+      style: ElevatedButton.styleFrom(
+        alignment: Alignment.center,
+        fixedSize: Size(220, 50),
+        backgroundColor: AppColors.secondary, // Button background color
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40),
+        ),
+      ),
     );
   }
 
+  Widget _otherButtons2(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: () {},
+      icon: const Icon(
+        Icons.file_open_sharp,
+        color: AppColors.primary,
+      ),
+      label: const Text(
+        'Terms and\nConditions',
+        style: const TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Nunito'),
+      ),
+      style: ElevatedButton.styleFrom(
+        alignment: Alignment.center,
+        fixedSize: Size(220, 68),
+        backgroundColor: AppColors.secondary, // Button background color
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40),
+        ),
+      ),
+    );
+  }
+
+  Widget _logOutButton(BuildContext context) {
+    return ElevatedButton.icon(
+        onPressed: () async {
+          // Make sure the dialog only runs if the context is still active
+          if (!context.mounted) return;
+
+          final shouldLogout = await showDialog<bool>(
+            context: context,
+            builder: (BuildContext dialogContext) {
+              return AlertDialog(
+                title: const Text("Confirm Logout"),
+                content: const Text("Are you sure you want to log out?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(false); // Cancel
+                    },
+                    child: const Text("Cancel"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop(true); // Confirm
+                    },
+                    child: const Text(
+                      "Confirm",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+
+          // Handle the user's decision
+          if (shouldLogout == true && context.mounted) {
+            final success = await sl<LogOutUseCase>().call();
+            if (success && context.mounted) {
+              AppNavigator.pushAndRemove(context, LogInPage());
+            }
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          fixedSize: Size(220, 50),
+          backgroundColor: AppColors.secondary, // Button background color
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 60),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
+        ),
+        icon: const Icon(Icons.logout, color: AppColors.primary),
+        label: const Text(
+          'Log Out',
+          style: const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w500,
+              fontFamily: 'Nunito'),
+        ));
+  }
 
   Widget _deleteButton(BuildContext context) {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: () {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: const Text(
-                "Delete Account",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              title: const Text("Delete Account",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("Are you sure you want to delete your account? This action cannot be undone."),
+                  const Text(
+                      "Are you sure you want to delete your account? This action cannot be undone."),
                   const SizedBox(height: 10),
                   TextField(
                     controller: _passwordCon,
@@ -239,7 +220,8 @@ class UserProfilePage extends StatelessWidget {
 
                       // Check if UID is null
                       if (uid == null) {
-                        DisplayMessage.errorMessage("User ID not found. Please log in again.", context);
+                        DisplayMessage.errorMessage(
+                            "User ID not found. Please log in again.", context);
                         return;
                       }
 
@@ -266,11 +248,22 @@ class UserProfilePage extends StatelessWidget {
           },
         );
       },
-      child: const Text("Delete Account",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(220, 50),
+        backgroundColor: AppColors.secondary, // Button background color
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 35),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(40),
+        ),
+      ),
+      icon: const Icon(Icons.delete, color: AppColors.primary),
+      label: const Text(
+        "Delete Account",
+        style: const TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Nunito'),
+      ),
     );
   }
-
 }
-
-

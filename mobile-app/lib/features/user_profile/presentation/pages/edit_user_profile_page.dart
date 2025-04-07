@@ -1,3 +1,4 @@
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,7 +26,9 @@ class EditUserProfilePage extends StatefulWidget {
 }
 
 class _EditUserProfilePageState extends State<EditUserProfilePage> {
+  final _formKey = GlobalKey<FormState>();
   late String _pfpPath;
+  late bool _isFormValid;
   final ImagePicker _picker = ImagePicker();
 
   final TextEditingController _firstNameCon = TextEditingController();
@@ -40,6 +43,19 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   void initState() {
     super.initState();
     _pfpPath = widget.pfpPath;
+    _isFormValid = false;
+  }
+
+  @override
+  void dispose() {
+    _ageCon.dispose();
+    _firstNameCon.dispose();
+    _lastNameCon.dispose();
+    _descriptionCon.dispose();
+    _teamNameCon.dispose();
+    _countryCon.dispose();
+    _cityCon.dispose();
+    super.dispose();
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -54,7 +70,6 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       });
 
       await sl<EditPFPUseCase>().call(params: image.path);
-
     }
   }
 
@@ -87,11 +102,6 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     );
   }
 
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,39 +115,62 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
 
   Widget editForm(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _homeBar(context),
+              const SizedBox(height: 10),
+              _nameLabels(),
+              _names(),
+              const SizedBox(height: 40),
+              _locationLabels(),
+              _location(),
+              const SizedBox(height: 40),
+              _teamAndAgeLabels(),
+              _teamAndAge(),
+              const SizedBox(height: 40),
+              _fieldLabel('Description'),
+              _descriptionField(),
+              const SizedBox(height: 30),
+              if (_isFormValid) ...[
+                _saveButton(context),
+              ]
+            ],
+          ),
+        ));
+  }
+
+  Widget _homeBar(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _fieldLabel('Profile picture'),
-          _pfp(),
-          const SizedBox(height: 30),
-          _fieldLabel('First Name'),
-          _firstNameField(),
-          const SizedBox(height: 20),
-          _fieldLabel('Last Name'),
-          _lastNameField(),
-          const SizedBox(height: 5),
-          const SizedBox(height: 20),
-          _fieldLabel('Age'),
-          _ageField(),
-          _fieldLabel('City'),
-          _cityField(),
-          _fieldLabel('Country'),
-          _countryField(),
-          _fieldLabel('Team Name'),
-          _teamNameField(),
-          _fieldLabel('Description'),
-          _descriptionField(),
-          const SizedBox(height: 5),
-          const SizedBox(height: 30),
-          _saveButton(context),
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.primary,
+            ),
+            onPressed: () {
+              // Replace with your actual home navigation logic
+              AppNavigator.pushAndRemove(context, UserProfilePage());
+            },
+            color: AppColors.background,
+            focusColor: AppColors.background,
+            hoverColor: AppColors.background,
+            highlightColor: AppColors.background,
+            splashColor: AppColors.background,
+          ),
+          _validateButton(context)
         ],
-      ),
+      ) 
     );
   }
 
@@ -174,20 +207,99 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
           radius: 30,
           backgroundImage: _pfpPath.isNotEmpty
               ? FileImage(File(_pfpPath)) as ImageProvider
-              : const AssetImage(
-              'lib/images/default-pfp.jpg'),
-        )
+              : const AssetImage('lib/images/default-pfp.jpg'),
+        ));
+  }
 
+  Widget _names() {
+    return Row(
+      children: [
+        _pfp(),
+        SizedBox(width: 10),
+        Expanded(child: _firstNameField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _lastNameField()),
+      ],
     );
   }
 
+  Widget _nameLabels() {
+    return Row(
+      children: [
+        Align(child: _fieldLabel('Profile\nPicture\n')),
+        SizedBox(width: 15),
+        Expanded(child: _fieldLabel('First Name')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Last Name')),
+      ],
+    );
+  }
+
+  Widget _location() {
+    return Row(
+      children: [
+        Expanded(child: _cityField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _countryField()),
+      ],
+    );
+  }
+
+  Widget _locationLabels() {
+    return Row(
+      children: [
+        Expanded(child: _fieldLabel('City')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Country')),
+      ],
+    );
+  }
+
+  Widget _teamAndAge() {
+    return Row(
+      children: [
+        Expanded(child: _teamNameField()),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _ageField()),
+      ],
+    );
+  }
+
+  Widget _teamAndAgeLabels() {
+    return Row(
+      children: [
+        Expanded(child: _fieldLabel('Team')),
+        SizedBox(width: 8), // Optional: space between the fields
+        Expanded(child: _fieldLabel('Age')),
+      ],
+    );
+  }
 
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
       decoration: InputDecoration(
         hintText: widget.user.firstName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -197,28 +309,114 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _lastNameCon,
       decoration: InputDecoration(
         hintText: widget.user.lastName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
 
   Widget _teamNameField() {
-    return TextField(
+    return TextFormField(
       controller: _teamNameCon,
       decoration: InputDecoration(
         hintText: widget.user.teamName,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
+      validator: (value){
+        if(value==null || value.isEmpty){
+          return null;
+        }
+        if (!RegExp(r'^[a-zA-Z0-9\s]+$').hasMatch(value!)) {
+          return 'Team name can only contain letters, numbers, and spaces';
+        }
+        return null;
+      },
     );
   }
 
   Widget _ageField() {
-    return TextField(
+    return TextFormField(
       controller: _ageCon,
+      keyboardType: TextInputType.number,
       decoration: InputDecoration(
         hintText: widget.user.age,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
+      validator: (value) {
+        // If value is empty, treat it as unchanged
+        if (value == null || value.trim().isEmpty) {
+          return null;
+        }
+
+        // If user entered same age as existing
+        if (value.trim() == widget.user.age) {
+          return null;
+        }
+        if (int.tryParse(value.trim()) == null) {
+          return 'Please enter a valid number';
+        }
+        if (int.tryParse(value.trim())! < 13 ||
+            int.tryParse(value.trim())! > 100) {
+          return 'Age must be between 13 and 100';
+        }
+        return null;
+      },
     );
   }
 
@@ -227,7 +425,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _cityCon,
       decoration: InputDecoration(
         hintText: widget.user.city,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -237,7 +454,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _countryCon,
       decoration: InputDecoration(
         hintText: widget.user.country,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -247,7 +483,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
       controller: _descriptionCon,
       decoration: InputDecoration(
         hintText: widget.user.description,
-        border: const OutlineInputBorder(),
+        hintStyle: const TextStyle(
+          color: AppColors.primary,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+        ),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+              color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -256,6 +511,8 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     return Text(
       text,
       style: const TextStyle(
+        color: Colors.white,
+        fontFamily: 'Nunito',
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
@@ -264,8 +521,32 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
 
   Future<String> _getUid() async {
     final SharedPreferences sharedPreferences =
-    await SharedPreferences.getInstance();
+        await SharedPreferences.getInstance();
     return sharedPreferences.getString('uid')!;
+  }
+
+  Widget _validateButton(BuildContext context) {
+    return IconButton(
+        icon: Icon(
+          Icons.check, // The tick icon
+          color: _isFormValid
+              ? AppColors.primary
+              : Colors.grey,
+        ),
+        onPressed: () {
+          // Only validate when the form is not yet validated
+          if (!_isFormValid) {
+            if (_formKey.currentState!.validate()) {
+              setState(() {
+                _isFormValid =
+                    true; // Show tick icon after successful validation
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Form is valid!")),
+              );
+            }
+          }
+        });
   }
 
   Widget _saveButton(BuildContext context) {
@@ -278,21 +559,26 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
         onPressed: () async => sl<EditProfileUseCase>().call(
           params: EditProfileReqParams(
               uid: await _getUid(),
-              age: _ageCon.text.isEmpty ? widget.user.age! : _ageCon.text,
-              city: _cityCon.text.isEmpty ? widget.user.city! : _cityCon.text,
-              country:
-              _countryCon.text.isEmpty ? widget.user.country! : _countryCon.text,
-              description: _descriptionCon.text.isEmpty
-                  ? widget.user.description!
+              age: _ageCon.text.trim().isEmpty
+                  ? widget.user.age ?? ""
+                  : _ageCon.text,
+              city: _cityCon.text.trim().isEmpty
+                  ? widget.user.city ?? ""
+                  : _cityCon.text,
+              country: _countryCon.text.trim().isEmpty
+                  ? widget.user.country ?? ""
+                  : _countryCon.text,
+              description: _descriptionCon.text.trim().isEmpty
+                  ? widget.user.description ?? ""
                   : _descriptionCon.text,
-              firstName: _firstNameCon.text.isEmpty
-                  ? widget.user.firstName!
+              firstName: _firstNameCon.text.trim().isEmpty
+                  ? widget.user.firstName ?? ""
                   : _firstNameCon.text,
-              lastName: _lastNameCon.text.isEmpty
-                  ? widget.user.lastName!
+              lastName: _lastNameCon.text.trim().isEmpty
+                  ? widget.user.lastName ?? ""
                   : _lastNameCon.text,
-              teamName: _teamNameCon.text.isEmpty
-                  ? widget.user.teamName!
+              teamName: _teamNameCon.text.trim().isEmpty
+                  ? widget.user.teamName ?? ""
                   : _teamNameCon.text),
         ),
         onSuccess: () {
