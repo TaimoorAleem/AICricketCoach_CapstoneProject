@@ -1,3 +1,5 @@
+import 'package:ai_cricket_coach/features/idealshot/domain/entities/ideal_shot.dart';
+
 class UploadDeliveryResponse {
   final String videoUrl;
   final BallCharacteristics ball;
@@ -39,20 +41,6 @@ class BallCharacteristics {
       ballLine: json['BallLine'],
       ballSpeed: (json['BallSpeed'] as num).toDouble(),
       batsmanPosition: json['BatsmanPosition'],
-    );
-  }
-}
-
-class IdealShot {
-  final String shot;
-  final double confidenceScore;
-
-  IdealShot({required this.shot, required this.confidenceScore});
-
-  factory IdealShot.fromJson(Map<String, dynamic> json) {
-    return IdealShot(
-      shot: json['shot'],
-      confidenceScore: (json['confidence_score'] as num).toDouble(),
     );
   }
 }

@@ -1,11 +1,9 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/entities/user_entity.dart';
 import 'package:ai_cricket_coach/features/user_profile/domain/usecases/edit_profile.dart';
-import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import 'package:ai_cricket_coach/resources/app_colors.dart';
 import 'package:ai_cricket_coach/resources/app_navigator.dart';
 import 'package:ai_cricket_coach/resources/display_message.dart';
@@ -13,6 +11,7 @@ import 'package:ai_cricket_coach/resources/service_locator.dart';
 import 'package:ai_cricket_coach/features/user_profile/data/models/EditProfileReqParams.dart';
 import 'package:reactive_button/reactive_button.dart';
 
+import '../../../home/presentation/pages/home_page.dart';
 import '../../domain/usecases/edit_pfp_usecase.dart';
 
 class EditUserProfilePage extends StatefulWidget {
@@ -160,7 +159,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
             ),
             onPressed: () {
               // Replace with your actual home navigation logic
-              AppNavigator.pushAndRemove(context, UserProfilePage());
+              AppNavigator.pushAndRemove(context, HomePage());
             },
             color: AppColors.background,
             focusColor: AppColors.background,
@@ -582,7 +581,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
                   : _teamNameCon.text),
         ),
         onSuccess: () {
-          AppNavigator.pushAndRemove(context, UserProfilePage());
+          AppNavigator.pushAndRemove(context, const HomePage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);

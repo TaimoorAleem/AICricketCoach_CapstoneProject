@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import '../features/analytics/data/network/performance_api_service.dart';
 import '../features/sessions/data/data_sources/session_api_service.dart';
 import '../resources/dio_client.dart';
 
@@ -30,7 +31,6 @@ import '../features/sessions/domain/repositories/sessions_repository.dart';
 import '../features/sessions/domain/usecases/get_sessions_usecase.dart';
 
 // Analytics
-import '../features/analytics/data/network/performance_api_service.dart';
 import '../features/analytics/data/repositories/performance_repository_impl.dart';
 import '../features/analytics/domain/repositories/performance_repository.dart';
 import '../features/analytics/domain/usecases/get_performance_history_usecase.dart';

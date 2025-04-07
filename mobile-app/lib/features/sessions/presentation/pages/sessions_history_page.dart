@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../home/data/data_sources/session_cache.dart';
 import '../../../../resources/service_locator.dart';
 import '../../domain/entities/session.dart';

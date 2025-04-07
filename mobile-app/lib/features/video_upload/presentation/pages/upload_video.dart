@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:ai_cricket_coach/features/video_upload/presentation/pages/sessions_manager_page.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-
 import '../../../../resources/api_urls.dart';
 import '../../../../resources/dio_client.dart';
 import '../../../home/data/data_sources/session_cache.dart';
@@ -16,10 +13,12 @@ import '../../../home/presentation/widgets/session_manager.dart';
 import '../../../idealshot/domain/entities/ideal_shot.dart';
 import '../../../sessions/data/dtos/AddDeliveryDTO.dart';
 import '../../../sessions/domain/entities/delivery.dart';
-import '../../../sessions/presentation/pages/delivery_details_page.dart';
 
 class UploadVideoPage extends StatefulWidget {
-  const UploadVideoPage({Key? key}) : super(key: key);
+  final void Function(int index)? navigateToTab;
+  final VoidCallback? openSessionsManager;
+
+  const UploadVideoPage({Key? key, this.navigateToTab, this.openSessionsManager}) : super(key: key);
 
   @override
   _UploadVideoPageState createState() => _UploadVideoPageState();
@@ -34,16 +33,6 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Upload Video'),
-        backgroundColor: Colors.blue,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            onPressed: recordVideo,
-          ),
-        ],
-      ),
       body: Column(
         children: [
           Expanded(
@@ -87,7 +76,7 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
                 ElevatedButton(
                   onPressed: _isUploading ? null : uploadVideo,
                   child: _isUploading
-                      ? const Text('Uploading...')
+                      ? const Text('Processing...')
                       : const Text('Upload Video'),
                 ),
               ],
@@ -168,10 +157,8 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       final file = File(_videoPath!);
       final fileName = Path.basename(file.path);
 
-      // Check or create session
       final sessionId = await SessionManager.getActiveSessionId() ?? await SessionManager.createSession();
 
-      // Upload video
       final dioClient = await DioClient.init();
       final response = await dioClient.post(
         ApiUrl.uploadVideo,
@@ -188,9 +175,6 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       }
 
       final deliveryData = response.data;
-
-
-      // Create delivery
       final prefs = await SharedPreferences.getInstance();
       final playerId = prefs.getString('uid')!;
 
@@ -211,38 +195,34 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
         }).toList(),
       );
 
-
       final addDeliveryResponse = await dioClient.post(
         ApiUrl.addDelivery,
         data: deliveryDTO.toJson(),
       );
 
       final _deliveryId = addDeliveryResponse.data['data']['deliveryId'];
-      final _ballength = deliveryData['ballCharacteristics']['BallLength'];
-      final _ballLine = deliveryData['ballCharacteristics']['BallLine'];
-      final _ballSpeed = (deliveryData['ballCharacteristics']['BallSpeed'] as num).toDouble();
-      final _batsmanPosition = deliveryData['ballCharacteristics']['BatsmanPosition'];
+      final _ballength = ballCharacteristics['BallLength'];
+      final _ballLine = ballCharacteristics['BallLine'];
+      final _ballSpeed = (ballCharacteristics['BallSpeed'] as num).toDouble();
+      final _batsmanPosition = ballCharacteristics['BatsmanPosition'];
       final _videoUrl = deliveryData['videoUrl'];
-      final _idealShots = (deliveryData['idealShot']['predicted_ideal_shots'] as List)
-          .map<IdealShot>((s) => IdealShot(
+      final _idealShots = idealShotsList.map<IdealShot>((s) => IdealShot(
         shot: s['shot'],
         confidenceScore: (s['confidence_score'] as num).toDouble(),
-      ))
-          .toList();
+      )).toList();
 
-      // Check if the response is valid
       if (addDeliveryResponse.statusCode != 200 || _deliveryId == null) {
         throw Exception('Add delivery failed: ${addDeliveryResponse.data}');
       }
 
       final newDelivery = Delivery(
-        deliveryId: _deliveryId,
-        ballLength: _ballength,
-        ballLine: _ballLine,
-        ballSpeed: _ballSpeed,
-        batsmanPosition: _batsmanPosition,
-        videoUrl: _videoUrl,
-        idealShots: _idealShots
+          deliveryId: _deliveryId,
+          ballLength: _ballength,
+          ballLine: _ballLine,
+          ballSpeed: _ballSpeed,
+          batsmanPosition: _batsmanPosition,
+          videoUrl: _videoUrl,
+          idealShots: _idealShots
       );
 
       SessionCache().addDeliveryToSession(
@@ -250,12 +230,10 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
         newDelivery: newDelivery,
       );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SessionsManagerPage(),
-        ),
-      );
+      if (widget.openSessionsManager != null) {
+        widget.openSessionsManager!();
+      }
+
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {

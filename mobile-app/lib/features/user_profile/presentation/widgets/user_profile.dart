@@ -1,17 +1,11 @@
 import 'dart:io';
-import 'package:ai_cricket_coach/features/authentication/presentation/pages/log_in_page.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_cubit.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/bloc/profile_state.dart';
 import 'package:ai_cricket_coach/features/user_profile/presentation/pages/edit_user_profile_page.dart';
 import 'package:ai_cricket_coach/resources/app_colors.dart';
 import 'package:ai_cricket_coach/resources/app_navigator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../resources/service_locator.dart';
-import '../../../authentication/domain/usecases/logout_usecase.dart';
-import '../../../home/presentation/pages/home_page.dart';
 import '../../domain/entities/user_entity.dart';
 
 class UserProfile extends StatelessWidget {
@@ -20,352 +14,158 @@ class UserProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (context) => ProfileCubit()..getUserProfile(),
-        child:
-            BlocBuilder<ProfileCubit, ProfileState>(builder: (context, state) {
+      create: (_) => ProfileCubit()..getUserProfile(),
+      child: BlocBuilder<ProfileCubit, ProfileState>(
+        builder: (context, state) {
           if (state is ProfileLoading) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
+
           if (state is ProfileLoaded) {
-            debugPrint('HelloHello');
-            UserEntity user = state.user; // Get the user from the state
-
-            Widget _homeBar(BuildContext context) {
-              return AppBar(
-                leading: IconButton(
-                  icon: const Icon(
-                    Icons.home_sharp,
-                    color: AppColors.primary,
-                  ),
-                  onPressed: () {
-                    // Replace with your actual home navigation logic
-                    AppNavigator.pushAndRemove(context, HomePage());
-                  },
-                ),
-                actions: [
-                  // Add an icon to the top right
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      color: AppColors.primary,
-                    ), // Replace with any icon
-                    onPressed: () async {
-                      AppNavigator.push(
-                          context,
-                          EditUserProfilePage(
-                            user: user,
-                            pfpPath: 'lib/images/default-pfp.jpg',
-                          ));
-                      context
-                          .read<ProfileCubit>()
-                          .getUserProfile(); // Fetch fresh data
-                    },
-                  ),
-                ],
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-              );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.all(10.0), // Main page padding
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _homeBar(context),
-
-                  const SizedBox(height: 16), // Optional spacing after AppBar
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0), // Or whatever padding you prefer
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row for Profile Picture and User Info
-                        Row(
-                          children: [
-                            // Profile Picture
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage: const AssetImage(
-                                  'lib/images/default-pfp.jpg'),
-                            ),
-                            const SizedBox(width: 30),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.email ?? 'Not available'}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.firstName} ${user.lastName}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 30,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${user.age ?? ''}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                                color: Colors.grey,
-                                                fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.teamName != null && user.teamName!.isNotEmpty ? "Team: ${user.teamName}" : ""}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${(user.city?.isNotEmpty ?? false) && (user.country?.isNotEmpty ?? false)
-                                            ? '${user.city}, ${user.country}'
-                                            : (user.city?.isNotEmpty ?? false)
-                                            ? user.city
-                                            : (user.country?.isNotEmpty ?? false)
-                                            ? user.country
-                                            : ''}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        // Description
-                        Text(
-                          '${user.description ?? ''}',
-                          style: const TextStyle(
-                            fontFamily: 'Nunito',
-                            fontSize: 15,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-
-                        const SizedBox(height: 10),
-                      ],
-                    ),
-                  ),
-
-                  // Buttons section comes here if you have it
-                ],
-              ),
-            );
+            return _buildProfile(context, state.user, 'lib/images/default-pfp.jpg');
           }
+
           if (state is ProfileLoadedWithPicture) {
-            debugPrint('HelloHello');
-            UserEntity user = state.user; // Get the user from the state
-            String profilePicturePath = state.profilePicturePath;
+            return _buildProfile(context, state.user, state.profilePicturePath);
+          }
 
-            Widget _homeBar(BuildContext context) {
-              return AppBar(
-                leading: IconButton(
-                  icon: const Icon(
-                    Icons.home_sharp,
-                    color: AppColors.primary,
-                  ),
-                  onPressed: () {
-                    // Replace with your actual home navigation logic
-                    AppNavigator.pushAndRemove(context, HomePage());
-                  },
-                ),
-                actions: [
-                  // Add an icon to the top right
-                  IconButton(
-                    icon: const Icon(
-                      Icons.edit_outlined,
-                      color: AppColors.primary,
-                    ), // Replace with any icon
-                    onPressed: () async {
-                      AppNavigator.push(
-                          context,
-                          EditUserProfilePage(
-                            user: user,
-                            pfpPath: profilePicturePath,
-                          ));
-                      context
-                          .read<ProfileCubit>()
-                          .getUserProfile(); // Fetch fresh data
-                    },
-                  ),
-                ],
-                backgroundColor: Colors.transparent,
-                elevation: 0,
+          if (state is ProfileLoadingFailed) {
+            return Center(child: Text(state.errorMessage));
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+
+  Widget _buildProfile(BuildContext context, UserEntity user, String pfpPath) {
+    final isLocalFile = pfpPath.startsWith('/') || pfpPath.contains('storage/emulated');
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _profileHeader(context, user, pfpPath, isLocalFile),
+          const SizedBox(height: 16),
+          Text(
+            user.description ?? '',
+            style: const TextStyle(
+              fontFamily: 'Nunito',
+              fontSize: 15,
+              color: Colors.white,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _profileHeader(BuildContext context, UserEntity user, String pfpPath, bool isLocalFile) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Align(
+          alignment: Alignment.topRight,
+          child: IconButton(
+            icon: const Icon(Icons.edit_outlined, color: AppColors.primary),
+            onPressed: () {
+              AppNavigator.push(
+                context,
+                EditUserProfilePage(user: user, pfpPath: pfpPath),
               );
-            }
-
-            return Padding(
-              padding: const EdgeInsets.all(10.0), // Main page padding
+            },
+          ),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CircleAvatar(
+              radius: 45,
+              backgroundImage: isLocalFile
+                  ? FileImage(File(pfpPath))
+                  : AssetImage(pfpPath) as ImageProvider,
+              backgroundColor: Colors.grey.shade300,
+            ),
+            const SizedBox(width: 20),
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _homeBar(context),
-
-                  const SizedBox(height: 16), // Optional spacing after AppBar
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0), // Or whatever padding you prefer
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row for Profile Picture and User Info
-                        Row(
-                          children: [
-                            // Profile Picture
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundImage:
-                              FileImage(File(profilePicturePath)),
-                              onBackgroundImageError: (_, __) =>
-                              const AssetImage(
-                                  'lib/images/default-pfp.jpg'),
-                            ),
-                            const SizedBox(width: 30),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.email ?? 'Not available'}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.firstName} ${user.lastName}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 30,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${user.age ?? ''}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                            color: Colors.grey,
-                                            fontSize: 20),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        '${user.teamName != null && user.teamName!.isNotEmpty ? "Team: ${user.teamName}" : ""}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${(user.city?.isNotEmpty ?? false) && (user.country?.isNotEmpty ?? false)
-                                            ? '${user.city}, ${user.country}'
-                                            : (user.city?.isNotEmpty ?? false)
-                                            ? user.city
-                                            : (user.country?.isNotEmpty ?? false)
-                                            ? user.country
-                                            : ''}',
-                                        style: const TextStyle(
-                                          fontFamily: 'Nunito',
-                                          fontSize: 15,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
+                  Text(
+                    user.email ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${user.firstName} ${user.lastName}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
-
-                        const SizedBox(height: 16),
-
-                        // Description
-                        Text(
-                          '${user.description ?? ''}',
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${user.age ?? ''}',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: 20,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        user.teamName?.isNotEmpty == true ? 'Team: ${user.teamName}' : '',
+                        style: const TextStyle(
+                          fontFamily: 'Nunito',
+                          fontSize: 15,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          _formatLocation(user.city, user.country),
                           style: const TextStyle(
                             fontFamily: 'Nunito',
                             fontSize: 15,
                             color: Colors.white,
-                            fontWeight: FontWeight.w400,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
                         ),
-
-                        const SizedBox(height: 10),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-
-                  // Buttons section comes here if you have it
                 ],
               ),
-            );
-          }
-          if (state is ProfileLoadingFailed) {
-            return Text(state.errorMessage);
-          }
-          return Container();
-        }));
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  String _formatLocation(String? city, String? country) {
+    if ((city?.isNotEmpty ?? false) && (country?.isNotEmpty ?? false)) {
+      return '$city, $country';
+    }
+    return city?.isNotEmpty == true
+        ? city!
+        : country?.isNotEmpty == true
+        ? country!
+        : '';
   }
 }
