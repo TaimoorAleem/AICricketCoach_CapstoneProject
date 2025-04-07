@@ -86,10 +86,11 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Sessions'),
-          BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
-          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Analytics'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Sessions'),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Analytics'),
+
         ],
       ),
     );
