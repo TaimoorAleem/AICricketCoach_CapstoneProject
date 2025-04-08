@@ -1,109 +1,97 @@
+// home_page.dart
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
-import 'package:ai_cricket_coach/features/feedback/presentation/pages/ideal_shot_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ai_cricket_coach/features/video_upload/presentation/pages/upload_video.dart';
+import 'package:ai_cricket_coach/features/sessions/presentation/pages/sessions_history_page.dart';
+import 'package:ai_cricket_coach/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:ai_cricket_coach/features/user_profile/presentation/pages/user_profile_page.dart';
 import '../../../../resources/app_colors.dart';
-import '../../../../resources/service_locator.dart';
-import '../../../sessions/presentation/pages/sessions_history_page.dart';
-import '../../../user_profile/presentation/pages/user_profile_page.dart';
-import '../../../feedback/domain/usecases/predict_shot_usecase.dart';
+import '../../../video_upload/presentation/pages/sessions_manager_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Future<String?> _getPlayerUid() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences.getString('uid');
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _selectedIndex = 0;
+  String? playerUid;
+  Widget? _overlayPage; // used to stack over current tab
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUid();
+  }
+
+  Future<void> _loadUid() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString('uid');
+    if (uid != null) {
+      setState(() {
+        playerUid = uid;
+        _pages = [
+          UserProfilePage(),
+          UploadVideoPage(
+            navigateToTab: _onItemTapped,
+            openSessionsManager: _showSessionsManager,
+          ),
+          SessionsHistoryPage(playerId: uid),
+          AnalyticsPage.singlePlayer(
+            playerUid: uid,
+            useHardcoded: true, // server response was invalid :( Will fix after defense presentation
+          ),
+        ];
+      });
+    }
+  }
+
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _overlayPage = null; // close any overlay
+    });
+  }
+
+  void _showSessionsManager() {
+    setState(() {
+      _overlayPage = const SessionsManagerPage();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (playerUid == null || _pages.isEmpty) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Center(
-          child: Text(
-            'Home',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: AppColors.secondary,
+        title: const Text('AI Cricket Coach'),
+        centerTitle: true,
       ),
-      body: FutureBuilder<String?>(
-        future: _getPlayerUid(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final playerUid = snapshot.data!;
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => UserProfilePage()),
-                    );
-                  },
-                  child: const Text('Go to User Profile'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SessionsHistoryPage(playerUid: playerUid),
-                      ),
-                    );
-                  },
-                  child: const Text('Go to Sessions History'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IdealShotPage(
-                          predictShot: sl<PredictShotUseCase>(),
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('Go to Feedback Page'),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AnalyticsPage.singlePlayer(playerUid: playerUid)),
-                    );
-                  },
-                  child: const Text('Go to Analytics Page'),
-                ),
-              ],
-            ),
-          );
-        },
+      body: Stack(
+        children: [
+          _pages[_selectedIndex],
+          if (_overlayPage != null) Positioned.fill(child: _overlayPage!),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.upload), label: 'Upload'),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Sessions'),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Analytics'),
+
+        ],
       ),
     );
   }

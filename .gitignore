@@ -39,6 +39,12 @@ mobile-app/flutter_assets/
 mobile-app/build/app/intermediates/
 mobile-app/build/app/generated/
 
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+
+
 # Symbolication related
 app.*.symbols
 
@@ -52,3 +58,5 @@ app.*.map.json
 
 # Environment files
 .env
+
+mobile-app/assets/APIKey.json

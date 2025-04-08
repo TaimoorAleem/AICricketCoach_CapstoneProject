@@ -1,23 +1,22 @@
-import 'package:ai_cricket_coach/features/coaches/presentation/pages/coach_home_page.dart';
 import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_button/reactive_button.dart';
+import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
-import '../../../coaches/domain/usecases/get_players_usecase.dart';
-import '../../../coaches/presentation/bloc/PlayerCubit.dart';
-import '../../domain/usecases/login_usecase.dart';
 import '../../data/models/login_req_params.dart';
+import '../../domain/usecases/login_usecase.dart';
+import 'reset_password_page.dart';
+import 'sign_up_page.dart';
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
+
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +27,19 @@ class LogInPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 50),
-              _welcomeHeading(),
+              const SizedBox(height: 100),
+              Image.asset(
+                'lib/images/logo.png', // Path to your logo
+                height: 120, // Adjust size as needed
+                width: 120,
+              ),
               const SizedBox(height: 20),
+              _welcomeHeading(),
+              const SizedBox(height: 10),
               _loginContainer(context),
+              const SizedBox(height: 20),
+              _signupText(context),
+              _forgotpwtext(context),
             ],
           ),
         ),
@@ -41,10 +49,12 @@ class LogInPage extends StatelessWidget {
 
   Widget _welcomeHeading() {
     return const Text(
-      'Welcome to AI Cricket Coach',
+      'AI Cricket Coach',
       style: TextStyle(
-        fontWeight: FontWeight.bold,
+        fontFamily: 'Nunito',
+        fontWeight: FontWeight.w600,
         fontSize: 26,
+        color: AppColors.primary,
       ),
       textAlign: TextAlign.center,
     );
@@ -54,12 +64,17 @@ class LogInPage extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 20),
+          const SizedBox(height: 5),
           _emailField(),
           const SizedBox(height: 20),
+          const SizedBox(height: 5),
           _passwordField(),
           const SizedBox(height: 30),
           _loginButton(context),
@@ -68,12 +83,41 @@ class LogInPage extends StatelessWidget {
     );
   }
 
+
+
+  Widget _fieldLabel(String text) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+    );
+  }
+
   Widget _emailField() {
     return TextField(
       controller: _emailCon,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Email',
-        border: OutlineInputBorder(),
+        hintStyle: const TextStyle(
+            fontFamily: 'Nunito',
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+          borderSide: BorderSide.none, // Removes border
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2), // Optional focus border
+        ),
       ),
     );
   }
@@ -82,12 +126,30 @@ class LogInPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       obscureText: true,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         hintText: 'Password',
-        border: OutlineInputBorder(),
+        hintStyle: const TextStyle(
+            fontFamily: 'Nunito',
+            color: AppColors.primary,
+            fontWeight: FontWeight.w500),
+        filled: true,
+        fillColor: AppColors.secondary,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12), // Make sure all fields match
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        ),
       ),
     );
   }
+
 
   Widget _loginButton(BuildContext context) {
     return Center(
@@ -95,26 +157,17 @@ class LogInPage extends StatelessWidget {
         title: 'Sign In',
         width: 10,
         height: 30,
-        onPressed: () async {
-          final result = await sl<LoginUseCase>().call(
+        activeColor: AppColors.primary,
+        onPressed: () async => await sl<LoginUseCase>().call(
             params: LoginReqParams(
               email: _emailCon.text,
               password: _passwordCon.text,
             ),
-          );
+          ),
 
-          result.fold(
-                (error) {
-              print("❌ Login Failed: $error");
-              DisplayMessage.errorMessage(error, context);
-            },
-                (data) async {
-              await _redirectUser(context);
-            },
-          );
-        },
         onSuccess: () async {
-          await _redirectUser(context);
+
+          AppNavigator.pushAndRemove(context, HomePage());
         },
         onFailure: (error) {
           DisplayMessage.errorMessage(error, context);
@@ -123,36 +176,55 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  Future<void> _redirectUser(BuildContext context) async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    final String? role = sharedPreferences.getString('role');
-    final String? uid = sharedPreferences.getString('uid');
-
-    if (role == "coach") {
-      print("🔹 Navigating to CoachHomePage...");
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MultiProvider(
-            providers: [
-              Provider<GetPlayersUseCase>(create: (_) => sl<GetPlayersUseCase>()),
-              BlocProvider<PlayerCubit>(
-                create: (context) => PlayerCubit(getPlayersUseCase: context.read<GetPlayersUseCase>()),
-              ),
-            ],
-            child: CoachHomePage(coachUid: uid!),
+  Widget _forgotpwtext(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const TextSpan(
+            text: "",
           ),
-        ),
-            (route) => false, // Clears the navigation stack
-      );
-
-      print("✅ Navigation to CoachHomePage completed");
-    } else {
-      print("🔹 Navigating to HomePage...");
-      AppNavigator.pushAndRemove(context, const HomePage());
-      print("✅ Navigation to HomePage completed");
-    }
+          TextSpan(
+            text: 'Forgot Password?',
+            style: const TextStyle(
+              fontFamily: 'Nunito',
+              color: Colors.blue,
+              fontWeight: FontWeight.w500,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                AppNavigator.push(context, ResetPasswordPage());
+              },
+          ),
+        ],
+      ),
+    );
   }
 
+
+
+
+  Widget _signupText(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        children: [
+          const TextSpan(
+            text: "Don't have an account? ",
+            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w500)
+          ),
+          TextSpan(
+            text: 'Sign Up',
+            style: const TextStyle(
+              fontFamily: 'Nunito',
+              color: Colors.blue,
+              fontWeight: FontWeight.w500,
+            ),
+            recognizer: TapGestureRecognizer()
+              ..onTap = () {
+                AppNavigator.push(context, SignupPage());
+              },
+          ),
+        ],
+      ),
+    );
+  }
 }

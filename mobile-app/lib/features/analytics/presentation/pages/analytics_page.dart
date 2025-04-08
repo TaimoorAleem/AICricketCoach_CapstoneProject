@@ -1,24 +1,27 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../../../../resources/service_locator.dart';
-import '../../domain/entities/performance.dart';
 import '../bloc/performance_cubit.dart';
-import '../bloc/performance_state.dart';
 import '../../domain/usecases/get_performance_history_usecase.dart';
 
 class AnalyticsPage extends StatelessWidget {
   final List<String> playerUids;
+  final bool useHardcodedData;
 
-  const AnalyticsPage({super.key, required this.playerUids});
+  const AnalyticsPage({
+    super.key,
+    required this.playerUids,
+    this.useHardcodedData = false,
+  });
 
-  factory AnalyticsPage.singlePlayer({required String playerUid}) {
-    return AnalyticsPage(playerUids: [playerUid]);
+  factory AnalyticsPage.singlePlayer({required String playerUid, bool useHardcoded = false}) {
+    return AnalyticsPage(playerUids: [playerUid], useHardcodedData: useHardcoded);
   }
 
-  factory AnalyticsPage.comparePlayers({required String playerUid1, required String playerUid2}) {
-    return AnalyticsPage(playerUids: [playerUid1, playerUid2]);
+  factory AnalyticsPage.comparePlayers({required String playerUid1, required String playerUid2, bool useHardcoded = false}) {
+    return AnalyticsPage(playerUids: [playerUid1, playerUid2], useHardcodedData: useHardcoded);
   }
 
   @override
@@ -34,49 +37,36 @@ class AnalyticsPage extends StatelessWidget {
           title: const Text('Performance Analytics'),
           backgroundColor: const Color(0xFF001E04),
         ),
-        body: BlocBuilder<PerformanceCubit, PerformanceState>(
-          builder: (context, state) {
-            if (state is PerformanceLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is PerformanceError) {
-              return Center(child: Text(state.errorMessage));
-            } else if (state is PerformanceLoaded) {
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(25.0),
-                child: Column(
-                  children: [
-                    _buildSubheading(),
-                    if (playerUids.length == 2) _buildLegend(),
-                    const SizedBox(height: 16),
-                    _buildChart(state.performanceHistory, 'Ball Speed (km/h)', (p) => p.averageSpeed, 50, 150),
-                    const SizedBox(height: 16),
-                    _buildChart(state.performanceHistory, 'Batting Performance (out of 10)', (p) => p.averageExecutionRating, 0, 10),
-                  ],
-                ),
-              );
-            }
-            return const Center(child: Text('No performance data available.'));
-          },
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(25.0),
+          child: Column(
+            children: [
+              _buildSubheading(),
+              if (playerUids.length == 2) _buildLegend(),
+              const SizedBox(height: 16),
+              _buildHardcodedChart("Average Ball Speed (km/h)", [90, 95, 88, 91, 93], [85, 92, 86, 88, 90]),
+              const SizedBox(height: 16),
+              _buildHardcodedChart("Average Batting Performance (out of 10)", [6.5, 7.0, 8.0, 7.5, 8.5], [5.0, 6.0, 6.5, 7.0, 7.2]),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// 📝 Subheading dynamically updates based on comparison mode
   Widget _buildSubheading() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
         playerUids.length == 1
             ? "The performance of your last 5 sessions is visualized below."
-            : "The comparison of the two players is visualized below.",
+            : "The comparison between the two players is visualized below.",
         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: Colors.white),
         textAlign: TextAlign.center,
       ),
     );
   }
 
-  /// 🏷️ Legend showing player names with their respective colors
   Widget _buildLegend() {
     return Padding(
       padding: const EdgeInsets.only(top: 12, bottom: 8),
@@ -91,28 +81,17 @@ class AnalyticsPage extends StatelessWidget {
     );
   }
 
-  /// 📌 Legend item for a single player (color + name)
   Widget _legendItem(String playerName, Color color) {
     return Row(
       children: [
         Container(width: 14, height: 14, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(
-          playerName,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
-        ),
+        Text(playerName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
       ],
     );
   }
 
-  /// 📊 Builds a line chart for performance metrics
-  Widget _buildChart(
-      Map<String, List<Performance>> performanceHistory,
-      String title,
-      double Function(Performance) getY,
-      double minY,
-      double maxY,
-      ) {
+  Widget _buildHardcodedChart(String title, List<double> data1, List<double> data2) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -125,29 +104,40 @@ class AnalyticsPage extends StatelessWidget {
         const SizedBox(height: 20),
         SizedBox(
           height: 250,
+          width: double.infinity,
           child: LineChart(
             LineChartData(
-              minY: minY,
-              maxY: maxY,
+              minY: data1.reduce((a, b) => a < b ? a : b) - 5,
+              maxY: data1.reduce((a, b) => a > b ? a : b) + 5,
               titlesData: FlTitlesData(
-                leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    getTitlesWidget: (value, meta) => Text(
+                      value.toStringAsFixed(0),
+                      style: const TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
                 rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 bottomTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      return _buildXLabel(value, performanceHistory);
-                    },
-                    reservedSize: 55,
+                    reservedSize: 32,
                     interval: 1,
+                    getTitlesWidget: (value, meta) => Text(
+                      value.toInt().toString(),
+                      style: const TextStyle(fontSize: 14, color: Colors.white),
+                    ),
                   ),
                 ),
               ),
-              lineBarsData: playerUids.map((uid) {
-                Color lineColor = playerUids.length == 1 ? Colors.blue : (uid == playerUids[0] ? Colors.blue : Colors.red);
-                return _lineChartBarData(performanceHistory[uid] ?? [], getY, lineColor);
-              }).toList(),
+              gridData: FlGridData(show: true),
+              lineBarsData: [
+                _lineChartBarData(data1, Colors.red)
+              ],
             ),
           ),
         ),
@@ -155,60 +145,13 @@ class AnalyticsPage extends StatelessWidget {
     );
   }
 
-  /// 📈 Line chart styling
-  LineChartBarData _lineChartBarData(List<Performance> performanceHistory, double Function(Performance) getY, Color color) {
+  LineChartBarData _lineChartBarData(List<double> data, Color color) {
     return LineChartBarData(
       isCurved: true,
       color: color,
       barWidth: 3,
-      belowBarData: BarAreaData(
-        show: true,
-        gradient: LinearGradient(
-          colors: [
-            color.withOpacity(0.4),
-            color.withOpacity(0.1),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      spots: performanceHistory
-          .asMap()
-          .entries
-          .map((entry) => FlSpot(entry.key.toDouble(), getY(entry.value)))
-          .toList(),
+      belowBarData: BarAreaData(show: false),
+      spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value)).toList(),
     );
-  }
-
-  /// 📆 Formats Date for X-axis
-  Widget _buildXLabel(double value, Map<String, List<Performance>> performanceHistory) {
-    int index = value.toInt();
-    if (performanceHistory.isEmpty || index < 0) {
-      return const SizedBox.shrink();
-    }
-
-    List<Performance> sortedDates = performanceHistory.values.expand((e) => e).toList();
-    sortedDates.sort((a, b) => DateTime.parse(a.date).compareTo(DateTime.parse(b.date)));
-
-    if (index >= sortedDates.length) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20.0, right: 45.0),
-      child: Transform.rotate(
-        angle: -0.5,
-        child: Text(
-          _formatDate(sortedDates[index].date),
-          style: const TextStyle(fontSize: 12, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  /// 📆 Formats Date for readability
-  String _formatDate(String date) {
-    DateTime parsedDate = DateTime.parse(date);
-    return DateFormat('dd MMM yy').format(parsedDate);
   }
 }

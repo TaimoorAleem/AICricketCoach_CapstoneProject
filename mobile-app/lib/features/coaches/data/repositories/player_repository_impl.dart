@@ -10,22 +10,12 @@ class PlayerRepositoryImpl implements PlayerRepository {
   PlayerRepositoryImpl({required this.apiService});
 
   @override
-  Future<Either<String, List<Player>>> getPlayers(String coachUid) async {
-    try {
-      final players = await apiService.fetchPlayers(coachUid);
-      return Right(players);
-    } catch (e) {
-      return Left(e.toString());
-    }
+  Future<Either<String, List<Player>>> getPlayers(String coachUid) {
+    return apiService.fetchPlayers(coachUid);
   }
 
   @override
-  Future<Either<String, Map<String, List<Performance>>>> getPlayersPerformance(List<String> playerUids) async {
-    try {
-      final performances = await apiService.fetchPlayersPerformance(playerUids);
-      return Right(performances);
-    } catch (e) {
-      return Left(e.toString());
-    }
+  Future<Either<String, Map<String, List<Performance>>>> getPlayersPerformance(List<String> playerUids) {
+    return apiService.fetchPlayersPerformance(playerUids);
   }
 }

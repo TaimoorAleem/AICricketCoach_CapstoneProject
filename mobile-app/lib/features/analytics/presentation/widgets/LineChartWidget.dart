@@ -6,14 +6,33 @@ class LineChartWidget extends StatelessWidget {
   final List<double> data1;
   final List<double>? data2;
 
-  LineChartWidget({required this.title, required this.data1, this.data2});
+  const LineChartWidget({
+    super.key,
+    required this.title,
+    required this.data1,
+    this.data2,
+  });
+
+  factory LineChartWidget.hardcoded(String title) {
+    if (title.contains("Speed")) {
+      return LineChartWidget(
+        title: title,
+        data1: [90, 95, 88, 91, 93],
+      );
+    } else {
+      return LineChartWidget(
+        title: title,
+        data1: [6.5, 7.0, 8.0, 7.5, 8.5],
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 10),
         AspectRatio(
           aspectRatio: 1.5,
           child: LineChart(
@@ -31,16 +50,17 @@ class LineChartWidget extends StatelessWidget {
                   barWidth: 4,
                   isStrokeCapRound: true,
                   belowBarData: BarAreaData(show: false),
-                  gradient: LinearGradient(colors: [Colors.blue, Colors.lightBlueAccent]),
+                  gradient: const LinearGradient(colors: [Colors.blue, Colors.lightBlueAccent]),
                 ),
-                if (data2 != null) LineChartBarData(
-                  spots: data2!.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value)).toList(),
-                  isCurved: true,
-                  barWidth: 4,
-                  isStrokeCapRound: true,
-                  belowBarData: BarAreaData(show: false),
-                  gradient: LinearGradient(colors: [Colors.red, Colors.pinkAccent]),
-                ),
+                if (data2 != null)
+                  LineChartBarData(
+                    spots: data2!.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value)).toList(),
+                    isCurved: true,
+                    barWidth: 4,
+                    isStrokeCapRound: true,
+                    belowBarData: BarAreaData(show: false),
+                    gradient: const LinearGradient(colors: [Colors.red, Colors.pinkAccent]),
+                  ),
               ],
             ),
           ),

@@ -32,17 +32,22 @@ dependencies:
     sdk: flutter
   cached_network_image: ^3.4.1
 
+  get:
+  file_picker: ^10.0.0
 
   #firebase_core: ^2.16.0
   firebase_core:
 
   firebase_auth:
 
+  flutter_local_notifications: ^19.0.0
+
+
   #firebase_auth: ^4.8.2
 
   flutter_bloc:
 
-  reactive_button: 0.0.9
+  reactive_button:
 
   dartz:
 
@@ -73,6 +78,7 @@ dependencies:
   provider: ^6.1.2
   firebase_messaging: ^15.2.3
   firebase_analytics: ^11.4.3
+  path: ^1.9.1
 
 
 dev_dependencies:
@@ -96,9 +102,60 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/static/Nunito-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/static/Nunito-ExtraLightItalic.ttf
+          weight: 200
+          style: italic
 
+        - asset: assets/fonts/static/Nunito-Light.ttf
+          weight: 300
+        - asset: assets/fonts/static/Nunito-LightItalic.ttf
+          weight: 300
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/static/Nunito-Italic.ttf
+          weight: 400
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/static/Nunito-MediumItalic.ttf
+          weight: 500
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/static/Nunito-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/static/Nunito-BoldItalic.ttf
+          weight: 700
+          style: italic
+
+        - asset: assets/fonts/static/Nunito-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/static/Nunito-ExtraBoldItalic.ttf
+          weight: 800
+          style: italic
+        - asset: assets/fonts/static/Nunito-Black.ttf
+          weight: 900
+        - asset: assets/fonts/static/Nunito-BlackItalic.ttf
+          weight: 900
+          style: italic
   assets:
     - lib/images/logo.png
+    - lib/images/pfp.jpg
+    - lib/images/default-pfp.jpg
+    - assets/APIKey.json
 
 
   # To add assets to your application, add an assets section, like this:

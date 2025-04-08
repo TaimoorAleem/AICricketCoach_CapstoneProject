@@ -4,40 +4,24 @@ import '../widgets/DeliveryCard.dart';
 
 class SessionDetailsPage extends StatelessWidget {
   final Session session;
+  final String playerId;
 
-  const SessionDetailsPage({Key? key, required this.session}) : super(key: key);
+  const SessionDetailsPage({super.key, required this.session, required this.playerId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Session Details')),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Session Date: ${session.date}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-              ],
-            ),
-          ),
-          const Divider(),
-          Expanded(
-            child: ListView.builder(
-              itemCount: session.deliveries.length,
-              itemBuilder: (context, index) {
-                final delivery = session.deliveries[index];
-                return DeliveryCard(delivery: delivery);
-              },
-            ),
-          ),
-        ],
+      appBar: AppBar(title: Text('Session: ${session.sessionId}')),
+      body: ListView.builder(
+        itemCount: session.deliveries.length,
+        itemBuilder: (context, index) {
+          final delivery = session.deliveries[index];
+          return DeliveryCard(
+            delivery: delivery,
+            sessionId: session.sessionId,
+            playerId: playerId,
+          );
+        },
       ),
     );
   }

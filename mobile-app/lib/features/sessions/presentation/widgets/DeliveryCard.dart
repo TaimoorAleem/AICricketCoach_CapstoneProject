@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:ai_cricket_coach/features/sessions/domain/entities/delivery.dart';
-import 'package:ai_cricket_coach/features/sessions/presentation/pages/delivery_details_page.dart'; // Update to the actual path of DeliveryDetailsPage
+import '../../domain/entities/delivery.dart';
+import '../pages/delivery_details_page.dart';
 
 class DeliveryCard extends StatelessWidget {
   final Delivery delivery;
+  final String sessionId;
+  final String playerId;
 
-  const DeliveryCard({Key? key, required this.delivery}) : super(key: key);
+  const DeliveryCard({super.key, required this.delivery, required this.sessionId, required this.playerId});
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +18,21 @@ class DeliveryCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Speed: ${delivery.speed} km/h'),
-            Text('Accuracy: ${delivery.accuracy}%'),
-            Text('Ideal Shot: ${delivery.idealShot}'),
-            Text('Execution Rating: ${delivery.executionRating}'),
+            Text('Speed: ${delivery.ballSpeed} km/h'),
+            Text('Ball Line: ${delivery.ballLine}'),
+            Text('Ball Length: ${delivery.ballLength}'),
+            if (delivery.feedback != null) Text('Feedback: ${delivery.feedback}'),
           ],
         ),
-        trailing: Icon(Icons.arrow_forward),
+        trailing: const Icon(Icons.arrow_forward),
         onTap: () {
-          // Navigate to the DeliveryDetailsPage
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DeliveryDetailsPage(delivery: delivery),
+              builder: (_) => DeliveryDetailsPage(
+                sessionId: sessionId,
+                deliveryId: delivery.deliveryId,
+              ),
             ),
           );
         },

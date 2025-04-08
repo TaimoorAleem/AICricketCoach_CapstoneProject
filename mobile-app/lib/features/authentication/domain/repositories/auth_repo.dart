@@ -4,12 +4,12 @@ import 'package:dartz/dartz.dart';
 
 import '../../data/models/login_req_params.dart';
 import '../../data/models/signup_req_params.dart';
-
 abstract class AuthRepo {
-  Future<Either<String, Map<String, dynamic>>> signup(SignupReqParams params);
-  Future<Either<String, Map<String, dynamic>>> login(LoginReqParams params); // ✅ Fixed return type
+
+  Future<Either> signup(SignupReqParams params);
+  Future<Either> login(LoginReqParams params);
   Future<bool> isAuthenticated();
-  Future<Either<String, Map<String, dynamic>>> resetpassword(ResetPWParams params);
-  Future<Either<String, Map<String, dynamic>>> createProfile(EditProfileReqParams params);
   Future<bool> logout();
+  Future<Either> resetpassword(ResetPWParams params);
+  Future<Either> createProfile(EditProfileReqParams params);
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:ai_cricket_coach/features/user_profile/data/models/EditProfileReqParams.dart';
 import 'package:ai_cricket_coach/resources/api_urls.dart';
@@ -24,10 +25,10 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> getProfileInfo() async {
     try {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       var response = await sl<DioClient>()
-          .get(ApiUrl.getUser, queryParameters: {"uid": uid});
+          .get(ApiUrl.getUserProfile, queryParameters: {"uid": uid});
 
       return Right(response.data);
     } on DioException catch (e) {
@@ -39,12 +40,12 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> deleteAccount(DeleteAccountReqParams params) async {
     try {
       var userData = await sl<DioClient>()
-          .get(ApiUrl.getUser, queryParameters: {"uid": params.uid});
+          .get(ApiUrl.getUserProfile, queryParameters: {"uid": params.uid});
 
       var email = userData.data['data']['email'];
 
       UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: params.password,
       );
@@ -56,7 +57,7 @@ class UserProfileServiceImpl extends UserProfileService {
         return const Left('Failed to generate ID token.');
       }
       final updatedParams =
-          DeleteAccountReqParams(uid: params.uid, password: idToken);
+      DeleteAccountReqParams(uid: params.uid, password: idToken);
 
       var response = await sl<DioClient>()
           .post(ApiUrl.deleteAccount, data: updatedParams.toMap());
@@ -73,9 +74,7 @@ class UserProfileServiceImpl extends UserProfileService {
   @override
   Future<Either> editProfileInfo(EditProfileReqParams params) async {
     try {
-      var response =
-          await sl<DioClient>().post(ApiUrl.editProfile, data: params.toMap());
-
+      var response = await sl<DioClient>().post(ApiUrl.editProfile, data: params.toMap());
       return Right(response.data);
     } on DioException catch (e) {
       return Left(e.response!.data['message']);
@@ -88,6 +87,7 @@ class UserProfileServiceImpl extends UserProfileService {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
+        imageCache.clear();
         final bytes = response.bodyBytes; // Image bytes
 
         // Get the application documents directory
@@ -113,7 +113,7 @@ class UserProfileServiceImpl extends UserProfileService {
   Future<Either> editProfilePicture(String path) async {
     try {
       final SharedPreferences sharedPreferences =
-          await SharedPreferences.getInstance();
+      await SharedPreferences.getInstance();
       var uid = sharedPreferences.getString('uid');
       FormData formData = FormData.fromMap({
         "uid": uid, // Send UID as text
@@ -122,7 +122,7 @@ class UserProfileServiceImpl extends UserProfileService {
       });
 
       var response =
-          await sl<DioClient>().post("/edit-profile-picture", data: formData);
+      await sl<DioClient>().post(ApiUrl.editProfilePicture, data: formData);
       if (response.statusCode == 200) {
         sharedPreferences.setString('pfpUrl', response.data['url']);
         return Right(response.data['url']);
