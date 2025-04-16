@@ -98,6 +98,7 @@ class LogInPage extends StatelessWidget {
   Widget _emailField() {
     return TextField(
       controller: _emailCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'Email',
         hintStyle: const TextStyle(
@@ -126,6 +127,7 @@ class LogInPage extends StatelessWidget {
     return TextField(
       controller: _passwordCon,
       obscureText: true,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'Password',
         hintStyle: const TextStyle(
@@ -209,7 +211,7 @@ class LogInPage extends StatelessWidget {
         children: [
           const TextSpan(
             text: "Don't have an account? ",
-            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w500)
+            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w500, color: Colors.white)
           ),
           TextSpan(
             text: 'Sign Up',

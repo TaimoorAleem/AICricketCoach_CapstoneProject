@@ -105,6 +105,7 @@ class ResetPasswordPage extends StatelessWidget {
   Widget _emailField() {
     return TextField(
       controller: _emailCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'Email',
         hintStyle: const TextStyle(
