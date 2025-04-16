@@ -160,7 +160,7 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
             _buildDetail("Speed", "${delivery!.ballSpeed} km/h"),
             _buildDetail("Ball Line", delivery!.ballLine),
             _buildDetail("Ball Length", delivery!.ballLength),
-            _buildDetail("Batsman Position", delivery!.batsmanPosition == 1 ? "Right Handed" : "Left Handed"),
+            _buildDetail("Batsman Position", delivery!.batsmanPosition == 1 ? "Left Handed" : "Right Handed"),
 
             const SizedBox(height: 30),
             if (isCoach) _buildFeedbackSection(),
