@@ -49,25 +49,29 @@ class UserProfilePage extends StatelessWidget {
             icon: Icons.settings,
             label: 'Settings',
             onPressed: () {},
+            textColor: AppColors.primary,
           ),
           const SizedBox(height: 20),
           _buildButton(
             icon: Icons.file_open_sharp,
-            label: 'Terms and\nConditions',
+            label: 'Terms and Conditions',
             height: 68,
             onPressed: () {},
+            textColor: AppColors.primary,
           ),
           const SizedBox(height: 20),
           _buildButton(
             icon: Icons.logout,
             label: 'Log Out',
             onPressed: () => _confirmLogout(context),
+            textColor: Colors.orange,
           ),
           const SizedBox(height: 20),
           _buildButton(
             icon: Icons.delete,
             label: 'Delete Account',
             onPressed: () => _confirmDelete(context),
+            textColor: Colors.red,
           ),
         ],
       ),
@@ -78,30 +82,43 @@ class UserProfilePage extends StatelessWidget {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
+    required Color textColor,
     double height = 50,
   }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: AppColors.primary),
-      label: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          color: AppColors.primary,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Nunito',
+    return SizedBox(
+      height: height,
+      width: 220,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.secondary,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(40),
+          ),
         ),
-      ),
-      style: ElevatedButton.styleFrom(
-        fixedSize: Size(220, height),
-        backgroundColor: AppColors.secondary,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: textColor),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Nunito',
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
 
   Future<void> _confirmLogout(BuildContext context) async {
     final shouldLogout = await showDialog<bool>(

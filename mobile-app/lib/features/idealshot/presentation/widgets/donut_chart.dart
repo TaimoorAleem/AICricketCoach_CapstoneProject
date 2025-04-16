@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class DonutChart extends StatelessWidget {
-  final double accuracy;  // This represents the confidence level as a percentage.
+  final double accuracy;
+  final double radius;
 
   const DonutChart({
     super.key,
     required this.accuracy,
+    this.radius = 120.0, // Default radius
   });
 
   @override
   Widget build(BuildContext context) {
     return CircularPercentIndicator(
-      radius: 120.0,
+      radius: radius,
       lineWidth: 15.0,
-      percent: accuracy / 100, // Convert the accuracy to a value between 0 and 1
+      percent: accuracy / 100,
       center: Text(
-        '${accuracy.toStringAsFixed(1)}%', // Display only the percentage value
-        style: TextStyle(
-          fontSize: 20.0,  // Adjust font size as needed
+        '${accuracy.toStringAsFixed(1)}%',
+        style: const TextStyle(
+          fontSize: 20.0,
           fontWeight: FontWeight.bold,
-          color: Colors.white,  // Adjust text color as needed
+          color: Colors.white,
         ),
       ),
       progressColor: Colors.blue,

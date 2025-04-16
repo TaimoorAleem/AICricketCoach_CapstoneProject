@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:ai_cricket_coach/features/video_upload/presentation/pages/sessions_manager_page.dart';
 import 'package:ai_cricket_coach/resources/app_colors.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
@@ -36,46 +35,36 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload Video'),
-        backgroundColor: AppColors.background,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.camera_alt),
-            onPressed: recordVideo,
+        title: const Text(
+          'Upload Video',
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontWeight: FontWeight.bold,
           ),
-        ],
+        ),
+        backgroundColor: AppColors.secondary,
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: pickVideo,
-                    child: const Text('Select Video from Gallery'),
-                  ),
-                  const SizedBox(height: 20),
-                  if (_videoPath != null &&
-                      _videoController != null &&
-                      _videoController!.value.isInitialized)
-                    Column(
-                      children: [
-                        AspectRatio(
-                          aspectRatio: _videoController!.value.aspectRatio,
-                          child: VideoPlayer(_videoController!),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.replay),
-                          onPressed: replayVideo,
-                        ),
-                      ],
-                    ),
-                ],
+          const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              "Upload or Record a Cricket Batting Video",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Nunito',
+                color: Colors.white,
               ),
+              textAlign: TextAlign.center,
             ),
           ),
+          const SizedBox(height: 20),
+          _videoButtons(),
+          const SizedBox(height: 20),
+          Expanded(child: _videoPreview()),
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Column(
@@ -87,33 +76,107 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
                   ),
                 ElevatedButton(
                   onPressed: _isUploading ? null : uploadVideo,
-                  child: _isUploading
-                      ? const Text('Processing...')
-                      : const Text('Upload Video'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.secondary,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  ),
+                  child: Text(
+                    _isUploading ? 'Processing...' : 'Upload Video',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Nunito',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ],
       ),
-      floatingActionButton: _videoController != null &&
-          _videoController!.value.isInitialized
-          ? FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _videoController!.value.isPlaying
-                ? _videoController!.pause()
-                : _videoController!.play();
-          });
-        },
-        child: Icon(
-          _videoController!.value.isPlaying
-              ? Icons.pause
-              : Icons.play_arrow,
-        ),
-      )
-          : null,
     );
+  }
+
+  Widget _videoButtons() {
+    return Column(
+      children: [
+        ElevatedButton.icon(
+          onPressed: pickVideo,
+          icon: const Icon(Icons.video_library, color: AppColors.primary),
+          label: const Text(
+            'Select from Gallery',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: Colors.white,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.secondary,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton.icon(
+          onPressed: recordVideo,
+          icon: const Icon(Icons.camera_alt, color: AppColors.primary),
+          label: const Text(
+            'Record a Video',
+            style: TextStyle(
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              color: Colors.white,
+            ),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.secondary,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _videoPreview() {
+    if (_videoPath != null &&
+        _videoController != null &&
+        _videoController!.value.isInitialized) {
+      return Column(
+        children: [
+          const Text(
+            "Preview",
+            style: TextStyle(
+              color: Colors.white70,
+              fontFamily: 'Nunito',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 10),
+          AspectRatio(
+            aspectRatio: _videoController!.value.aspectRatio,
+            child: VideoPlayer(_videoController!),
+          ),
+          IconButton(
+            icon: const Icon(Icons.replay, color: AppColors.primary),
+            onPressed: replayVideo,
+          ),
+        ],
+      );
+    } else {
+      return const Center(
+        child: Text(
+          "No video selected.",
+          style: TextStyle(
+            color: Colors.white70,
+            fontFamily: 'Nunito',
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -228,13 +291,13 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       }
 
       final newDelivery = Delivery(
-          deliveryId: _deliveryId,
-          ballLength: _ballength,
-          ballLine: _ballLine,
-          ballSpeed: _ballSpeed,
-          batsmanPosition: _batsmanPosition,
-          videoUrl: _videoUrl,
-          idealShots: _idealShots
+        deliveryId: _deliveryId,
+        ballLength: _ballength,
+        ballLine: _ballLine,
+        ballSpeed: _ballSpeed,
+        batsmanPosition: _batsmanPosition,
+        videoUrl: _videoUrl,
+        idealShots: _idealShots,
       );
 
       SessionCache().addDeliveryToSession(
@@ -245,7 +308,6 @@ class _UploadVideoPageState extends State<UploadVideoPage> {
       if (widget.openSessionsManager != null) {
         widget.openSessionsManager!();
       }
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
