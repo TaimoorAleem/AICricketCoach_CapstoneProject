@@ -152,7 +152,7 @@ class UserProfilePage extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Delete Account",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
