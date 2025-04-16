@@ -277,6 +277,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _firstNameField() {
     return TextField(
       controller: _firstNameCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.firstName,
         hintStyle: const TextStyle(
@@ -306,6 +307,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _lastNameField() {
     return TextField(
       controller: _lastNameCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.lastName,
         hintStyle: const TextStyle(
@@ -335,6 +337,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _teamNameField() {
     return TextFormField(
       controller: _teamNameCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.teamName,
         hintStyle: const TextStyle(
@@ -374,6 +377,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
     return TextFormField(
       controller: _ageCon,
       keyboardType: TextInputType.number,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.age,
         hintStyle: const TextStyle(
@@ -422,6 +426,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _cityField() {
     return TextField(
       controller: _cityCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.city,
         hintStyle: const TextStyle(
@@ -451,6 +456,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _countryField() {
     return TextField(
       controller: _countryCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.country,
         hintStyle: const TextStyle(
@@ -480,6 +486,7 @@ class _EditUserProfilePageState extends State<EditUserProfilePage> {
   Widget _descriptionField() {
     return TextField(
       controller: _descriptionCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: widget.user.description,
         hintStyle: const TextStyle(

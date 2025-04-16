@@ -147,6 +147,7 @@ class _SignUpPageState extends State<SignupPage> {
   Widget _firstNameField() {
     return TextFormField(
       controller: _firstNameCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'First Name',
         hintStyle: const TextStyle(color: AppColors.primary,
@@ -183,6 +184,7 @@ class _SignUpPageState extends State<SignupPage> {
   Widget _lastNameField() {
     return TextFormField(
       controller: _lastNameCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'LastName',
         hintStyle: const TextStyle(color: AppColors.primary,
@@ -220,6 +222,7 @@ class _SignUpPageState extends State<SignupPage> {
   Widget _emailField() {
     return TextFormField(
       controller: _emailCon,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'Email',
         hintStyle: const TextStyle(color: AppColors.primary,
@@ -261,6 +264,7 @@ class _SignUpPageState extends State<SignupPage> {
     return TextFormField(
       controller: _passwordCon,
       obscureText: true,
+      style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
       decoration: InputDecoration(
         hintText: 'Password',
         hintStyle: const TextStyle(color: AppColors.primary,
@@ -416,6 +420,7 @@ class _SignUpPageState extends State<SignupPage> {
     return Center(
       child: DropdownButtonFormField(
         value: _selectedRole,
+        style: const TextStyle(color: Colors.white, fontFamily: 'Nunito'),
         decoration: InputDecoration(
           label: Text('Role'),
           labelStyle: TextStyle(color: AppColors.primary),  // Label text color
@@ -440,8 +445,7 @@ class _SignUpPageState extends State<SignupPage> {
         onChanged: (value) {
           _selectedRole = value!;
         },
-        dropdownColor: AppColors.secondary,  // Dropdown background color
-        style: TextStyle(color: AppColors.primary),  // Text color of the dropdown
+        dropdownColor: AppColors.secondary,
       ),
     );
   }
