@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
 import 'features/authentication/presentation/bloc/AuthCubit.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -21,16 +22,24 @@ Future<void> main() async {
   await requestNotifPermissions();
   NotifService notifService = NotifService();
   await notifService.initLocalNotifFirebase();
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) { notifService.showNotifBanner(message);});
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    notifService.showNotifBanner(message);
+  });
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // Disable auto-init to prevent auto token refresh
   await messaging.setAutoInitEnabled(false);
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
-  setupServiceLocator();
-  runApp(const MyApp());
+  await setupServiceLocator();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        BlocProvider<AuthCubit>(create: (_) => sl<AuthCubit>()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 Future<void> requestNotifPermissions() async {
@@ -59,24 +68,17 @@ class NotifService {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  // Initialize local notifications
   Future<void> initLocalNotifFirebase() async {
     var androidInit = const AndroidInitializationSettings('@drawable/logo');
-    var initSetting = InitializationSettings(
-        android: androidInit
-    );
+    var initSetting = InitializationSettings(android: androidInit);
 
     await _flutterLocalNotificationsPlugin.initialize(initSetting,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
           debugPrint('Notification tapped! Payload: ${response.payload}');
         });
-
-
   }
 
-  // Show the notification banner
   Future<void> showNotifBanner(RemoteMessage message) async {
-    // Create an Android Notification Channel
     const AndroidNotificationChannel androidNotificationChannel =
     AndroidNotificationChannel(
       'high_importance_channel',
@@ -85,20 +87,19 @@ class NotifService {
       importance: Importance.high,
     );
 
-    // Initialize Notification Details
-    AndroidNotificationDetails androidNotificationDetails = AndroidNotificationDetails(
+    AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails(
       androidNotificationChannel.id,
       androidNotificationChannel.name,
       channelDescription: androidNotificationChannel.description,
-      priority: Priority.high, // Make sure this is high
-      importance: Importance.high, // Also, set importance to high
+      priority: Priority.high,
+      importance: Importance.high,
       ticker: 'ticker',
       playSound: true,
     );
 
-    // Show the notification
     await _flutterLocalNotificationsPlugin.show(
-      Random.secure().nextInt(10000), // Random ID for the notification
+      Random.secure().nextInt(10000),
       message.notification?.title ?? 'New Notification',
       message.notification?.body ?? '',
       NotificationDetails(android: androidNotificationDetails),
@@ -115,13 +116,10 @@ class MyApp extends StatelessWidget {
       const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
     );
 
-    return BlocProvider(
-      create: (context) => AuthCubit()..appStarted(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.appTheme,
-        home: const LoadingPage(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.appTheme,
+      home: const LoadingPage(),
     );
   }
 }

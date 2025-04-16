@@ -12,7 +12,7 @@ abstract class SessionsApiService {
     required String playerId,
     required String sessionId,
     required String deliveryId,
-    required double battingRating,
+    required double executionRating,
     required String feedback,
   });
 
@@ -36,6 +36,7 @@ class SessionsApiServiceImpl implements SessionsApiService {
         ApiUrl.getSessions,
         queryParameters: {'uid': playerUid},
       );
+      print('📦 RAW SESSION RESPONSE: ${response.data}');
       return Right(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       return Left(e.response?.data['message'] ?? 'Failed to fetch sessions');
@@ -49,7 +50,7 @@ class SessionsApiServiceImpl implements SessionsApiService {
     required String playerId,
     required String sessionId,
     required String deliveryId,
-    required double battingRating,
+    required double executionRating,
     required String feedback,
   }) async {
     try {
@@ -59,7 +60,7 @@ class SessionsApiServiceImpl implements SessionsApiService {
           "playerId": playerId,
           "sessionId": sessionId,
           "deliveryId": deliveryId,
-          "battingRating": battingRating,
+          "executionRating": executionRating,
           "feedback": feedback,
         },
       );

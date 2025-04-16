@@ -5,6 +5,8 @@ import 'package:chewie/chewie.dart';
 import '../../../home/data/data_sources/session_cache.dart';
 import '../../../idealshot/presentation/pages/ideal_shot_page.dart';
 import '../../domain/entities/delivery.dart';
+import '../../../../resources/service_locator.dart';
+import '../../domain/usecases/add_feedback_usecase.dart';
 
 class DeliveryDetailsPage extends StatefulWidget {
   final String sessionId;
@@ -23,6 +25,8 @@ class DeliveryDetailsPage extends StatefulWidget {
 class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
   Delivery? delivery;
   bool isCoach = false;
+  String? playerId;
+  String? coachUid;
 
   final TextEditingController _feedbackController = TextEditingController();
   double _battingRating = 5.0;
@@ -39,18 +43,20 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
   }
 
   void _loadDelivery() {
-    delivery = SessionCache().getDeliveryById(widget.sessionId, widget.deliveryId);
-    if (delivery != null) {
-      _feedbackController.text = delivery!.feedback ?? '';
-      _battingRating = delivery!.battingRating ?? 5.0;
-      _initializeVideoPlayer(delivery!.videoUrl);
+    final fetched = SessionCache().getDeliveryById(widget.sessionId, widget.deliveryId);
+    delivery = fetched;
+    if (fetched != null) {
+      playerId = SessionCache().activePlayerId;
+      _feedbackController.text = fetched.feedback ?? '';
+      _battingRating = fetched.battingRating ?? 5.0;
+      _initializeVideoPlayer(fetched.videoUrl);
     }
   }
 
   Future<void> _initializeVideoPlayer(String url) async {
     _videoPlayerController = VideoPlayerController.networkUrl(Uri.parse(url));
     await _videoPlayerController!.initialize();
-    _videoPlayerController!.setVolume(0); // 🔇 Mute video
+    _videoPlayerController!.setVolume(0);
 
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController!,
@@ -64,23 +70,50 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
   Future<void> _checkUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString('role');
-    setState(() => isCoach = role == 'coach');
+    coachUid = prefs.getString('uid');
+    setState(() => isCoach = role == 'Coach');
   }
 
   Future<void> _submitFeedback() async {
+    print("🚀 Submit Feedback Pressed");
+    if (delivery == null || playerId?.isEmpty != false || coachUid?.isEmpty != false) {
+      print("❌ Missing playerId or coachUid");
+      return;
+    }
+
     setState(() => isSubmitting = true);
 
-    SessionCache().updateDeliveryFeedback(
+    final usecase = sl<AddFeedbackUseCase>();
+    final result = await usecase(
+      uid: coachUid!,
+      playerId: playerId!,
       sessionId: widget.sessionId,
       deliveryId: widget.deliveryId,
-      rating: _battingRating,
+      executionRating: _battingRating,
       feedback: _feedbackController.text,
     );
 
-    setState(() => isSubmitting = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Feedback submitted')),
+    result.fold(
+          (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $error')),
+        );
+      },
+          (_) {
+        SessionCache().updateDeliveryFeedback(
+          sessionId: widget.sessionId,
+          deliveryId: widget.deliveryId,
+          rating: _battingRating,
+          feedback: _feedbackController.text,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Feedback submitted')),
+        );
+      },
     );
+
+    setState(() => isSubmitting = false);
   }
 
   void _navigateToIdealShotPage() {
@@ -112,7 +145,7 @@ class _DeliveryDetailsPageState extends State<DeliveryDetailsPage> {
   Widget build(BuildContext context) {
     if (delivery == null) {
       return const Scaffold(
-        body: Center(child: Text("Delivery not found.")),
+        body: Center(child: Text("Delivery not found or not cached.")),
       );
     }
 

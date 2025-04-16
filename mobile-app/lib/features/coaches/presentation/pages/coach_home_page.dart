@@ -1,103 +1,65 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../../../user_profile/presentation/pages/user_profile_page.dart';
+import '../../domain/entities/player_entity.dart';
 import '../../domain/usecases/get_players_usecase.dart';
-import '../bloc/PlayerCubit.dart';
-import '../bloc/player_state.dart';
-import '../widgets/PlayerCard.dart';
-import '../../../analytics/presentation/pages/analytics_page.dart';
+import 'player_list_page.dart';
 
 class CoachHomePage extends StatefulWidget {
-  final String coachUid;
-
-  const CoachHomePage({super.key, required this.coachUid});
+  const CoachHomePage({Key? key}) : super(key: key);
 
   @override
-  _CoachHomePageState createState() => _CoachHomePageState();
+  State<CoachHomePage> createState() => _CoachHomePageState();
 }
 
 class _CoachHomePageState extends State<CoachHomePage> {
-  final Set<String> selectedPlayers = {};
-  bool compareMode = false;
+  int _selectedIndex = 0;
+  List<PlayerEntity> _players = [];
+  bool _isLoading = true;
 
-  // TODO: User Profile Button
+  @override
+  void initState() {
+    super.initState();
+    _loadPlayers();
+  }
+
+  Future<void> _loadPlayers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final coachUid = prefs.getString('uid');
+    if (coachUid == null) return;
+
+    final getPlayersUseCase = Provider.of<GetPlayersUseCase>(context, listen: false);
+    final result = await getPlayersUseCase(coachUid);
+
+    setState(() {
+      _players = result;
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PlayerCubit(getPlayersUseCase: context.read<GetPlayersUseCase>())..getPlayers(widget.coachUid),
-      child: Scaffold(
-        appBar: AppBar(title: const Text("Coach Dashboard")),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    compareMode = !compareMode;
-                    selectedPlayers.clear();
-                  });
-                },
-                child: Text(compareMode ? "Cancel Compare" : "Compare Players"),
-              ),
-            ),
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
-            Expanded(
-              child: BlocBuilder<PlayerCubit, PlayerState>(
-                builder: (context, state) {
-                  if (state is PlayerLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is PlayerError) {
-                    return Center(child: Text(state.message));
-                  } else if (state is PlayerLoaded) {
-                    return ListView(
-                      children: state.players.map((player) {
-                        return PlayerCard(
-                          player: player,
-                          compareMode: compareMode,
-                          isSelected: selectedPlayers.contains(player.uid),
-                          onSelect: (bool? selected) {
-                            setState(() {
-                              if (selected == true) {
-                                if (selectedPlayers.length < 2) {
-                                  selectedPlayers.add(player.uid);
-                                }
-                              } else {
-                                selectedPlayers.remove(player.uid);
-                              }
-                            });
-                          },
-                        );
-                      }).toList(),
-                    );
-                  }
-                  return const Center(child: Text("No players available."));
-                },
-              ),
-            ),
+    final List<Widget> _pages = [
+      UserProfilePage(),
+      PlayerListPage(players: _players),
+    ];
 
-            // ✅ "Compare Players" Button (Only visible when 2 players are selected)
-            if (compareMode)
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: selectedPlayers.length == 2
-                      ? () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AnalyticsPage.comparePlayers(
-                          playerUid1: selectedPlayers.first,
-                          playerUid2: selectedPlayers.last,
-                        ),
-                      ),
-                    );
-                  }
-                      : null, // Disable button until 2 players are selected
-                  child: const Text("Compare Selected Players"),
-                ),
-              ),
-          ],
-        ),
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: (index) => setState(() => _selectedIndex = index),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Players'),
+        ],
       ),
     );
   }

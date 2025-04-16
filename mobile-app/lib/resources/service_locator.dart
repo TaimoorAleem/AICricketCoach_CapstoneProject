@@ -29,6 +29,7 @@ import '../features/user_profile/domain/usecases/get_profile_picture.dart';
 import '../features/sessions/data/repositories/sessions_repository_impl.dart';
 import '../features/sessions/domain/repositories/sessions_repository.dart';
 import '../features/sessions/domain/usecases/get_sessions_usecase.dart';
+import '../features/sessions/domain/usecases/add_feedback_usecase.dart';
 
 // Analytics
 import '../features/analytics/data/repositories/performance_repository_impl.dart';
@@ -40,12 +41,6 @@ import '../features/coaches/data/data_sources/player_api_service.dart';
 import '../features/coaches/data/repositories/player_repository_impl.dart';
 import '../features/coaches/domain/repositories/player_repository.dart';
 import '../features/coaches/domain/usecases/get_players_usecase.dart';
-import '../features/coaches/domain/usecases/get_players_performance_usecase.dart';
-
-// Feedback (commented for now; uncomment if you add it later)
-// import '../features/feedback/data/repositories/shot_prediction_repository_impl.dart';
-// import '../features/feedback/domain/repositories/shot_prediction_repository.dart';
-// import '../features/feedback/domain/usecases/predict_shot_usecase.dart';
 
 final sl = GetIt.instance;
 
@@ -61,7 +56,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<UserProfileService>(() => UserProfileServiceImpl());
   sl.registerLazySingleton<SessionsApiService>(() => SessionsApiServiceImpl(sl<DioClient>()));
   sl.registerLazySingleton<PerformanceApiService>(() => PerformanceApiService(sl<DioClient>()));
-  sl.registerLazySingleton<PlayerApiService>(() => PlayerApiService(sl<DioClient>()));
+  sl.registerLazySingleton<PlayerApiService>(() => PlayerApiService(dio: sl<DioClient>().dio));
 
   // Repositories
   sl.registerLazySingleton<AuthRepo>(() => AuthRepoImpl());
@@ -86,11 +81,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<EditProfileUseCase>(() => EditProfileUseCase());
   sl.registerLazySingleton<DeleteAccountUseCase>(() => DeleteAccountUseCase());
   sl.registerLazySingleton<GetSessionsUseCase>(() => GetSessionsUseCase(sl<SessionsRepository>()));
+  sl.registerLazySingleton<AddFeedbackUseCase>(() => AddFeedbackUseCase());
   sl.registerLazySingleton<GetPerformanceHistoryUseCase>(() => GetPerformanceHistoryUseCase(repository: sl<PerformanceRepository>()));
   sl.registerLazySingleton<GetPlayersUseCase>(() => GetPlayersUseCase(repository: sl<PlayerRepository>()));
-  sl.registerLazySingleton<GetPlayersPerformanceUseCase>(() => GetPlayersPerformanceUseCase(repository: sl<PlayerRepository>()));
-
-  // Feedback (if needed later)
-  // sl.registerLazySingleton<ShotPredictionRepository>(() => ShotPredictionRepositoryImpl(sl<DioClient>()));
-  // sl.registerLazySingleton<PredictShotUseCase>(() => PredictShotUseCase(sl<ShotPredictionRepository>()));
 }

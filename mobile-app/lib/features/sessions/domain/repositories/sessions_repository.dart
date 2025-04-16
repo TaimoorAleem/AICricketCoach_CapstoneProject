@@ -8,7 +8,7 @@ abstract class SessionsRepository {
     required String playerId,
     required String sessionId,
     required String deliveryId,
-    required double battingRating,
+    required double executionRating,
     required String feedback,
   });
   Future<Either<String, void>> addDelivery({

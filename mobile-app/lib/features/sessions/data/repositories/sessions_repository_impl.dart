@@ -20,11 +20,11 @@ class SessionsRepositoryImpl implements SessionsRepository {
         try {
           final sessionsJson = data['sessions'];
           if (sessionsJson == null || sessionsJson is! List) {
-            return const Right([]); // Handle empty or malformed session list
+            return const Right([]);
           }
 
-          final sessions = sessionsJson
-              .map<Session>((json) => SessionModel.fromJson(json).toEntity())
+          final sessions = (sessionsJson as List<dynamic>)
+              .map<Session>((json) => SessionModel.fromJson(json as Map<String, dynamic>).toEntity())
               .toList();
 
           return Right(sessions);
@@ -40,17 +40,18 @@ class SessionsRepositoryImpl implements SessionsRepository {
     required String playerId,
     required String sessionId,
     required String deliveryId,
-    required double battingRating,
+    required double executionRating,
     required String feedback,
   }) async {
     return await apiService.addFeedback(
       playerId: playerId,
       sessionId: sessionId,
       deliveryId: deliveryId,
-      battingRating: battingRating,
+      executionRating: executionRating,
       feedback: feedback,
     );
   }
+
 
   @override
   Future<Either<String, void>> addDelivery({

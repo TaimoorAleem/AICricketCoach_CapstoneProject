@@ -2,14 +2,15 @@ import 'package:ai_cricket_coach/resources/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/service_locator.dart';
-import '../../../authentication/presentation/bloc/AuthCubit.dart';
-import '../../../authentication/presentation/bloc/AuthState.dart';
 import '../../../coaches/domain/usecases/get_players_usecase.dart';
-import '../../../coaches/presentation/bloc/PlayerCubit.dart';
 import '../../../coaches/presentation/pages/coach_home_page.dart';
+import '../../../home/data/data_sources/session_cache.dart';
 import '../../../home/presentation/pages/home_page.dart';
+import '../bloc/AuthCubit.dart';
+import '../bloc/AuthState.dart';
 import 'log_in_page.dart';
 
 class LoadingPage extends StatelessWidget {
@@ -19,26 +20,34 @@ class LoadingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
+          print("🔥 LoadingPage received state: $state");
+
           if (state is UnAuthenticated) {
             AppNavigator.pushReplacement(context, LogInPage());
           }
 
           if (state is Authenticated) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('uid', state.uid);
+            SessionCache().setActivePlayerId(state.uid); // ✅
             AppNavigator.pushReplacement(context, const HomePage());
           }
 
           if (state is CoachAuthenticated) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('uid', state.uid);
+            SessionCache().setActivePlayerId(state.uid); // ✅
+
             AppNavigator.pushReplacement(
               context,
               MultiProvider(
                 providers: [
-                  Provider<GetPlayersUseCase>(create: (_) => sl<GetPlayersUseCase>()),
-                  BlocProvider<PlayerCubit>(
-                    create: (context) => PlayerCubit(getPlayersUseCase: context.read<GetPlayersUseCase>()),
+                  Provider<GetPlayersUseCase>(
+                    create: (_) => sl<GetPlayersUseCase>(),
                   ),
                 ],
-                child: CoachHomePage(coachUid: state.uid),
+                child: const CoachHomePage(),
               ),
             );
           }

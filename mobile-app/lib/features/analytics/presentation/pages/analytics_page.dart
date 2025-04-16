@@ -136,8 +136,10 @@ class AnalyticsPage extends StatelessWidget {
               ),
               gridData: FlGridData(show: true),
               lineBarsData: [
-                _lineChartBarData(data1, Colors.red)
+                _lineChartBarData(data1, Colors.blue),
+                _lineChartBarData(data2, Colors.red),
               ],
+
             ),
           ),
         ),

@@ -5,30 +5,21 @@ class SessionCache {
   static final SessionCache _instance = SessionCache._internal();
   final Map<String, Session> _sessionMap = {};
   String? _activeSessionId;
+  String? _activePlayerId;
 
   SessionCache._internal();
-
   factory SessionCache() => _instance;
 
-  // Active session methods
-  Session? getActiveSession() {
-    if (_activeSessionId == null) return null;
-    return _sessionMap[_activeSessionId];
-  }
-
-  void setActiveSessionId(String sessionId) {
-    _activeSessionId = sessionId;
-  }
-
+  Session? getActiveSession() => _activeSessionId == null ? null : _sessionMap[_activeSessionId!];
   String? get activeSessionId => _activeSessionId;
-
-  void clearActiveSession() {
-    _activeSessionId = null;
-  }
-
   bool hasActiveSession() => _activeSessionId != null;
+  void setActiveSessionId(String sessionId) => _activeSessionId = sessionId;
+  void clearActiveSession() => _activeSessionId = null;
 
-  // Session data handling
+  void setActivePlayerId(String uid) => _activePlayerId = uid;
+  String? get activePlayerId => _activePlayerId;
+  void clearActivePlayer() => _activePlayerId = null;
+
   void storeSessions(List<Session> sessions) {
     _sessionMap.clear();
     for (var session in sessions) {
@@ -50,7 +41,6 @@ class SessionCache {
     }
   }
 
-  // Update delivery feedback
   void updateDeliveryFeedback({
     required String sessionId,
     required String deliveryId,
@@ -67,23 +57,17 @@ class SessionCache {
       battingRating: rating,
       feedback: feedback,
     );
-
     session.deliveries[index] = updatedDelivery;
   }
 
-  // Add delivery to a session
   void addDeliveryToSession({
     required String sessionId,
     required Delivery newDelivery,
   }) {
-    final existingSession = _sessionMap[sessionId];
-
-    if (existingSession != null) {
-      final updatedDeliveries = List<Delivery>.from(existingSession.deliveries)..add(newDelivery);
-      final updatedSession = existingSession.copyWith(deliveries: updatedDeliveries);
-      _sessionMap[sessionId] = updatedSession;
+    final session = _sessionMap[sessionId];
+    if (session != null) {
+      session.deliveries.add(newDelivery);
     } else {
-      // ✅ If the session doesn't exist, create a new one with this delivery
       _sessionMap[sessionId] = Session(
         sessionId: sessionId,
         date: DateTime.now().toIso8601String(),
@@ -91,12 +75,12 @@ class SessionCache {
         performance: {},
       );
     }
-
     _activeSessionId = sessionId;
   }
 
   void clear() {
     _sessionMap.clear();
     _activeSessionId = null;
+    _activePlayerId = null;
   }
 }

@@ -49,8 +49,7 @@ class AuthRepoImpl extends AuthRepo {
     return data.fold((error) {
       return Left(error);
     }, (data) async {
-      final SharedPreferences sharedPreferences =
-      await SharedPreferences.getInstance();
+      final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
       sharedPreferences.setString('uid', data['uid']);
       sharedPreferences.setString('role', data['role']);
       debugPrint(sharedPreferences.getString('uid'));

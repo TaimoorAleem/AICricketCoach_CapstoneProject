@@ -1,59 +1,24 @@
 import 'dart:convert';
-import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
-import '../../../../resources/api_urls.dart';
-import '../../../../resources/dio_client.dart';
-import '../../../analytics/domain/entities/performance.dart';
-import '../../domain/entities/player.dart';
+class PlayerApiService {
+  final Dio dio;
 
-abstract class PlayerService {
-  Future<Either<String, List<Player>>> fetchPlayers(String coachUid);
-  Future<Either<String, Map<String, List<Performance>>>> fetchPlayersPerformance(List<String> playerUids);
-}
+  PlayerApiService({required this.dio});
 
-class PlayerApiService implements PlayerService {
-  final DioClient dioClient;
+  Future<Map<String, dynamic>> fetchPlayers(String coachUid) async {
+    final url = 'https://aicc-gateway2-28bbo1fy.uc.gateway.dev/coaches/get-players?uid=$coachUid';
 
-  PlayerApiService(this.dioClient);
-
-  @override
-  Future<Either<String, List<Player>>> fetchPlayers(String coachUid) async {
     try {
-      final response = await dioClient.get(
-        ApiUrl.getPlayers,
-        queryParameters: {'uid': coachUid},
-      );
+      final response = await dio.get(url);
 
-      final playersMap = response.data['players'] as Map<String, dynamic>;
-      final players = playersMap.values.map((p) => Player.fromJson(p)).toList();
-      return Right(players);
-    } on DioException catch (e) {
-      return Left(e.response?.data?['message'] ?? 'Failed to fetch players.');
+      if (response.statusCode == 200 && response.data['status'] == 'success') {
+        return response.data['players'] as Map<String, dynamic>;
+      } else {
+        throw Exception('Failed to load players');
+      }
     } catch (e) {
-      return Left('An unexpected error occurred: $e');
-    }
-  }
-
-  @override
-  Future<Either<String, Map<String, List<Performance>>>> fetchPlayersPerformance(List<String> playerUids) async {
-    try {
-      final response = await dioClient.get(
-        ApiUrl.getPerformance,
-        queryParameters: {'uid_list': jsonEncode(playerUids)},
-      );
-
-      final playerData = response.data['data'] as Map<String, dynamic>;
-      final mapped = playerData.map((uid, sessions) => MapEntry(
-        uid,
-        (sessions as List).map((s) => Performance.fromJson(s)).toList(),
-      ));
-
-      return Right(mapped);
-    } on DioException catch (e) {
-      return Left(e.response?.data?['message'] ?? 'Failed to fetch performance data.');
-    } catch (e) {
-      return Left('An unexpected error occurred: $e');
+      throw Exception('Error fetching players: $e');
     }
   }
 }

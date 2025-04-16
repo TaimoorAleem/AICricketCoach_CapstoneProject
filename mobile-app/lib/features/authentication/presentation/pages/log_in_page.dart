@@ -1,22 +1,25 @@
-import 'package:ai_cricket_coach/features/home/presentation/pages/home_page.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:reactive_button/reactive_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../../resources/app_colors.dart';
 import '../../../../resources/app_navigator.dart';
 import '../../../../resources/display_message.dart';
 import '../../../../resources/service_locator.dart';
-import '../../data/models/login_req_params.dart';
-import '../../domain/usecases/login_usecase.dart';
-import 'reset_password_page.dart';
+import '../../../home/data/data_sources/session_cache.dart';
+import '../../../authentication/domain/usecases/login_usecase.dart';
+import '../../../authentication/data/models/login_req_params.dart';
+import '../../../authentication/presentation/bloc/AuthCubit.dart';
+import '../../../authentication/presentation/pages/loading_page.dart';
 import 'sign_up_page.dart';
+import 'reset_password_page.dart';
 
 class LogInPage extends StatelessWidget {
   LogInPage({super.key});
 
   final TextEditingController _emailCon = TextEditingController();
   final TextEditingController _passwordCon = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -25,21 +28,16 @@ class LogInPage extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 100),
-              Image.asset(
-                'lib/images/logo.png', // Path to your logo
-                height: 120, // Adjust size as needed
-                width: 120,
-              ),
+              Image.asset('lib/images/logo.png', height: 120, width: 120),
               const SizedBox(height: 20),
-              _welcomeHeading(),
-              const SizedBox(height: 10),
-              _loginContainer(context),
+              const Text('AI Cricket Coach', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w600, color: AppColors.primary)),
               const SizedBox(height: 20),
+              _loginFields(context),
+              const SizedBox(height: 16),
               _signupText(context),
-              _forgotpwtext(context),
+              _forgotPasswordText(context),
             ],
           ),
         ),
@@ -47,183 +45,75 @@ class LogInPage extends StatelessWidget {
     );
   }
 
-  Widget _welcomeHeading() {
-    return const Text(
-      'AI Cricket Coach',
-      style: TextStyle(
-        fontFamily: 'Nunito',
-        fontWeight: FontWeight.w600,
-        fontSize: 26,
-        color: AppColors.primary,
-      ),
-      textAlign: TextAlign.center,
-    );
-  }
-
-  Widget _loginContainer(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          const SizedBox(height: 5),
-          _emailField(),
-          const SizedBox(height: 20),
-          const SizedBox(height: 5),
-          _passwordField(),
-          const SizedBox(height: 30),
-          _loginButton(context),
-        ],
-      ),
-    );
-  }
-
-
-
-  Widget _fieldLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
-      ),
-    );
-  }
-
-  Widget _emailField() {
-    return TextField(
-      controller: _emailCon,
-      decoration: InputDecoration(
-        hintText: 'Email',
-        hintStyle: const TextStyle(
-            fontFamily: 'Nunito',
-            color: AppColors.primary,
-            fontWeight: FontWeight.w500),
-        filled: true,
-        fillColor: AppColors.secondary,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12), // Rounded corners
-          borderSide: BorderSide.none, // Removes border
+  Widget _loginFields(BuildContext context) {
+    return Column(
+      children: [
+        TextField(
+          controller: _emailCon,
+          decoration: _inputDecoration('Email'),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        const SizedBox(height: 16),
+        TextField(
+          controller: _passwordCon,
+          obscureText: true,
+          decoration: _inputDecoration('Password'),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2), // Optional focus border
-        ),
-      ),
-    );
-  }
-
-  Widget _passwordField() {
-    return TextField(
-      controller: _passwordCon,
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        hintStyle: const TextStyle(
-            fontFamily: 'Nunito',
-            color: AppColors.primary,
-            fontWeight: FontWeight.w500),
-        filled: true,
-        fillColor: AppColors.secondary,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12), // Make sure all fields match
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primary, width: 2),
-        ),
-      ),
-    );
-  }
-
-
-  Widget _loginButton(BuildContext context) {
-    return Center(
-      child: ReactiveButton(
-        title: 'Sign In',
-        width: 10,
-        height: 30,
-        activeColor: AppColors.primary,
-        onPressed: () async => await sl<LoginUseCase>().call(
-            params: LoginReqParams(
-              email: _emailCon.text,
-              password: _passwordCon.text,
-            ),
-          ),
-
-        onSuccess: () async {
-
-          AppNavigator.pushAndRemove(context, HomePage());
-        },
-        onFailure: (error) {
-          DisplayMessage.errorMessage(error, context);
-        },
-      ),
-    );
-  }
-
-  Widget _forgotpwtext(BuildContext context) {
-    return Text.rich(
-      TextSpan(
-        children: [
-          const TextSpan(
-            text: "",
-          ),
-          TextSpan(
-            text: 'Forgot Password?',
-            style: const TextStyle(
-              fontFamily: 'Nunito',
-              color: Colors.blue,
-              fontWeight: FontWeight.w500,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                AppNavigator.push(context, ResetPasswordPage());
+        const SizedBox(height: 32),
+        ElevatedButton(
+          onPressed: () async {
+            final result = await sl<LoginUseCase>().call(
+              params: LoginReqParams(email: _emailCon.text, password: _passwordCon.text),
+            );
+            result.fold(
+                  (failure) => DisplayMessage.errorMessage(failure.toString(), context),
+                  (_) async {
+                final prefs = await SharedPreferences.getInstance();
+                final uid = prefs.getString('uid');
+                final role = prefs.getString('role');
+                if (uid != null) {
+                  SessionCache().setActivePlayerId(uid);
+                  context.read<AuthCubit>().authenticate(uid: uid, role: role);
+                  AppNavigator.pushAndRemove(context, const LoadingPage());
+                }
               },
-          ),
-        ],
-      ),
+            );
+          },
+          child: const Text('Sign In'),
+        ),
+      ],
     );
   }
 
-
-
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      filled: true,
+      fillColor: AppColors.secondary,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+    );
+  }
 
   Widget _signupText(BuildContext context) {
     return Text.rich(
       TextSpan(
+        text: "Don't have an account? ",
         children: [
-          const TextSpan(
-            text: "Don't have an account? ",
-            style: const TextStyle(fontFamily: 'Nunito',fontWeight: FontWeight.w500)
-          ),
           TextSpan(
             text: 'Sign Up',
-            style: const TextStyle(
-              fontFamily: 'Nunito',
-              color: Colors.blue,
-              fontWeight: FontWeight.w500,
-            ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = () {
-                AppNavigator.push(context, SignupPage());
-              },
+            style: const TextStyle(color: Colors.blue),
+            recognizer: TapGestureRecognizer()..onTap = () => AppNavigator.push(context, SignupPage()),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _forgotPasswordText(BuildContext context) {
+    return Text.rich(
+      TextSpan(
+        text: 'Forgot Password?',
+        style: const TextStyle(color: Colors.blue),
+        recognizer: TapGestureRecognizer()..onTap = () => AppNavigator.push(context, ResetPasswordPage()),
       ),
     );
   }

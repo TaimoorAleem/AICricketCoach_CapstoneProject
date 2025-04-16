@@ -1,6 +1,8 @@
 abstract class AuthState {}
 
-class DisplayLoadingPage extends AuthState {}
+class AuthInitial extends AuthState {}
+
+class UnAuthenticated extends AuthState {}
 
 class Authenticated extends AuthState {
   final String uid;
@@ -11,5 +13,3 @@ class CoachAuthenticated extends AuthState {
   final String uid;
   CoachAuthenticated({required this.uid});
 }
-
-class UnAuthenticated extends AuthState {}

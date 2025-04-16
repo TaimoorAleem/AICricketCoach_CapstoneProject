@@ -1,5 +1,4 @@
-import 'package:dartz/dartz.dart';
-import '../entities/player.dart';
+import '../entities/player_entity.dart';
 import '../repositories/player_repository.dart';
 
 class GetPlayersUseCase {
@@ -7,7 +6,7 @@ class GetPlayersUseCase {
 
   GetPlayersUseCase({required this.repository});
 
-  Future<Either<String, List<Player>>> call(String coachUid) async {
-    return await repository.getPlayers(coachUid);
+  Future<List<PlayerEntity>> call(String coachUid) {
+    return repository.getPlayers(coachUid);
   }
 }

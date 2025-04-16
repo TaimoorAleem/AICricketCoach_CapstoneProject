@@ -1,23 +1,21 @@
 import 'package:dartz/dartz.dart';
-import '../repositories/sessions_repository.dart';
+import '../../../../resources/service_locator.dart';
+import '../../domain/repositories/sessions_repository.dart';
 
 class AddFeedbackUseCase {
-  final SessionsRepository repository;
-
-  AddFeedbackUseCase(this.repository);
-
   Future<Either<String, void>> call({
+    required String uid,
     required String playerId,
     required String sessionId,
     required String deliveryId,
-    required double battingRating,
+    required double executionRating,
     required String feedback,
-  }) {
-    return repository.addFeedback(
+  }) async {
+    return await sl<SessionsRepository>().addFeedback(
       playerId: playerId,
       sessionId: sessionId,
       deliveryId: deliveryId,
-      battingRating: battingRating,
+      executionRating: executionRating,
       feedback: feedback,
     );
   }
