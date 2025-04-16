@@ -4,6 +4,7 @@ import '../../../../resources/service_locator.dart';
 import '../../domain/entities/session.dart';
 import '../../domain/usecases/get_sessions_usecase.dart';
 import '../widgets/SessionCard.dart';
+import '../../../../resources/app_colors.dart';
 
 class SessionsHistoryPage extends StatefulWidget {
   final String playerId;
@@ -50,13 +51,23 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sessions History')),
+      appBar: AppBar(
+        title: const Text(
+          'Sessions History',
+          style: TextStyle(
+            fontFamily: 'Nunito',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: AppColors.secondary,
+        centerTitle: true,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-          ? Center(child: Text('Error: $errorMessage'))
+          ? _buildMessage('Error: $errorMessage')
           : sessions.isEmpty
-          ? const Center(child: Text('No sessions found'))
+          ? _buildMessage('No sessions found')
           : RefreshIndicator(
         onRefresh: _loadSessions,
         child: ListView.builder(
@@ -65,9 +76,25 @@ class _SessionsHistoryPageState extends State<SessionsHistoryPage> {
             return SessionCard(
               session: sessions[index],
               playerId: widget.playerId,
+              sessionNumber: sessions.length - index, // 1 is oldest at bottom
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _buildMessage(String message) {
+    return Center(
+      child: Text(
+        message,
+        style: const TextStyle(
+          color: Colors.white70,
+          fontFamily: 'Nunito',
+          fontWeight: FontWeight.w500,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

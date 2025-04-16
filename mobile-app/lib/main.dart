@@ -3,33 +3,33 @@ import 'dart:math';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'features/authentication/presentation/bloc/AuthCubit.dart';
+import 'package:ai_cricket_coach/features/authentication/presentation/bloc/AuthCubit.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../resources/service_locator.dart';
+import 'resources/service_locator.dart';
 import 'features/authentication/presentation/pages/loading_page.dart';
-import '../resources/app_theme.dart';
+import 'resources/app_colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await requestNotifPermissions();
+
   NotifService notifService = NotifService();
   await notifService.initLocalNotifFirebase();
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) { notifService.showNotifBanner(message);});
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    notifService.showNotifBanner(message);
+  });
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // Disable auto-init to prevent auto token refresh
-  await messaging.setAutoInitEnabled(false);
+  await FirebaseMessaging.instance.setAutoInitEnabled(false);
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(false);
-  setupServiceLocator();
+  await setupServiceLocator();
+
   runApp(const MyApp());
 }
 
@@ -59,49 +59,38 @@ class NotifService {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
-  // Initialize local notifications
   Future<void> initLocalNotifFirebase() async {
     var androidInit = const AndroidInitializationSettings('@drawable/logo');
-    var initSetting = InitializationSettings(
-        android: androidInit
-    );
-
+    var initSetting = InitializationSettings(android: androidInit);
     await _flutterLocalNotificationsPlugin.initialize(initSetting,
         onDidReceiveNotificationResponse: (NotificationResponse response) {
           debugPrint('Notification tapped! Payload: ${response.payload}');
         });
-
-
   }
 
-  // Show the notification banner
   Future<void> showNotifBanner(RemoteMessage message) async {
-    // Create an Android Notification Channel
-    const AndroidNotificationChannel androidNotificationChannel =
-    AndroidNotificationChannel(
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel',
       'High Importance Notifications',
       description: 'This channel is used for important notifications.',
       importance: Importance.high,
     );
 
-    // Initialize Notification Details
-    AndroidNotificationDetails androidNotificationDetails = AndroidNotificationDetails(
-      androidNotificationChannel.id,
-      androidNotificationChannel.name,
-      channelDescription: androidNotificationChannel.description,
-      priority: Priority.high, // Make sure this is high
-      importance: Importance.high, // Also, set importance to high
+    AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      channel.id,
+      channel.name,
+      channelDescription: channel.description,
+      importance: Importance.high,
+      priority: Priority.high,
       ticker: 'ticker',
       playSound: true,
     );
 
-    // Show the notification
     await _flutterLocalNotificationsPlugin.show(
-      Random.secure().nextInt(10000), // Random ID for the notification
+      Random.secure().nextInt(10000),
       message.notification?.title ?? 'New Notification',
       message.notification?.body ?? '',
-      NotificationDetails(android: androidNotificationDetails),
+      NotificationDetails(android: androidDetails),
     );
   }
 }
@@ -116,10 +105,22 @@ class MyApp extends StatelessWidget {
     );
 
     return BlocProvider(
-      create: (context) => AuthCubit()..appStarted(),
+      create: (_) => AuthCubit()..appStarted(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.appTheme,
+        theme: ThemeData(
+          scaffoldBackgroundColor: AppColors.background,
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppColors.secondary,
+            foregroundColor: Colors.white,
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            backgroundColor: AppColors.secondary,
+            selectedItemColor: AppColors.primary,
+            unselectedItemColor: Colors.grey,
+          ),
+        ),
         home: const LoadingPage(),
       ),
     );
