@@ -397,6 +397,7 @@ class _SignUpPageState extends State<SignupPage> {
             style: const TextStyle(
               fontFamily: 'Nunito',
               fontWeight: FontWeight.w500,
+              color: Colors.white
             ),
           ),
           TextSpan(
