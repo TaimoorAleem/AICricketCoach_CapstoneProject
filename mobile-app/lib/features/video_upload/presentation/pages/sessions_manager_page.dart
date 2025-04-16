@@ -62,7 +62,7 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
           const SnackBar(content: Text('Session ended and performance saved.')),
         );
 
-        Navigator.pop(context); // Return to Upload Video
+        Navigator.pop(context);
       } else {
         throw Exception('Failed to end session: ${response.data}');
       }
@@ -76,17 +76,22 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
             AppBar(
               title: const Text(
                 'Active Session',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Nunito',
+                  color: AppColors.primary,
+                ),
               ),
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.secondary,
               centerTitle: true,
+              iconTheme: const IconThemeData(color: Colors.white),
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
@@ -97,7 +102,11 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
                 child: Center(
                   child: Text(
                     'No active session.',
-                    style: TextStyle(color: Colors.white70, fontSize: 18),
+                    style: TextStyle(
+                      fontFamily: 'Nunito',
+                      color: Colors.white70,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               )
@@ -108,19 +117,29 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
                   itemBuilder: (context, index) {
                     final delivery = activeSession!.deliveries[index];
                     return Card(
-                      color: Colors.black87,
-                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      color: AppColors.secondary,
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: ListTile(
-                        title: Text('Delivery ${index + 1}',
-                            style: const TextStyle(color: Colors.white)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        title: Text(
+                          'Delivery ${index + 1}',
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                         subtitle: Text(
                           'Ball Speed: ${delivery.ballSpeed} km/h',
-                          style: const TextStyle(color: Colors.grey),
+                          style: const TextStyle(
+                            fontFamily: 'Nunito',
+                            color: Colors.white70,
+                          ),
                         ),
-                        trailing: const Icon(Icons.chevron_right, color: Colors.white70),
+                        trailing: const Icon(Icons.chevron_right, color: Colors.white),
                         onTap: () {
                           Navigator.push(
                             context,
@@ -145,7 +164,14 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.add, size: 24),
-                      label: const Text('Add New Delivery', style: TextStyle(fontSize: 16)),
+                      label: const Text(
+                        'Add New Delivery',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Nunito',
+                          color: Colors.white,
+                        ),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -168,7 +194,14 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.stop_circle_outlined, size: 24),
-                      label: const Text('End Session', style: TextStyle(fontSize: 16)),
+                      label: const Text(
+                        'End Session',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Nunito',
+                          color: Colors.white,
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.redAccent,
                         padding: const EdgeInsets.symmetric(vertical: 16),
