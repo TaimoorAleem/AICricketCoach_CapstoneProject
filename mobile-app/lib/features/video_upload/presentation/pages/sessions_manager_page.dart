@@ -133,11 +133,12 @@ class _SessionsManagerPageState extends State<SessionsManagerPage> {
                           ),
                         ),
                         subtitle: Text(
-                          'Ball Speed: ${delivery.ballSpeed} km/h',
+                          'Ball Speed: ${delivery.ballSpeed} km/h\nBall Line: ${delivery.ballLine}\nBall Length: ${delivery.ballLength}\nBatsman Position: ${delivery!.batsmanPosition == 1 ? "Left Handed" : "Right Handed"}',
                           style: const TextStyle(
                             fontFamily: 'Nunito',
                             color: Colors.white70,
                           ),
+
                         ),
                         trailing: const Icon(Icons.chevron_right, color: Colors.white),
                         onTap: () {
