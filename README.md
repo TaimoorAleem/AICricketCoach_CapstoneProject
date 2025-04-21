@@ -15,7 +15,6 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 ## 🔍 Ball Characteristics Documentation
 
-
 ---
 
 ### 🏏 1. Ball Detection and Pitch Mapping
@@ -35,8 +34,6 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 - Detected ball centers across frames are saved as a trajectory and transformed to the pitch view.
 
 **Output**: Mapped trajectory image (mapped_trajectory_on_pitch.png) and bounce coordinates (bounce_coords.txt).
-
----
 
 ---
 
