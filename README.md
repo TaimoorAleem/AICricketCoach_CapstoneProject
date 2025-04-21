@@ -37,8 +37,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 **Example** 
 
-![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)
-
+![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)   ![pitch.jpeg](VideoProcessing%2Fpitch.jpeg)
 ---
 
 ### 🏏 2. Ball Speed
