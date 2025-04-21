@@ -36,8 +36,12 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 **Output**: Mapped trajectory image (mapped_trajectory_on_pitch.png) and bounce coordinates (bounce_coords.txt).
 
 **Example** 
+Pitch Detection and Mapping
+![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)     ![Dummy.png](VideoProcessing%2FExample_Images%2FDummy.png)
 
-![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)                ![Dummy.png](VideoProcessing%2FExample_Images%2FDummy.png)
+Ball Detection
+
+![23.png](VideoProcessing%2FFrame%2F23.png)    ![processed_frame_23.png](VideoProcessing%2FFrame_b%2Fprocessed_frame_23.png)
 ---
 
 ### 🏏 2. Ball Speed
