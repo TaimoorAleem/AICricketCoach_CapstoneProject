@@ -15,9 +15,32 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 ## 🔍 Ball Characteristics Documentation
 
+
 ---
 
-### 🏏 1. Ball Speed
+### 🏏 1. Ball Detection and Pitch Mapping
+
+**Objective**: Detect the cricket ball in each frame and map its trajectory onto a reference pitch image.
+
+**Script**: `BallDetectionandMapping.py`
+
+**Methodology**:
+
+- Uses a YOLO model trained for cricket ball detection.
+- Detects the pitch in the first frame using a second YOLO model.
+- Extracts four corner coordinates (top-left, top-right, bottom-left, bottom-right) from the detected pitch.
+- These coordinates are used as source points for computing a homography matrix.
+- The destination points are predefined dummy pitch coordinates based on a top-down pitch image.
+- The homography matrix is used to transform trajectory points from camera perspective to the top-down view.
+- Detected ball centers across frames are saved as a trajectory and transformed to the pitch view.
+
+**Output**: Mapped trajectory image (mapped_trajectory_on_pitch.png) and bounce coordinates (bounce_coords.txt).
+
+---
+
+---
+
+### 🏏 2. Ball Speed
 
 **Objective**: Calculate the speed of the cricket ball in real time from frame-to-frame motion.
 
@@ -43,7 +66,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 ---
 
-### 📈 2. Ball Line
+### 📈 3. Ball Line
 
 **Objective**: Determine if the ball would hit the **off stump**, **middle stump**, or **leg stump** based on the batsman’s handedness.
 
@@ -60,7 +83,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 ---
 
-### 📏 3. Ball Length
+### 📏 4. Ball Length
 
 **Objective**: Classify the bounce location into common cricket bowling zones.
 
@@ -83,7 +106,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 ---
 
-### 🫍️ 4. Batsman Position
+### 🫍️ 5. Batsman Position
 
 **Objective**: Detect the batsman’s position and determine if they are **right-handed** or **left-handed**.
 
@@ -96,7 +119,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 **Methodology**:
 
-1. First frame (`20.png`) is processed using Roboflow to detect the batsman.
+1. First frame (`0.png`) is processed using Roboflow to detect the batsman.
 2. Batsman region is cropped and passed to MediaPipe.
 3. Compares the x-coordinate of left and right wrists to determine which hand is forward.
 
