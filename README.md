@@ -191,6 +191,11 @@ Once processing is complete, you will receive:
   - Ball Length
   - Average Ball Speed (in km/h)
 
+Ball Trajectory:
+
+![Trajectory.png](VideoProcessing%2FExample_Images%2FTrajectory.png)
+
+
 ---
 
 ## 📌 Example Output
