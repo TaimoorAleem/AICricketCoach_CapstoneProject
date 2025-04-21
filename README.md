@@ -37,7 +37,7 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 **Example** 
 
-![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)   ![pitch.jpeg](VideoProcessing%2Fpitch.jpeg)
+![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)                ![Dummy.png](VideoProcessing%2FExample_Images%2FDummy.png)
 ---
 
 ### 🏏 2. Ball Speed
@@ -91,6 +91,8 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 **Pitch Zones**:
 
+![PitchLength.png](VideoProcessing%2FExample_Images%2FPitchLength.png)
+
 - **Yorker**
 - **Full-pitched**
 - **Good length**
@@ -124,6 +126,10 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 3. Compares the x-coordinate of left and right wrists to determine which hand is forward.
 
 **Output**: `"right"`, `"left"`, or `"Handedness Not Detected"`.
+
+**Example Output**
+
+![BatsmanPosition.png](VideoProcessing%2FExample_Images%2FBatsmanPosition.png)                 ![BatsmanPositionOutput.png](VideoProcessing%2FExample_Images%2FBatsmanPositionOutput.png)
 
 ---
 
@@ -189,13 +195,14 @@ Cricket Ball Analysis Results:
 Batsman Position: right
 Ball Line: off stump
 Ball Length: good length
-Ball Speed: 132.45 km/h
+Ball Speed: 117.45 km/h
 ```
 
 ---
 
 ## 💡 Future Enhancements
 
-- Use LSTM or Kalman Filters for better trajectory smoothing
+- Use better YOLO models with more images and train with 100 eps
 - Automate stump zone detection via deep learning
-- Integrate full PWA to upload and visualize results online
+- Use a 3D model for better trajectory visualization
+
