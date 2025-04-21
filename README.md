@@ -1,6 +1,6 @@
 # 🎯 Final Year Project - Cricket Video Analysis
 
-## 📹 Video Processing Subsystem
+ ## 📹 Video Processing Subsystem
 
 The **Video Processing Subsystem** leverages computer vision and AI models to extract four key gameplay parameters from cricket match videos:
 
@@ -37,11 +37,13 @@ These insights are extracted using trained YOLO models, MediaPipe, and supportin
 
 **Example** 
 Pitch Detection and Mapping
+
 ![Detected_pitch.png](VideoProcessing%2FExample_Images%2FDetected_pitch.png)     ![Dummy.png](VideoProcessing%2FExample_Images%2FDummy.png)
 
 Ball Detection
 
-![23.png](VideoProcessing%2FFrame%2F23.png)    ![processed_frame_23.png](VideoProcessing%2FFrame_b%2Fprocessed_frame_23.png)
+![1.png](VideoProcessing%2FExample_Images%2F1.png)   ![2.png](VideoProcessing%2FExample_Images%2F2.png)
+
 ---
 
 ### 🏏 2. Ball Speed
