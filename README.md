@@ -3,7 +3,7 @@
 AI Cricket Coach is a mobile application utilizes Computer Vision to analyze practice session videos captured from the umpire’s POV, extracting key features like ball speed, line and length. Using these features, a Machine Learning model suggests the most appropriate shots for the batsman to play, improving their decision-making abilities.
 
 ### 🏆 First Place CS Capstone Award
-This project was ranked First Place for CS Capstone Awards Winter 2025 across all specializations (Data Analytics, Cloud Computing, Game Engineering)
+This project was ranked First Place for CS Capstone Awards 2025 across all specializations (Data Analytics, Cloud Computing, Game Engineering)
 
 The ranking was determined based on student votes as well as the Capstone Defense Evaluation, of which the
 rubric included:
